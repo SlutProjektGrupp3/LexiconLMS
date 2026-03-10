@@ -1,3 +1,4 @@
+using Domain.Models.Entities;
 using LMS.Blazor.Components.Account.Pages;
 using LMS.Blazor.Components.Account.Pages.Manage;
 using LMS.Blazor.Data;

@@ -1,3 +1,4 @@
+using Domain.Models.Entities;
 using LMS.Blazor.Client.Pages;
 using LMS.Blazor.Components;
 using LMS.Blazor.Components.Account;
@@ -27,11 +28,14 @@ public class Program
                 options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
             })
             .AddIdentityCookies();
+
         builder.Services.AddAuthorization();
 
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+       
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));
+       
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
         builder.Services.AddIdentityCore<ApplicationUser>(options =>

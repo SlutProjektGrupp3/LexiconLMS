@@ -1,3 +1,4 @@
+using Domain.Models.Entities;
 using LMS.Blazor.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;

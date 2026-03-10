@@ -1,3 +1,4 @@
+using LMS.Blazor.Client.Services;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 namespace LMS.Blazor.Client;
@@ -16,6 +17,8 @@ internal class Program
         {
             BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
         });
+
+        builder.Services.AddScoped<IApiService, ClientApiService>();
 
         await builder.Build().RunAsync();
     }

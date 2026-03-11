@@ -62,7 +62,6 @@ public class Program
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         });
 
-
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.

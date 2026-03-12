@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Token storage (contains sensitive authentication tokens)
+**/App_Data/

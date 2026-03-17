@@ -10,6 +10,26 @@ namespace LMS.Infractructure.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
+
+        }
+        public DbSet<Course> Courses => Set<Course>();
+        public DbSet<Module> Modules => Set<Module>();
+        public DbSet<ModuleActivity> Activities => Set<ModuleActivity>();
+        public DbSet<ActivityType> ActivityTypes => Set<ActivityType>();
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+            builder.Entity<Course>()
+                .HasMany(c => c.Modules)
+                .WithOne(m => m.Course)
+                .HasForeignKey(m => m.CourseId)
+                .OnDelete(DeleteBehavior.Cascade);
+            builder.Entity<Module>()
+                .HasMany(m => m.Activities)
+                .WithOne(a => a.Module)
+                .HasForeignKey(a => a.ModuleId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
     }

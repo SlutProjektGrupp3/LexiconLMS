@@ -1,0 +1,44 @@
+﻿@page "/teacher/courses"
+@using LMS.Shared.DTOs.CourseDtos
+
+<h3>Courses</h3>
+<div class="mb-3">
+    <button class="btn btn-primary" @onclick="LoadCourses">Ladda kurser</button>
+</div>
+
+@if (courses.Count == 0)
+{
+    <p>Inga kurser hittades.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Namn</th>
+                <th>Beskrivning</th>
+                <th>Start</th>
+                <th>Slut</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var course in courses)
+            {
+                <tr>
+                    <td>@course.Name</td>
+                    <td>@course.Description</td>
+                    <td>@course.StartDate.ToShortDateString()</td>
+                    <td>@course.EndDate.ToShortDateString()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    private List<CourseDto> courses = new();
+
+    private async Task LoadCourses()
+    {
+        courses = await  CourseApiClient.GetCoursesAsync();
+    }
+}

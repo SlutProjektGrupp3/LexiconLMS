@@ -11,5 +11,6 @@ public class MapperProfile : Profile
     {
         CreateMap<UserRegistrationDto, ApplicationUser>();
         CreateMap<Course, CourseDto>();
+        CreateMap<CourseCreateDto, Course>();
     }
 }

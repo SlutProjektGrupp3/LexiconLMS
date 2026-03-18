@@ -47,5 +47,13 @@ namespace LMS.Presentation.Controllers
 
         //    return Ok(pagedResult.courseDtos);
         //}
+
+        [HttpPost]
+        public async Task<ActionResult<CourseDto>> PostCourse(CourseCreateDto dto)
+        {
+            var createdDto = await serviceManager.CourseService.CreateCourseAsync(dto);
+
+            return CreatedAtAction(nameof(GetCourse), new { id = createdDto.Id }, createdDto);
+        }
     }
 }

@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Domain.Contracts.Repositories;
+using Domain.Models.Entities;
 using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.Request;
 using Service.Contracts;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace LMS.Services
 {
@@ -33,6 +35,15 @@ namespace LMS.Services
             var pagedList = await uow.CourseRepository.GetCoursesAsync(requestParams, trackChanges);
             var courseDtos = mapper.Map<IEnumerable<CourseDto>>(pagedList.Items);
             return (courseDtos, pagedList.MetaData);
+        }
+        public async Task<CourseDto> CreateCourseAsync(CourseCreateDto dto)
+        {
+            var course = mapper.Map<Course>(dto);
+
+            uow.CourseRepository.Create(course);
+            await uow.CompleteAsync();
+
+            return mapper.Map<CourseDto>(course);
         }
     }
 }

@@ -34,5 +34,7 @@ namespace LMS.Infractructure.Repositories
 
             return await PagedList<Course>.CreateAsync(courses, requestParams.PageNumber, requestParams.PageSize);
         }
+
+        public void CreateCourse(Course course) => Create(course);
     }
 }

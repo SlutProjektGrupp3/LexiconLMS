@@ -1,5 +1,6 @@
 ﻿using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.Request;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 using System;
@@ -21,6 +22,7 @@ namespace LMS.Presentation.Controllers
             this.serviceManager = serviceManager;
         }
 
+        [Authorize(Roles = "Teacher")]
         [HttpGet]
         public async Task<IActionResult> GetCourses()
         {

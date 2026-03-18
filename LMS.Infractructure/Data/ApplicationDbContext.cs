@@ -22,12 +22,12 @@ namespace LMS.Infractructure.Data
             base.OnModelCreating(builder);
             builder.Entity<Course>()
                 .HasMany(c => c.Modules)
-                .WithOne(m => m.Course)
+                .WithOne()
                 .HasForeignKey(m => m.CourseId)
                 .OnDelete(DeleteBehavior.Cascade);
             builder.Entity<Module>()
                 .HasMany(m => m.Activities)
-                .WithOne(a => a.Module)
+                .WithOne()
                 .HasForeignKey(a => a.ModuleId)
                 .OnDelete(DeleteBehavior.Cascade);
         }

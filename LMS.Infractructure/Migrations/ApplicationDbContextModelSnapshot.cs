@@ -34,7 +34,7 @@ namespace LMS.Infractructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ActivityTypes");
+                    b.ToTable("ActivityTypes", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.ApplicationUser", b =>
@@ -143,7 +143,7 @@ namespace LMS.Infractructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Courses");
+                    b.ToTable("Courses", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Module", b =>
@@ -173,7 +173,7 @@ namespace LMS.Infractructure.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("Modules");
+                    b.ToTable("Modules", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.ModuleActivity", b =>
@@ -208,7 +208,7 @@ namespace LMS.Infractructure.Migrations
 
                     b.HasIndex("TypeId");
 
-                    b.ToTable("Activities");
+                    b.ToTable("Activities", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

@@ -12,7 +12,6 @@ namespace Domain.Models.Entities
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public Guid CourseId { get; set; }
-        public required Course Course { get; set; }
         public ICollection<ModuleActivity> Activities { get; set; } = new List<ModuleActivity>();
 
     }

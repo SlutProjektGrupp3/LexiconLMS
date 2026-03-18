@@ -13,6 +13,5 @@ namespace Domain.Models.Entities
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public Guid ModuleId { get; set; }
-        public required Module Module { get; set; }
     }
 }

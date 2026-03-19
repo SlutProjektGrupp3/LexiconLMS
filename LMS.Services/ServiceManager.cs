@@ -15,6 +15,6 @@ public class ServiceManager : IServiceManager
     {
         this.authService = authService;
         this.courseService = courseService;
-        _activityService = activityService; // Add this
+        _activityService = activityService;
     }
 }

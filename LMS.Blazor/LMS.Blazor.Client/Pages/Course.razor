@@ -1,0 +1,65 @@
+﻿@page "/courses/{Id:guid}"
+@inject IApiService ApiService
+@using LMS.Shared.DTOs.Course
+
+@if(isLoading)
+{
+    <p><em>Loading...</em></p>
+}
+else if (error != null)
+{
+    <div class="alert alert-danger">
+        <strong>Error:</strong> @error
+    </div>
+}
+else if (_course != null)
+{
+    @*Title*@
+    <h1>@_course.Name</h1>
+
+    <h2>Moduler</h2>
+
+    foreach (var module in _course.Modules)
+    {
+        <div>
+            <h3>@module.Name</h3>
+            <p>@module.Description</p>
+        </div>
+    }
+}
+
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private CourseDetailsDto? _course;
+    private string? error;
+    private bool isLoading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //This method run in prerender
+        await CallApi();
+    }
+
+    private async Task CallApi()
+    {
+        isLoading = true;
+        error = null;
+        _course = null;
+
+        try
+        {
+            _course = await ApiService.GetAsync<CourseDetailsDto>($"courses/{Id}");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

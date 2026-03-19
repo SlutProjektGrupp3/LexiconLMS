@@ -12,6 +12,7 @@ namespace Service.Contracts
         Task<IEnumerable<CourseDto>> GetAllCoursesAsync (bool trackChanges = false);
         Task<CourseDto> GetCourseAsync (Guid courseId, bool trackChanges = false);
         Task<CourseDto> CreateCourseAsync (CourseCreateDto courseCreateDto);
+        Task<CourseDetailsDto?> GetCourseByIdAsync(Guid id);
 
-    }
+    }    
 }

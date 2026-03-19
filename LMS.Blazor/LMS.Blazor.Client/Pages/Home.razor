@@ -1,7 +1,66 @@
 ﻿@page "/"
+@using System.Security.Claims
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Lexicon LMS</PageTitle>
 
-<h1>Hello, world!</h1>
+<AuthorizeView>
+    <Authorized>
+        @switch (userRole)
+        {
+            case "Student":
+                <div>Student overview</div>
+                break;
 
-Welcome to your new app.
+            case "Teacher":
+                <div>Teacher overview</div>
+                break;
+
+            default:
+                <div>No recognized role</div>
+                break;
+        }
+    </Authorized>
+    <NotAuthorized>
+        <p>Redirecting to login…</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private string? userRole = null;
+
+    private string? GetPrimaryRole(ClaimsPrincipal user)
+    {
+        var roles = user.FindAll(ClaimTypes.Role)
+                    .Select(c => c.Value)
+                    .ToHashSet(); // fast lookup
+
+        var priorityOrder = new[]
+        {
+            "Student",
+            "Teacher"
+        };
+
+        foreach (var role in priorityOrder)
+        {
+            if (roles.Contains(role)) return role;
+        }
+
+        return null;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity?.IsAuthenticated ?? true)
+        {
+            Nav.NavigateTo("Account/Login");
+            return;
+        }
+        
+        userRole = GetPrimaryRole(user);
+    }
+}

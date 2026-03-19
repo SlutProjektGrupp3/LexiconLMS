@@ -3,8 +3,10 @@ using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.Request;
-using Service.Contracts;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using LMS.Shared.DTOs.Course;
+using LMS.Shared.DTOs.Module;
+using Service.Contracts;
 
 namespace LMS.Services
 {
@@ -44,6 +46,28 @@ namespace LMS.Services
             await uow.CompleteAsync();
 
             return mapper.Map<CourseDto>(course);
+        }
+        
+        public async Task<CourseDetailsDto?> GetCourseByIdAsync(Guid id)
+        {
+            var course = await uow.CourseRepository.GetCourseByIdAsync(id);
+            if (course == null)
+                return null;
+
+            return new CourseDetailsDto(
+                course.Id,
+                course.Name,
+                course.Description,
+                course.StartDate,
+                course.EndDate,
+                course.Modules.Select(m => new ModuleDto(
+                    m.Id,
+                    m.Name,
+                    m.Description,
+                    m.StartDate,
+                    m.EndDate
+                )).ToList()
+            );
         }
     }
 }

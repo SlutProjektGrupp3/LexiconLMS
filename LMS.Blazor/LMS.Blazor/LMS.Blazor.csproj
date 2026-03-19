@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Domain.Models\Domain.Models.csproj" />
+    <ProjectReference Include="..\..\LMS.Blazor.Shared\LMS.Blazor.Shared.csproj" />
     <ProjectReference Include="..\LMS.Blazor.Client\LMS.Blazor.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.5" />

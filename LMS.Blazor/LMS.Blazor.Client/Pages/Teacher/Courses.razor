@@ -1,12 +1,19 @@
 ﻿@page "/teacher/courses"
 @using LMS.Shared.DTOs.CourseDtos
+@inject IApiService ApiService
+@attribute [Authorize(Roles = "Teacher")]
 
 <h3>Courses</h3>
-<div class="mb-3">
-    <button class="btn btn-primary" @onclick="LoadCourses">Ladda kurser</button>
-</div>
 
-@if (courses.Count == 0)
+@if (isLoading)
+{
+    <p>Laddar kurser...</p>
+}
+else if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger">@error</div>
+}
+else if (_courses is null || _courses.Count == 0)
 {
     <p>Inga kurser hittades.</p>
 }
@@ -15,14 +22,14 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>Namn</th>
-                <th>Beskrivning</th>
-                <th>Start</th>
-                <th>Slut</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>StartDate</th>
+                <th>EndDate</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var course in courses)
+            @foreach (var course in _courses)
             {
                 <tr>
                     <td>@course.Name</td>
@@ -34,11 +41,33 @@ else
         </tbody>
     </table>
 }
+
 @code {
-    private List<CourseDto> courses = new();
+    private List<CourseDto> _courses = new();
+    private bool isLoading;
+    private string? error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCourses();
+    }
 
     private async Task LoadCourses()
     {
-        // courses = await  CourseApiClient.GetCoursesAsync();
+        isLoading = true;
+        error = null;
+
+        try
+        {
+            _courses = await ApiService.GetAsync<List<CourseDto>>("api/courses");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 }

@@ -22,8 +22,9 @@ namespace LMS.Presentation.Controllers
             this.serviceManager = serviceManager;
         }
 
-        [Authorize(Roles = "Teacher")]
         [HttpGet]
+        [Authorize(Roles = "Teacher")]
+        // GET: api/courses
         public async Task<IActionResult> GetCourses()
         {
             var courses = await serviceManager.CourseService.GetAllCoursesAsync();
@@ -51,6 +52,7 @@ namespace LMS.Presentation.Controllers
         //}
 
         [HttpPost]
+        [Authorize(Roles = "Teacher")]
         public async Task<ActionResult<CourseDto>> PostCourse(CourseCreateDto dto)
         {
             var createdDto = await serviceManager.CourseService.CreateCourseAsync(dto);

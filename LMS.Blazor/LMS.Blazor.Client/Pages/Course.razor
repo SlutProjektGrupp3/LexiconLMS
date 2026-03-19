@@ -1,6 +1,7 @@
 ﻿@page "/courses/{Id:guid}"
 @inject IApiService ApiService
 @using LMS.Shared.DTOs.Course
+@using LMS.Shared.DTOs.Activity
 
 @if(isLoading)
 {
@@ -16,26 +17,54 @@ else if (_course != null)
 {
     @*Title*@
     <h1>@_course.Name</h1>
-
     <h2>Moduler</h2>
-
     foreach (var module in _course.Modules)
     {
         <div>
             <h3>@module.Name</h3>
             <p>@module.Description</p>
+
+            <button @onclick="() => ToggleActivitiesAsync(module.Id)">
+                @(_moduleActivities.ContainsKey(module.Id) ? "Hide Activities" : "Show Activities")
+            </button>
+
+            @if (_loadingModules.Contains(module.Id))
+            {
+                <p><em>Loading activities...</em></p>
+            }
+            else if (_moduleActivities.TryGetValue(module.Id, out var activities))
+            {
+                <div>
+                    @if (activities.Any())
+                    {
+                        @foreach (var activity in activities)
+                        {
+                            <div>
+                                <p><strong>@activity.Name</strong> (@activity.TypeName)</p>
+                                <p>@activity.Description</p>
+                                <small>@activity.StartDate.ToShortDateString() - @activity.EndDate.ToShortDateString()</small>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p>No activities found for this module.</p>
+                    }
+                </div>
+            }
         </div>
     }
 }
 
-
 @code {
     [Parameter]
     public Guid Id { get; set; }
-
     private CourseDetailsDto? _course;
     private string? error;
     private bool isLoading;
+
+    private Dictionary<Guid, List<ActivityDto>> _moduleActivities = new();
+    private HashSet<Guid> _loadingModules = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -48,7 +77,6 @@ else if (_course != null)
         isLoading = true;
         error = null;
         _course = null;
-
         try
         {
             _course = await ApiService.GetAsync<CourseDetailsDto>($"courses/{Id}");
@@ -60,6 +88,32 @@ else if (_course != null)
         finally
         {
             isLoading = false;
+        }
+    }
+
+    private async Task ToggleActivitiesAsync(Guid moduleId)
+    {
+        if (_moduleActivities.ContainsKey(moduleId))
+        {
+            _moduleActivities.Remove(moduleId);
+            return;
+        }
+
+        _loadingModules.Add(moduleId);
+        StateHasChanged();
+
+        try
+        {
+            var activities = await ApiService.GetAsync<List<ActivityDto>>($"api/activities/modules/{moduleId}");
+            _moduleActivities[moduleId] = activities ?? new List<ActivityDto>();
+        }
+        catch (Exception)
+        {
+            _moduleActivities[moduleId] = new List<ActivityDto>();
+        }
+        finally
+        {
+            _loadingModules.Remove(moduleId);
         }
     }
 }

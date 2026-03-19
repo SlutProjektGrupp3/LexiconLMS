@@ -7,7 +7,7 @@ using System.Text;
 
 namespace LMS.Presentation.Controllers
 {
-    [Route("modules/{moduleId}/activities")]
+    [Route("api/activities")]
     [ApiController]
     [Authorize] 
     public class ActivitiesController : ControllerBase
@@ -19,7 +19,7 @@ namespace LMS.Presentation.Controllers
             _serviceManager = serviceManager;
         }
 
-        [HttpGet]
+        [HttpGet("modules/{moduleId}")]
         public async Task<IActionResult> GetActivitiesForModule(Guid moduleId)
         {
             var activities = await _serviceManager.ActivityService.GetActivitiesForModuleAsync(moduleId);

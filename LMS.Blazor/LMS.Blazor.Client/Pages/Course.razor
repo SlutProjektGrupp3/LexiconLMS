@@ -104,7 +104,7 @@ else if (_course != null)
 
         try
         {
-            var activities = await ApiService.GetAsync<List<ActivityDto>>($"modules/{moduleId}/activities");
+            var activities = await ApiService.GetAsync<List<ActivityDto>>($"api/activities/modules/{moduleId}");
             _moduleActivities[moduleId] = activities ?? new List<ActivityDto>();
         }
         catch (Exception)

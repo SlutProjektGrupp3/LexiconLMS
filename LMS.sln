@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LMS.Blazor", "LMS.Blazor\LM
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LMS.Blazor.Client", "LMS.Blazor\LMS.Blazor.Client\LMS.Blazor.Client.csproj", "{4FECC27D-EAE8-4CA4-AB7E-73E7ED7B61CC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LMS.Blazor.Shared", "LMS.Blazor.Shared\LMS.Blazor.Shared.csproj", "{ADF01DFD-91B9-4039-B3F7-10586722A639}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,10 @@ Global
 		{4FECC27D-EAE8-4CA4-AB7E-73E7ED7B61CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4FECC27D-EAE8-4CA4-AB7E-73E7ED7B61CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4FECC27D-EAE8-4CA4-AB7E-73E7ED7B61CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ADF01DFD-91B9-4039-B3F7-10586722A639}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADF01DFD-91B9-4039-B3F7-10586722A639}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADF01DFD-91B9-4039-B3F7-10586722A639}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADF01DFD-91B9-4039-B3F7-10586722A639}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -94,6 +100,7 @@ Global
 		{5B2772EF-6439-4A73-B2D7-AFA5D0BBEE61} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{F8BA0EE4-256D-46C7-83FC-C6D2C4D41E57} = {5B2772EF-6439-4A73-B2D7-AFA5D0BBEE61}
 		{4FECC27D-EAE8-4CA4-AB7E-73E7ED7B61CC} = {5B2772EF-6439-4A73-B2D7-AFA5D0BBEE61}
+		{ADF01DFD-91B9-4039-B3F7-10586722A639} = {5B2772EF-6439-4A73-B2D7-AFA5D0BBEE61}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F35F38BC-8F0E-4CC9-929A-0D4EA3CCFB45}

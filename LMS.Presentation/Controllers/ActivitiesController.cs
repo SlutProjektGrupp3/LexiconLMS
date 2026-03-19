@@ -9,7 +9,7 @@ namespace LMS.Presentation.Controllers
 {
     [Route("api/modules/{moduleId}/activities")]
     [ApiController]
-    //[Authorize] 
+    [Authorize] 
     public class ActivitiesController : ControllerBase
     {
         private readonly IActivityService _activityService;

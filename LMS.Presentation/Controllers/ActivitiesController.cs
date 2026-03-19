@@ -7,7 +7,7 @@ using System.Text;
 
 namespace LMS.Presentation.Controllers
 {
-    [Route("api/modules/{moduleId}/activities")]
+    [Route("modules/{moduleId}/activities")]
     [ApiController]
     [Authorize] 
     public class ActivitiesController : ControllerBase

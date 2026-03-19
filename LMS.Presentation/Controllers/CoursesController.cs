@@ -1,6 +1,8 @@
 ﻿
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts.Courses;
+using LMS.Shared.DTOs;
 
 namespace LMS.Api.Controllers;
 
@@ -16,6 +18,8 @@ public class CoursesController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Teacher")]
+
     public async Task<IActionResult> CreateCourse([FromBody] CreateCourseDto dto)
     {
         try

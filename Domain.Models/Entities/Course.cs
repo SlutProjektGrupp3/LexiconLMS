@@ -4,7 +4,7 @@
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = null!;
-        public string Description { get; set; } = null!;
+        public string? Description { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public ICollection<ApplicationUser> Students { get; set; } = new List<ApplicationUser>();

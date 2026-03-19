@@ -4,14 +4,14 @@ using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Text;
 
-namespace Service.Contracts.Courses
+namespace LMS.Shared.DTOs
 {
     public class CreateCourseDto
     {
 
         [Required]
         public string Name { get; set; } = null!;
-        public string? Description { get; set; } = null!;
+        public string? Description { get; set; }
         [Required]
         public DateTime StartDate { get; set; }
         [Required]

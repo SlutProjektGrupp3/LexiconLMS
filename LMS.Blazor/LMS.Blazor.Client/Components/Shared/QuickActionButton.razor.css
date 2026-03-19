@@ -1,0 +1,17 @@
+﻿.quick-action-button {
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+    .quick-action-button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 .25rem .75rem rgba(0, 0, 0, 0.08);
+    }
+
+.quick-action-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 1.25rem;
+    line-height: 1;
+    flex-shrink: 0;
+}

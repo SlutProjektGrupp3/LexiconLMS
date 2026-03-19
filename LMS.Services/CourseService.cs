@@ -2,6 +2,7 @@
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using Service.Contracts.Courses;
+using LMS.Shared.DTOs;
 
 namespace Application.Services;
 

@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Domain.Models.Entities;
+using System;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 using System.Text;
-using Domain.Models.Entities;
+using LMS.Shared.DTOs;
 
 
 namespace Service.Contracts.Courses

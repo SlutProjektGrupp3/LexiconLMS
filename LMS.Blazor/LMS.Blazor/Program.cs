@@ -8,6 +8,7 @@ using LMS.Blazor.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Headers;
+using System.Globalization;
 
 namespace LMS.Blazor;
 
@@ -15,6 +16,12 @@ public class Program
 {
     public static void Main(string[] args)
     {
+
+        var culture = new CultureInfo("sv-SE");  // show date swedish style
+        CultureInfo.DefaultThreadCurrentCulture = culture;
+        CultureInfo.DefaultThreadCurrentUICulture = culture;
+
+
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.

@@ -8,6 +8,7 @@
 @using LMS.Blazor.Data
 @using System.IdentityModel.Tokens.Jwt
 @using System.Security.Claims
+@using LMS.Blazor.Shared.Components.Icons
 
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
@@ -17,17 +18,16 @@
 @inject IHttpClientFactory HttpClientFactory
 @inject ITokenStorage TokenStorage
 
-<PageTitle>Log in</PageTitle>
+<PageTitle>Logga in</PageTitle>
 
-<h1>Log in</h1>
-<div class="row">
-    <div class="col-lg-6">
-        <section>
+<div class="d-flex vh-100 justify-content-center align-items-center">
+    <div class="card col-5 align-self-center shadow border-0">
+        <div class="d-flex flex-column justify-content-center align-items-center p-4">
+            <BookOpenIcon Size="48" CssClass="text-primary" />
+            <h1 class="pt-2 pb-3">Lexicon LMS</h1>
             <StatusMessage Message="@errorMessage" />
-            <EditForm EditContext="editContext" method="post" OnSubmit="LoginUser" FormName="login">
+            <EditForm EditContext="editContext" method="post" OnSubmit="LoginUser" FormName="login" class="w-100">
                 <DataAnnotationsValidator />
-                <h2>Use a local account to log in.</h2>
-                <hr />
                 <ValidationSummary class="text-danger" role="alert" />
                 <div class="form-floating mb-3">
                     <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="username webauthn" aria-required="true" placeholder="name@example.com" />
@@ -45,37 +45,42 @@
                         Remember me
                     </label>
                 </div>
-                <div>
-                    <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
+                <div class="pt-5">
+                    <button type="submit" class="w-100 btn btn-lg btn-primary">Logga in</button>
                 </div>
-                <hr />
-                <div class="d-flex flex-column">
+
+                @* <div class="d-flex flex-column">
                     <span class="text-secondary mx-auto mt-2">OR</span>
                     <PasskeySubmit Operation="PasskeyOperation.Request" Name="Input.Passkey" EmailName="Input.Email" class="btn btn-link mx-auto">Log in with a passkey</PasskeySubmit>
-                </div>
-                <hr />
-                <div>
-                    <p>
-                        <a href="Account/ForgotPassword">Forgot your password?</a>
-                    </p>
-                    <p>
-                        <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
-                    </p>
-                    <p>
-                        <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
-                    </p>
-                </div>
+                </div> 
+                <hr /> *@
             </EditForm>
-        </section>
+
+            <div>
+                <p class="pt-5 pb-3">
+                    <a href="Account/ForgotPassword">Glömt lösernord?</a>
+                </p>
+                @* <p>
+                <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
+                </p> *@
+                            @* <p>
+                    <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
+                </p> *@
+            </div>
+        </div>
     </div>
-    <div class="col-lg-4 col-lg-offset-2">
+
+    @* Lämna den här så att vi kan ställa tillbacka senare, kanske *@
+    @* <div class="col-lg-4 col-lg-offset-2">
         <section>
             <h3>Use another service to log in.</h3>
             <hr />
             <ExternalLoginPicker />
         </section>
-    </div>
+    </div> *@
 </div>
+
+
 
 @code {
     private string? errorMessage;

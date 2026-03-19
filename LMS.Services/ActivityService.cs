@@ -1,5 +1,5 @@
 ﻿using Domain.Contracts.Repositories;
-using LMS.Shared.DTOs;
+using LMS.Shared.DTOs.Activity;
 using Service.Contracts;
 using System;
 using System.Collections.Generic;

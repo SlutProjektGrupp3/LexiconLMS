@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace LMS.Shared.DTOs
+namespace LMS.Shared.DTOs.Activity
 {
     public record ActivityDto(
     Guid Id,

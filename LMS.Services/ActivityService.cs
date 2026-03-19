@@ -10,10 +10,12 @@ namespace LMS.Services
     public class ActivityService : IActivityService
     {
         private readonly IActivityRepository _repository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ActivityService(IActivityRepository repository)
+        public ActivityService(IActivityRepository repository, IUnitOfWork unitOfWork)
         {
             _repository = repository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<IEnumerable<ActivityDto>> GetActivitiesForModuleAsync(Guid moduleId)

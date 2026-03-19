@@ -12,17 +12,17 @@ namespace LMS.Presentation.Controllers
     [Authorize] 
     public class ActivitiesController : ControllerBase
     {
-        private readonly IActivityService _activityService;
+        private readonly IServiceManager _serviceManager;
 
-        public ActivitiesController(IActivityService activityService)
+        public ActivitiesController(IServiceManager serviceManager)
         {
-            _activityService = activityService;
+            _serviceManager = serviceManager;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetActivitiesForModule(Guid moduleId)
         {
-            var activities = await _activityService.GetActivitiesForModuleAsync(moduleId);
+            var activities = await _serviceManager.ActivityService.GetActivitiesForModuleAsync(moduleId);
             return Ok(activities);
         }
     }

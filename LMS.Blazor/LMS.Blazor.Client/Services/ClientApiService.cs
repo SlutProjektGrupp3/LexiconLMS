@@ -55,7 +55,7 @@ public class ClientApiService : IApiService
 
         if (!response.IsSuccessStatusCode)
         {
-            throw new Exception($"Status: {(int)response.StatusCode} {response.ReasonPhrase}. Response: {responseBody}");
+            throw new InvalidOperationException("Kunde inte slutföra anropet till servern.");
         }
     }
 }

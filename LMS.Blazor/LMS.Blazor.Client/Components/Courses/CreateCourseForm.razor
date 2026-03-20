@@ -16,14 +16,14 @@
     <ValidationSummary />
 
     <div class="mb-3">
-        <label class="form-label" for="course-name">Namn</label>
-        <InputText id="course-name" class="form-control" @bind-Value="model.Name" />
+        <label class="form-label" for="course-name">Kursnamn</label>
+        <InputText id="course-name" placeholder="T.ex. Lexicon LTU" class="form-control" @bind-Value="model.Name" />
         <ValidationMessage For="@(() => model.Name)" class="text-danger" />
     </div>
 
     <div class="mb-3">
         <label class="form-label" for="course-description">Beskrivning</label>
-        <InputTextArea id="course-description" class="form-control" rows="4" @bind-Value="model.Description" />
+        <InputTextArea id="course-description" placeholder="Beskriv kursen (valfritt)" class="form-control" rows="4" @bind-Value="model.Description" />
     </div>
 
     <div class="row">

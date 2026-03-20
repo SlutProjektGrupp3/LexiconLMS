@@ -37,7 +37,7 @@ namespace LMS.Presentation.Controllers
         public async Task<IActionResult> GetCourse(Guid id)
         {
             var courses = await serviceManager.CourseService.GetCourseAsync(id, trackChanges: false);
-            if (course == null)
+            if (courses == null)
                 return NotFound();
             return Ok(courses);
         }
@@ -61,15 +61,5 @@ namespace LMS.Presentation.Controllers
 
             return CreatedAtAction(nameof(GetCourse), new { id = createdDto.Id }, createdDto);
         }
-        
-         [HttpGet("{id}")]
-    public async Task<IActionResult> GetCourse(Guid id)
-    {
-        var course = await _serviceManager.CourseService.GetCourseByIdAsync(id);
-
-        if (course == null)
-            return NotFound();
-
-        return Ok(course);
-    }   
+    }
 }

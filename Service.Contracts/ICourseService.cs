@@ -1,4 +1,5 @@
-﻿using LMS.Shared.DTOs.CourseDtos;
+﻿using LMS.Shared.DTOs.Course;
+using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.Request;
 using System;
 using System.Collections.Generic;

@@ -25,7 +25,7 @@ namespace LMS.Infractructure.Repositories
             return include ?
                 await FindByCondition(c => c.Id == id, trackChanges).Include(c => c.Students).FirstOrDefaultAsync() :
                 await FindByCondition(c => c.Id == id, trackChanges).FirstOrDefaultAsync();
-        }        
+        }
 
         public async Task<PagedList<Course>> GetCoursesAsync(CourseRequestParams requestParams, bool trackChanges = false)
         {
@@ -36,25 +36,14 @@ namespace LMS.Infractructure.Repositories
         }
 
         public void CreateCourse(Course course) => Create(course);
-﻿
-using Domain.Contracts.Repositories;
-using Domain.Models.Entities;
-using LMS.Infractructure.Data;
-using Microsoft.EntityFrameworkCore;
 
-namespace LMS.Infractructure.Repositories;
 
-public class CourseRepository : RepositoryBase<Course>, ICourseRepository
-{
-    private readonly ApplicationDbContext context;
-    public CourseRepository(ApplicationDbContext context) : base(context)
-    {
-        this.context = context;
-    }
-    public async Task<Course?> GetCourseByIdAsync(Guid courseId, bool trackChanges = false)
-    {
-        return await FindByCondition(c => c.Id == courseId, trackChanges)
-            .Include(c => c.Modules)
-            .FirstOrDefaultAsync();
+
+        public async Task<Course?> GetCourseByIdAsync(Guid courseId, bool trackChanges = false)
+        {
+            return await FindByCondition(c => c.Id == courseId, trackChanges)
+                .Include(c => c.Modules)
+                .FirstOrDefaultAsync();
+        }
     }
 }

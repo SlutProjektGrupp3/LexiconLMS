@@ -8,5 +8,6 @@ namespace Service.Contracts
     public interface IActivityService
     {
         Task<IEnumerable<ActivityDto>> GetActivitiesForModuleAsync(Guid moduleId);
+        Task<ActivityDto> CreateActivityAsync(CreateActivityDto dto);
     }
 }

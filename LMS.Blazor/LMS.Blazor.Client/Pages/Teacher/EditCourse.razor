@@ -1,0 +1,11 @@
+﻿@page "/teacher/courses/edit/{Id:guid}"
+@attribute [Authorize(Roles = "Teacher")]
+
+<h3>Edit Course</h3>
+
+<p>Course ID: @Id</p>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+}

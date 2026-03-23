@@ -33,7 +33,7 @@ public class CourseService : ICourseService
     }
     public async Task<(IEnumerable<CourseDto> courseDtos, MetaData metaData)> GetCoursesAsync(CourseRequestParams requestParams, bool trackChanges = false)
     {
-        var pagedList = await uow.CourseRepository.GetAllCoursesAsync(requestParams, trackChanges);
+        var pagedList = await uow.CourseRepository.GetCoursesAsync(requestParams, trackChanges);
         var courseDtos = mapper.Map<IEnumerable<CourseDto>>(pagedList.Items);
         return (courseDtos, pagedList.MetaData);
     }

@@ -22,7 +22,7 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<PagedList<Course>> GetAllCoursesAsync(CourseRequestParams requestParams, bool trackChanges = false)
+    public async Task<PagedList<Course>> GetCoursesAsync(CourseRequestParams requestParams, bool trackChanges = false)
     {
         IQueryable<Course> courses = requestParams.IncludeStudents ? FindAll(trackChanges).Include(c => c.Students) :
                                                       FindAll(trackChanges);

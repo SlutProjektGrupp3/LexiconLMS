@@ -32,14 +32,14 @@ public class Program
         // Configure the HTTP request pipeline.
         app.ConfigureExceptionHandler();
 
-        if (app.Environment.IsDevelopment())
-        {
+        //if (app.Environment.IsDevelopment())
+        //{
             app.UseSwagger();
             app.UseSwaggerUI(opt =>
             {
                 opt.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
             });
-        }
+        //}
 
         app.UseHttpsRedirection();
         app.UseCors("AllowAll"); 

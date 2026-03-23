@@ -18,7 +18,7 @@ public class UserService : IUserService
     }
     public async Task<IEnumerable<UserListDto>> GetAllUsersAsync()
     {
-        var users = await _unitOfWork.Users.GetAllUsersAsync();
+        var users = await _unitOfWork.UserRepository.GetAllUsersAsync();
         
         var dtoList = new List<UserListDto>();
 

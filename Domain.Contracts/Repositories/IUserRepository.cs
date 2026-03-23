@@ -1,9 +1,8 @@
 ﻿using Domain.Models.Entities;
 
-namespace Domain.Contracts.Repositories
+namespace Domain.Contracts.Repositories;
+
+public interface IUserRepository
 {
-    public interface IUserRepository
-    {
-        Task <IEnumerable<ApplicationUser>> GetAllUsersAsync(bool trackChanges = false);
-    }
+    Task <IEnumerable<ApplicationUser>> GetAllUsersAsync(bool trackChanges = false);
 }

@@ -4,7 +4,7 @@ using Service.Contracts;
 
 namespace LMS.API.Controllers;
 
-[Route("[controller]")]
+[Route("api/[controller]")]
 [ApiController]
 public class CoursesController : ControllerBase
 {

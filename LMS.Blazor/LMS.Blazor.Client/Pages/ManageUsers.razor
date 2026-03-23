@@ -1,8 +1,8 @@
-﻿@page "/courses/{Id:guid}"
+﻿@page "/manageusers"
 @inject IApiService ApiService
-@using LMS.Shared.DTOs.Course
+@using LMS.Shared.DTOs.User
 
-@if(isLoading)
+@if (isLoading)
 {
     <p><em>Loading...</em></p>
 }
@@ -12,20 +12,22 @@ else if (error != null)
         <strong>Error:</strong> @error
     </div>
 }
-else if (_course != null)
+else if (_users.Any())
 {
-    @*Title*@
-    <h1>@_course.Name</h1>
+    <div class="card shadow-sm rounded border-0">
 
-    <h2>Moduler</h2>
-
-    foreach (var module in _course.Modules)
-    {
-        <div>
-            <h3>@module.Name</h3>
-            <p>@module.Description</p>
+        <div class="card-header bg-white border-bottom py-3 px-4">
+            <h2 class="h5 mb-1">Manage Users</h2>
+            <p class="text-muted small mb-0">Overview of all users</p>
         </div>
-    }
+
+        <UserTable Users=_users></UserTable>
+
+    </div>
+}
+else
+{
+    <p>No users found.</p>
 }
 
 
@@ -33,7 +35,7 @@ else if (_course != null)
     [Parameter]
     public Guid Id { get; set; }
 
-    private CourseDetailsDto? _course;
+    private IEnumerable<UserListDto> _users = new List<UserListDto>();
     private string? error;
     private bool isLoading;
 
@@ -47,11 +49,10 @@ else if (_course != null)
     {
         isLoading = true;
         error = null;
-        _course = null;
 
         try
         {
-            _course = await ApiService.GetAsync<CourseDetailsDto>($"api/courses/{Id}");
+            _users = await ApiService.GetAsync<IEnumerable<UserListDto>>($"api/users/") ?? new List<UserListDto>();
         }
         catch (Exception ex)
         {

@@ -8,6 +8,6 @@ namespace Domain.Contracts.Repositories
     public interface IActivityRepository
     {
         Task<IEnumerable<ModuleActivity>> GetActivitiesByModuleIdAsync(Guid moduleId, bool trackChanges);
-
+        void Create(ModuleActivity activity);
     }
 }

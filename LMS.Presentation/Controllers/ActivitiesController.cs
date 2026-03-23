@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using LMS.Shared.DTOs.Activity;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 
@@ -21,5 +23,12 @@ public class ActivitiesController : ControllerBase
     {
         var activities = await _serviceManager.ActivityService.GetActivitiesForModuleAsync(moduleId);
         return Ok(activities);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateActivity(CreateActivityDto dto)
+    {
+        var createdActivity = await _serviceManager.ActivityService.CreateActivityAsync(dto);
+        return StatusCode(StatusCodes.Status201Created, createdActivity);
     }
 }

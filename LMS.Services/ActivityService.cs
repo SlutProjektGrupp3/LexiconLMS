@@ -1,4 +1,5 @@
 ﻿using Domain.Contracts.Repositories;
+using Domain.Models.Entities;
 using LMS.Shared.DTOs.Activity;
 using Service.Contracts;
 using System;
@@ -33,5 +34,36 @@ namespace LMS.Services
 
             return dtoList;
         }
+
+        public async Task<ActivityDto> CreateActivityAsync(CreateActivityDto dto)
+        {
+            var newActivity = new ModuleActivity
+            {
+                Id = Guid.NewGuid(),
+                Name = dto.Name,
+                Description = dto.Description,
+                StartDate = dto.StartDate,
+                EndDate = dto.EndDate,
+                ModuleId = dto.ModuleId,
+                Type = new ActivityType
+                {
+                    Id = Guid.NewGuid(),
+                    Name = dto.ActivityTypeName
+                }
+            };
+
+            _repository.Create(newActivity);
+            await _unitOfWork.CompleteAsync();
+
+            return new ActivityDto(
+                newActivity.Id,
+                newActivity.Name,
+                newActivity.Type.Name,
+                newActivity.Description,
+                newActivity.StartDate,
+                newActivity.EndDate
+            );
+        }
     }
+
 }

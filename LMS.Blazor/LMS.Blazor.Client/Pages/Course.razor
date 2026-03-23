@@ -79,7 +79,7 @@ else if (_course != null)
         _course = null;
         try
         {
-            _course = await ApiService.GetAsync<CourseDetailsDto>($"courses/{Id}");
+            _course = await ApiService.GetAsync<CourseDetailsDto>($"api/courses/{Id}");
         }
         catch (Exception ex)
         {

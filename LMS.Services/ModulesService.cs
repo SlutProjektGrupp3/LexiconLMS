@@ -6,7 +6,7 @@ using Service.Contracts;
 
 namespace LMS.Services
 {
-    public class ModulesService : IModulesService
+    public class ModulesService : IModuleService
     {
         private readonly IUnitOfWork uow;
         private readonly IMapper mapper;

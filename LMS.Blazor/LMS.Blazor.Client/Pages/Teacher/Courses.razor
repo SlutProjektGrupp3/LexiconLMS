@@ -3,4 +3,40 @@
 @inject IApiService ApiService
 @attribute [Authorize(Roles = "Teacher")]
 
-<CoursesList />
+<h3>Courses</h3>
+
+@if (isLoading)
+{
+    <p>Loading courses...</p>
+}
+else if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+else
+{
+    <CoursesList Courses="_courses" />
+}
+
+@code {
+    private List<CourseDto> _courses = new();
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var result = await ApiService.GetAsync<List<CourseDto>>("api/courses");
+            _courses = result ?? new List<CourseDto>();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

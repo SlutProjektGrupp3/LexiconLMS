@@ -1,53 +1,35 @@
 ﻿@using LMS.Shared.DTOs.CourseDtos
-@inject IApiService ApiService
 
-<h3>Courses</h3>
-
-@if (isLoading)
-{
-    <p>Loading courses...</p>
-}
-else if (!string.IsNullOrWhiteSpace(errorMessage))
-{
-    <div class="alert alert-danger">@errorMessage</div>
-}
-else if (courses is null || courses.Count == 0)
+@if (Courses is null || Courses.Count == 0)
 {
     <p>No courses found.</p>
 }
 else
 {
-    <ul class="list-group">
-        @foreach (var course in courses)
-        {
-            <li class="list-group-item">
-                <strong>@course.Name</strong><br />
-                <span>@course.Description</span><br />
-                <small>@course.StartDate.ToShortDateString() - @course.EndDate.ToShortDateString()</small>
-            </li>
-        }
-    </ul>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>StartDate</th>
+                <th>EndDate</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var course in Courses)
+            {
+                <tr>
+                    <td>@course.Name</td>
+                    <td>@course.Description</td>
+                    <td>@course.StartDate.ToShortDateString()</td>
+                    <td>@course.EndDate.ToShortDateString()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 }
 
 @code {
-    private List<CourseDto> courses = new();
-    private bool isLoading = true;
-    private string? errorMessage;
-
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            var result = await ApiService.GetAsync<List<CourseDto>>("api/courses");
-            courses = result ?? new List<CourseDto>();
-        }
-        catch (Exception ex)
-        {
-            errorMessage = ex.Message;
-        }
-        finally
-        {
-            isLoading = false;
-        }
-    }
+    [Parameter]
+    public List<CourseDto> Courses { get; set; } = new();
 }

@@ -1,4 +1,4 @@
-﻿using LMS.Shared.DTOs.CourseDtos;
+using LMS.Shared.DTOs.CourseDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
@@ -11,6 +11,7 @@ namespace LMS.Presentation.Controllers;
 public class CoursesController : ControllerBase
 {
     private readonly IServiceManager serviceManager;
+
     public CoursesController(IServiceManager serviceManager)
     {
         this.serviceManager = serviceManager;
@@ -22,21 +23,11 @@ public class CoursesController : ControllerBase
     public async Task<IActionResult> GetCourses()
     {
         var courses = await serviceManager.CourseService.GetAllCoursesAsync();
-        //var dto = _mapper.Map<List<CourseDto>>(courses);
         return Ok(courses);
     }
 
-    // GET: api/courses/{id}
-    //[HttpGet("{id:guid}")]
-    //public async Task<IActionResult> GetCourse(Guid id)
-    //{
-    //    var courses = await serviceManager.CourseService.GetCourseAsync(id, trackChanges: false);
-    //    if (courses == null)
-    //        return NotFound();
-    //    return Ok(courses);
-    //}
-
     [HttpGet("{id:guid}")]
+    [Authorize] 
     public async Task<IActionResult> GetCourseById(Guid id)
     {
         var courseDetails = await serviceManager.CourseService.GetCourseByIdAsync(id);
@@ -44,17 +35,6 @@ public class CoursesController : ControllerBase
             return NotFound();
         return Ok(courseDetails);
     }
-
-    //// GET: api/courses?PageNumber=1&PageSize=10
-    //[HttpGet]
-    //public async Task<ActionResult<IEnumerable<CourseDto>>> GetCourse([FromQuery] CourseRequestParams requestParams)
-    //{
-    //    var pagedResult = await serviceManager.CourseService.GetCoursesAsync(requestParams);
-
-    //    Response.Headers.Append(new("X-Pagination", JsonSerializer.Serialize(pagedResult.metaData)));
-
-    //    return Ok(pagedResult.courseDtos);
-    //}
 
     [HttpPost]
     [Authorize(Roles = "Teacher")]

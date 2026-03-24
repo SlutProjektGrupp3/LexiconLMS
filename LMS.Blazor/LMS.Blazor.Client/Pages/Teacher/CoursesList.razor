@@ -13,6 +13,7 @@ else
                 <th>Description</th>
                 <th>StartDate</th>
                 <th>EndDate</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -23,6 +24,10 @@ else
                     <td>@course.Description</td>
                     <td>@course.StartDate.ToShortDateString()</td>
                     <td>@course.EndDate.ToShortDateString()</td>
+                    <NavLink class="btn btn-sm btn-outline-primary"
+                             href="@($"/teacher/courses/edit/{course.Id}")">
+                        Edit
+                    </NavLink>
                 </tr>
             }
         </tbody>

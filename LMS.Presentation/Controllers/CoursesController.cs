@@ -1,66 +1,47 @@
-﻿using LMS.Shared.DTOs.CourseDtos;
-using LMS.Shared.Request;
+using LMS.Shared.DTOs.CourseDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
-using System;
-using System.Collections.Generic;
-using System.Net.Http.Json;
-using System.Text;
-using System.Text.Json;
 
-namespace LMS.Presentation.Controllers
+namespace LMS.Presentation.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+
+public class CoursesController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-
-    public class CoursesController : ControllerBase
+    private readonly IServiceManager serviceManager;
+    public CoursesController(IServiceManager serviceManager)
     {
-        private readonly IServiceManager serviceManager;
-        public CoursesController(IServiceManager serviceManager)
-        {
-            this.serviceManager = serviceManager;
-        }
+        this.serviceManager = serviceManager;
+    }
 
-        [HttpGet]
-        [Authorize(Roles = "Teacher")]
-        // GET: api/courses
-        public async Task<IActionResult> GetCourses()
-        {
-            var courses = await serviceManager.CourseService.GetAllCoursesAsync();
-            //var dto = _mapper.Map<List<CourseDto>>(courses);
-            return Ok(courses);
-        }
+    [HttpGet]
+    [Authorize(Roles = "Teacher")]
+    // GET: api/courses
+    public async Task<IActionResult> GetCourses()
+    {
+        var courses = await serviceManager.CourseService.GetAllCoursesAsync();
+        //var dto = _mapper.Map<List<CourseDto>>(courses);
+        return Ok(courses);
+    }
 
-        // GET: api/courses/{id}
-        [HttpGet("{id:guid}")]
-        [Authorize] // any role can access course details, but must be authenticated
-        public async Task<IActionResult> GetCourse(Guid id)
-        {
-            var courses = await serviceManager.CourseService.GetCourseByIdAsync(id);
-            if (courses == null)
-                return NotFound();
-            return Ok(courses);
-        }
+    [HttpGet("{id:guid}")]
+    [Authjorize] 
+    public async Task<IActionResult> GetCourseById(Guid id)
+    {
+        var courseDetails = await serviceManager.CourseService.GetCourseByIdAsync(id);
+        if (courseDetails == null)
+            return NotFound();
+        return Ok(courseDetails);
+    }
 
-        //// GET: api/courses?PageNumber=1&PageSize=10
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<CourseDto>>> GetCourse([FromQuery] CourseRequestParams requestParams)
-        //{
-        //    var pagedResult = await serviceManager.CourseService.GetCoursesAsync(requestParams);
+    [HttpPost]
+    [Authorize(Roles = "Teacher")]
+    public async Task<ActionResult<CourseDto>> PostCourse(CourseCreateDto dto)
+    {
+        var createdDto = await serviceManager.CourseService.CreateCourseAsync(dto);
 
-        //    Response.Headers.Append(new("X-Pagination", JsonSerializer.Serialize(pagedResult.metaData)));
-
-        //    return Ok(pagedResult.courseDtos);
-        //}
-
-        [HttpPost]
-        [Authorize(Roles = "Teacher")]
-        public async Task<ActionResult<CourseDto>> PostCourse(CourseCreateDto dto)
-        {
-            var createdDto = await serviceManager.CourseService.CreateCourseAsync(dto);
-
-            return CreatedAtAction(nameof(GetCourse), new { id = createdDto.Id }, createdDto);
-        }
+        return CreatedAtAction(nameof(GetCourseById), new { id = createdDto.Id }, createdDto);
     }
 }

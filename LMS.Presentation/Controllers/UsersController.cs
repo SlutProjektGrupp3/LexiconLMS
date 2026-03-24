@@ -1,0 +1,25 @@
+﻿using LMS.Shared.DTOs.User;
+using Microsoft.AspNetCore.Mvc;
+using Service.Contracts;
+
+namespace LMS.API.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class UsersController : ControllerBase
+{
+    private readonly IServiceManager _serviceManager;
+
+    public UsersController(IServiceManager serviceManager)
+    {
+        _serviceManager = serviceManager;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAllUsers()
+    {
+        var users = await _serviceManager.UserService.GetAllUsersAsync();
+
+        return Ok(users ?? new List<UserListDto>());
+    }
+}

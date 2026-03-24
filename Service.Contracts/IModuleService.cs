@@ -2,7 +2,7 @@
 
 namespace Service.Contracts
 {
-    public interface IModulesService
+    public interface IModuleService
     {
         Task<CreateModuleResultDto> CreateModuleAsync(CreateModuleDto createModuleDto);
     }

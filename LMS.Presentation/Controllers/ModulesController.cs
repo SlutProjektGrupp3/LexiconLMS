@@ -26,7 +26,7 @@ namespace LMS.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status201Created, "Module successfully created")]
         public async Task<IActionResult> CreateModule(CreateModuleDto createModuleDto)
         {
-            var result = await serviceManager.ModulesService.CreateModuleAsync(createModuleDto);
+            var result = await serviceManager.ModuleService.CreateModuleAsync(createModuleDto);
 
             return result.Succeeded ? StatusCode(StatusCodes.Status201Created) : BadRequest(result.Errors); 
         }

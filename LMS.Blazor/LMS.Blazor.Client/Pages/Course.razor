@@ -1,4 +1,4 @@
-﻿@page "/courses/{Id:guid}"
+@page "/courses/{Id:guid}"
 @inject IApiService ApiService
 @using LMS.Shared.DTOs.Course
 @using LMS.Shared.DTOs.Activity
@@ -140,6 +140,9 @@ else if (_course != null)
     private HashSet<Guid> _loadingModules = new();
     private HashSet<Guid> _openModules = new();
 
+    private Dictionary<Guid, bool> _showCreateForm = new();
+    private Dictionary<Guid, CreateActivityDto> _newActivities = new();
+
     protected override async Task OnInitializedAsync()
     {
         //This method run in prerender
@@ -197,6 +200,49 @@ else if (_course != null)
             {
                 _loadingModules.Remove(moduleId);
             }
+        }
+    }
+
+    private void ToggleCreateForm(Guid moduleId)
+    {
+        var isCurrentlyShown = _showCreateForm.GetValueOrDefault(moduleId);
+        _showCreateForm[moduleId] = !isCurrentlyShown;
+        if (_showCreateForm[moduleId] && !_newActivities.ContainsKey(moduleId))
+        {
+            _newActivities[moduleId] = new CreateActivityDto
+            {
+                ModuleId = moduleId,
+                StartDate = DateTime.Now,
+                EndDate = DateTime.Now.AddDays(1)
+            };
+        }
+    }
+
+    private async Task HandleCreateActivity(Guid moduleId)
+    {
+        var dtoToSave = _newActivities[moduleId];
+        try
+        {
+            var createdActivity = await ApiService.PostAsync<CreateActivityDto, ActivityDto>("api/activities", dtoToSave);
+            
+            if (createdActivity != null)
+            {
+                if (_moduleActivities.ContainsKey(moduleId))
+                {
+                    _moduleActivities[moduleId].Add(createdActivity);
+                }
+                else
+                {
+                    await ToggleActivitiesAsync(moduleId);
+                }
+
+                _showCreateForm[moduleId] = false;
+                _newActivities.Remove(moduleId);
+            }
+        }
+        catch (Exception ex)
+        {
+            error = "Failed to create activity: " + ex.Message;
         }
     }
 }

@@ -17,8 +17,8 @@ public class MapperProfile : Profile
         CreateMap<Course, CourseDetailsDto>();
         CreateMap<CourseCreateDto, Course>();
         CreateMap<CreateModuleDto, Module>();
-<<<<<<< task-7-3---skapa-ett-formulär-för-att-skapa-en-modul
         CreateMap<Module, ModuleDto>();
+        CreateMap<UpdateCourseDto, Course>();
 
         // Explicit mapping for Module -> ModuleDto record
         CreateMap<Module, ModuleDto>()
@@ -26,9 +26,6 @@ public class MapperProfile : Profile
             .ForCtorParam("name", opt => opt.MapFrom(src => src.Name))
             .ForCtorParam("description", opt => opt.MapFrom(src => src.Description))
             .ForCtorParam("startDate", opt => opt.MapFrom(src => src.StartDate))
-            .ForCtorParam("endDate", opt => opt.MapFrom(src => src.EndDate));
-=======
-        CreateMap<UpdateCourseDto, Course>();
->>>>>>> develop
+            .ForCtorParam("endDate", opt => opt.MapFrom(src => src.EndDate));       
     }
 }

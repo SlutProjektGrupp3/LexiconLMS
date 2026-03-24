@@ -38,7 +38,7 @@ public class CourseService : ICourseService
 
     public async Task<CourseDetailsDto?> GetCourseByIdAsync(Guid id)
     {
-        var course = await uow.CourseRepository.GetCourseByIdAsync(id);
+        var course = await uow.CourseRepository.GetCourseByIdAsync(id, includeModules: true);
         if (course == null)
             return null;
 
@@ -60,10 +60,10 @@ public class CourseService : ICourseService
 
     public async Task UpdateCourseAsync(Guid id, UpdateCourseDto updateCourseDto, bool trackChanges)
     {
-        var courseEntity = await uow.CourseRepository.GetCourseByIdAsync(id, trackChanges);
+        var courseEntity = await uow.CourseRepository.GetCourseByIdAsync(id, trackChanges, includeModules: false);
 
         if (courseEntity is null)
-            throw new Exception($"Course with id {id} was not found.");
+            throw new KeyNotFoundException($"Course with id {id} was not found.");
 
         if (updateCourseDto.EndDate < updateCourseDto.StartDate)
             throw new Exception("End date must be after start date.");

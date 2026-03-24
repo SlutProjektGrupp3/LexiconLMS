@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
+using System;
 
 namespace LMS.Presentation.Controllers;
 
@@ -63,5 +64,17 @@ public class CoursesController : ControllerBase
         var createdDto = await serviceManager.CourseService.CreateCourseAsync(dto);
 
         return CreatedAtAction(nameof(GetCourseById), new { id = createdDto.Id }, createdDto);
+    }
+
+    [Authorize(Roles = "Teacher")]
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> UpdateCourse(Guid id, [FromBody] UpdateCourseDto updateCourseDto)
+    {
+        if (updateCourseDto is null)
+            return BadRequest("UpdateCourseDto is null.");
+
+        await serviceManager.CourseService.UpdateCourseAsync(id, updateCourseDto, trackChanges: true);
+
+        return NoContent();
     }
 }

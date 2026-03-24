@@ -8,4 +8,5 @@ public interface IUnitOfWork
     IModuleRepository ModuleRepository { get; }
     IUserRepository UserRepository { get; }
     Task CompleteAsync();
+    Task SaveAsync();
 }

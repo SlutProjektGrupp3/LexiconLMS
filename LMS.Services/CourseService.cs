@@ -68,4 +68,19 @@ public class CourseService : ICourseService
             )).ToList()
         );
     }
+
+    public async Task UpdateCourseAsync(Guid id, UpdateCourseDto updateCourseDto, bool trackChanges)
+    {
+        var courseEntity = await uow.CourseRepository.GetCourseAsync(id, trackChanges);
+
+        if (courseEntity is null)
+            throw new Exception($"Course with id {id} was not found.");
+
+        if (updateCourseDto.EndDate < updateCourseDto.StartDate)
+            throw new Exception("End date must be after start date.");
+
+        mapper.Map(updateCourseDto, courseEntity);
+
+        await uow.SaveAsync();
+    }
 }

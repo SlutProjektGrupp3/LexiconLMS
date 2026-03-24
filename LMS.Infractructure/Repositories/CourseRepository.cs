@@ -32,4 +32,7 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
 
     public void CreateCourse(Course course) => Create(course);
 
+    public async Task<Course?> GetCourseAsync(Guid id, bool trackChanges) =>
+        await FindByCondition(c => c.Id == id, trackChanges)
+            .SingleOrDefaultAsync();
 }

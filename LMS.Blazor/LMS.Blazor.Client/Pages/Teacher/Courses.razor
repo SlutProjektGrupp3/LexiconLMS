@@ -7,63 +7,32 @@
 
 @if (isLoading)
 {
-    <p>Laddar kurser...</p>
+    <p>Loading courses...</p>
 }
-else if (!string.IsNullOrWhiteSpace(error))
+else if (!string.IsNullOrWhiteSpace(errorMessage))
 {
-    <div class="alert alert-danger">@error</div>
-}
-else if (_courses is null || _courses.Count == 0)
-{
-    <p>Inga kurser hittades.</p>
+    <div class="alert alert-danger">@errorMessage</div>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>StartDate</th>
-                <th>EndDate</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var course in _courses)
-            {
-                <tr>
-                    <td>@course.Name</td>
-                    <td>@course.Description</td>
-                    <td>@course.StartDate.ToShortDateString()</td>
-                    <td>@course.EndDate.ToShortDateString()</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <CoursesList Courses="_courses" />
 }
 
 @code {
     private List<CourseDto> _courses = new();
-    private bool isLoading;
-    private string? error;
+    private bool isLoading = true;
+    private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadCourses();
-    }
-
-    private async Task LoadCourses()
-    {
-        isLoading = true;
-        error = null;
-
         try
         {
-            _courses = await ApiService.GetAsync<List<CourseDto>>("api/courses");
+            var result = await ApiService.GetAsync<List<CourseDto>>("api/courses");
+            _courses = result ?? new List<CourseDto>();
         }
         catch (Exception ex)
         {
-            error = ex.Message;
+            errorMessage = ex.Message;
         }
         finally
         {

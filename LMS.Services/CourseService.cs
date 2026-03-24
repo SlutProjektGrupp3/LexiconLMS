@@ -71,7 +71,7 @@ public class CourseService : ICourseService
 
     public async Task UpdateCourseAsync(Guid id, UpdateCourseDto updateCourseDto, bool trackChanges)
     {
-        var courseEntity = await uow.CourseRepository.GetCourseAsync(id, trackChanges);
+        var courseEntity = await uow.CourseRepository.GetCourseByIdAsync(id, trackChanges);
 
         if (courseEntity is null)
             throw new Exception($"Course with id {id} was not found.");
@@ -81,6 +81,6 @@ public class CourseService : ICourseService
 
         mapper.Map(updateCourseDto, courseEntity);
 
-        await uow.SaveAsync();
+        await uow.CompleteAsync();
     }
 }

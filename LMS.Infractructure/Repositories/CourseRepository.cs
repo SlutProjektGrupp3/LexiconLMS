@@ -15,11 +15,14 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
         return await FindAll(trackChanges).AsNoTracking().ToListAsync();
     }
 
-    public async Task<Course?> GetCourseByIdAsync(Guid courseId, bool trackChanges = false)
+    public async Task<Course?> GetCourseByIdAsync(Guid courseId, bool trackChanges = false, bool includeModules = false)
     {
-        return await FindByCondition(c => c.Id == courseId, trackChanges)
-            .Include(c => c.Modules)
-            .FirstOrDefaultAsync();
+        var query = FindByCondition(c => c.Id == courseId, trackChanges);
+
+        if (includeModules)
+            query = query.Include(c => c.Modules);
+
+        return await query.SingleOrDefaultAsync();
     }
 
     public async Task<PagedList<Course>> GetCoursesAsync(CourseRequestParams requestParams, bool trackChanges = false)
@@ -30,9 +33,5 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
         return await PagedList<Course>.CreateAsync(courses, requestParams.PageNumber, requestParams.PageSize);
     }
 
-    public void CreateCourse(Course course) => Create(course);
-
-    public async Task<Course?> GetCourseAsync(Guid id, bool trackChanges) =>
-        await FindByCondition(c => c.Id == id, trackChanges)
-            .SingleOrDefaultAsync();
+    public void CreateCourse(Course course) => Create(course);    
 }

@@ -27,7 +27,5 @@ public class UnitOfWork : IUnitOfWork
     }
 
     public async Task CompleteAsync() => await context.SaveChangesAsync();
-
-    public async Task SaveAsync() => await context.SaveChangesAsync();
 }
 

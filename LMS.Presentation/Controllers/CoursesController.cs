@@ -34,9 +34,10 @@ namespace LMS.Presentation.Controllers
 
         // GET: api/courses/{id}
         [HttpGet("{id:guid}")]
+        [Authorize] // any role can access course details, but must be authenticated
         public async Task<IActionResult> GetCourse(Guid id)
         {
-            var courses = await serviceManager.CourseService.GetCourseAsync(id, trackChanges: false);
+            var courses = await serviceManager.CourseService.GetCourseByIdAsync(id);
             if (courses == null)
                 return NotFound();
             return Ok(courses);

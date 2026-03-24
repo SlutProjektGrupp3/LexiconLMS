@@ -2,10 +2,17 @@
 @inject IApiService ApiService
 @using LMS.Shared.DTOs.Course
 @using LMS.Shared.DTOs.Activity
+@using LMS.Blazor.Shared.Components.Icons
 
-@if(isLoading)
+<PageTitle>Kursdetaljer</PageTitle>
+
+@if (isLoading)
 {
-    <p><em>Loading...</em></p>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <p><em>Loading...</em></p>
+        </div>
+    </div>
 }
 else if (error != null)
 {
@@ -15,56 +22,123 @@ else if (error != null)
 }
 else if (_course != null)
 {
-    @*Title*@
-    <h1>@_course.Name</h1>
-    <h2>Moduler</h2>
-    foreach (var module in _course.Modules)
-    {
-        <div>
-            <h3>@module.Name</h3>
-            <p>@module.Description</p>
+    <div class="card shadow-sm">
+        <div class="card-body">
 
-            <button @onclick="() => ToggleActivitiesAsync(module.Id)">
-                @(_moduleActivities.ContainsKey(module.Id) ? "Hide Activities" : "Show Activities")
-            </button>
-
-            @if (_loadingModules.Contains(module.Id))
-            {
-                <p><em>Loading activities...</em></p>
-            }
-            else if (_moduleActivities.TryGetValue(module.Id, out var activities))
-            {
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    @if (activities.Any())
-                    {
-                        @foreach (var activity in activities)
-                        {
-                            <div>
-                                <p><strong>@activity.Name</strong> (@activity.TypeName)</p>
-                                <p>@activity.Description</p>
-                                <small>@activity.StartDate.ToShortDateString() - @activity.EndDate.ToShortDateString()</small>
-                            </div>
-                        }
-                    }
-                    else
-                    {
-                        <p>No activities found for this module.</p>
-                    }
+                    <h4 class="mb-0">@_course.Name</h4>
                 </div>
+
+                <button class="btn btn-primary d-flex align-items-center gap-1">
+                    <CirclePlusIcon Size="18" />
+                    Ny Modul
+                </button>
+            </div>
+
+            if (_course.Modules == null || !_course.Modules.Any())
+            {
+            <p class="text-muted">Kursen har inga moduler.</p>
             }
+            else
+            {
+            <div class="accordion" id="modulesAccordion">
+                @foreach (var module in _course.Modules)
+                {
+                    var collapseId = $"collapse-{module.Id}";
+                    var headingId = $"heading-{module.Id}";
+                    var accordionIsOpen = _openModules.Contains(module.Id);
+
+                    <div class="accordion-item">
+
+                        <!-- Header -->
+                        <h2 class="accordion-header" id="@headingId">
+                            <button class="accordion-button @(accordionIsOpen ? "" : "collapsed")"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#@collapseId"
+                                    aria-expanded="@accordionIsOpen"
+                                    aria-controls="@collapseId"
+                                    @onclick="() => ToggleModuleAsync(module.Id)">
+                                <div class="d-flex flex-column text-start">
+                                    <span class="fw-semibold">@module.Name</span>
+                                    <small class="text-muted">@module.Description</small>
+                                </div>
+
+                            </button>
+                        </h2>
+
+                        <!-- Body -->
+                        <div id="@collapseId"
+                             class="accordion-collapse collapse @(accordionIsOpen ? "show" : "")"
+                             data-bs-parent="#modulesAccordion">
+
+                            <div class="accordion-body">
+
+                                @if (_loadingModules.Contains(module.Id))
+                                {
+                                    <div class="text-muted small">Laddar aktiviteter...</div>
+                                }
+                                else if (_moduleActivities.TryGetValue(module.Id, out var activities))
+                                {
+                                    @if (activities.Any())
+                                    {
+                                        <div class="list-group list-group-flush">
+                                            @foreach (var activity in activities)
+                                            {
+                                                <div class="list-group-item px-0">
+
+                                                    <div class="fw-semibold">
+                                                        @activity.Name
+                                                        <span class="text-muted fw-normal small">
+                                                            (@activity.TypeName)
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="text-muted small">
+                                                        @activity.Description
+                                                    </div>
+
+                                                    <div class="text-muted small">
+                                                        @activity.StartDate.ToShortDateString()
+                                                        -
+                                                        @activity.EndDate.ToShortDateString()
+                                                    </div>
+
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="text-muted small">
+                                            Inga aktiviteter hittades.
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+
+            </div>
         </div>
-    }
+    </div>
 }
+
+
 
 @code {
     [Parameter]
     public Guid Id { get; set; }
     private CourseDetailsDto? _course;
     private string? error;
-    private bool isLoading;
+    private bool isLoading = true;
 
     private Dictionary<Guid, List<ActivityDto>> _moduleActivities = new();
     private HashSet<Guid> _loadingModules = new();
+    private HashSet<Guid> _openModules = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -79,7 +153,7 @@ else if (_course != null)
         _course = null;
         try
         {
-            _course = await ApiService.GetAsync<CourseDetailsDto>($"courses/{Id}");
+            _course = await ApiService.GetAsync<CourseDetailsDto>($"api/courses/{Id}");
         }
         catch (Exception ex)
         {
@@ -91,29 +165,62 @@ else if (_course != null)
         }
     }
 
-    private async Task ToggleActivitiesAsync(Guid moduleId)
+    private async Task LoadActivitiesIfNeeded(Guid moduleId)
     {
         if (_moduleActivities.ContainsKey(moduleId))
-        {
-            _moduleActivities.Remove(moduleId);
             return;
-        }
 
         _loadingModules.Add(moduleId);
         StateHasChanged();
 
         try
         {
-            var activities = await ApiService.GetAsync<List<ActivityDto>>($"api/activities/modules/{moduleId}");
+            var activities = await ApiService
+                .GetAsync<List<ActivityDto>>($"api/activities/modules/{moduleId}");
+
             _moduleActivities[moduleId] = activities ?? new List<ActivityDto>();
         }
-        catch (Exception)
+        catch
         {
             _moduleActivities[moduleId] = new List<ActivityDto>();
         }
         finally
         {
             _loadingModules.Remove(moduleId);
+        }
+    }
+
+    private async Task ToggleModuleAsync(Guid moduleId)
+    {
+        if (_openModules.Contains(moduleId))
+        {
+            _openModules.Remove(moduleId);
+            return;
+        }
+
+        _openModules.Add(moduleId);
+
+        // Load data if needed
+        if (!_moduleActivities.ContainsKey(moduleId))
+        {
+            _loadingModules.Add(moduleId);
+            StateHasChanged();
+
+            try
+            {
+                var activities = await ApiService
+                    .GetAsync<List<ActivityDto>>($"api/activities/modules/{moduleId}");
+
+                _moduleActivities[moduleId] = activities ?? new List<ActivityDto>();
+            }
+            catch
+            {
+                _moduleActivities[moduleId] = new List<ActivityDto>();
+            }
+            finally
+            {
+                _loadingModules.Remove(moduleId);
+            }
         }
     }
 }

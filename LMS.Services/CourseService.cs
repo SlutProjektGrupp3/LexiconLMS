@@ -49,7 +49,7 @@ public class CourseService : ICourseService
 
     public async Task<CourseDetailsDto?> GetCourseByIdAsync(Guid id)
     {
-        var course = await uow.CourseRepository.GetCourseByIdAsync(id);
+        var course = await uow.CourseRepository.GetCourseByIdAsync(id, includeModules: true);
         if (course == null)
             return null;
 

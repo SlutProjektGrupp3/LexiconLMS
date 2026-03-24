@@ -17,4 +17,10 @@ public class ServerNoOpApiService(ILogger<ServerNoOpApiService> logger) : IApiSe
         _logger.LogWarning("ServerNoOpApiService called Post for: {Endpoint}", endpoint);
         return Task.FromResult<TResponse?>(default);
     }
+
+    public Task DeleteAsync(string endpoint, CancellationToken ct = default)
+    {
+        _logger.LogWarning("ServerNoOpApiService called Delete for: {Endpoint}", endpoint);
+        return Task.CompletedTask;
+    }
 }

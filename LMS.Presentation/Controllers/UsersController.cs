@@ -22,4 +22,13 @@ public class UsersController : ControllerBase
 
         return Ok(users ?? new List<UserListDto>());
     }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteUser(Guid id)
+    {
+        await _serviceManager.UserService.DeleteUserAsync(id);
+
+        return NoContent();
+    }
+
 }

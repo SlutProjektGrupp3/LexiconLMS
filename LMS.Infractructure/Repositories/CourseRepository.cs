@@ -15,14 +15,11 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
         return await FindAll(trackChanges).AsNoTracking().ToListAsync();
     }
 
-    public async Task<Course?> GetCourseByIdAsync(Guid courseId, bool trackChanges = false, bool includeModules = false)
+    public async Task<Course?> GetCourseByIdAsync(Guid courseId, bool trackChanges = false)
     {
-        var query = FindByCondition(c => c.Id == courseId, trackChanges);
-
-        if (includeModules)
-            query = query.Include(c => c.Modules);
-
-        return await query.SingleOrDefaultAsync();
+        return await FindByCondition(c => c.Id == courseId, trackChanges)
+            .Include(c => c.Modules)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<PagedList<Course>> GetCoursesAsync(CourseRequestParams requestParams, bool trackChanges = false)

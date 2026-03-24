@@ -1,9 +1,17 @@
 ﻿@page "/teacher/courses"
 @using LMS.Shared.DTOs.CourseDtos
 @inject IApiService ApiService
+@inject NavigationManager Navigation
 @attribute [Authorize(Roles = "Teacher")]
 
 <h3>Courses</h3>
+
+@if (showSuccessMessage)
+{
+    <div class="alert alert-success">
+        Course updated successfully!
+    </div>
+}
 
 @if (isLoading)
 {
@@ -22,9 +30,37 @@ else
     private List<CourseDto> _courses = new();
     private bool isLoading = true;
     private string? errorMessage;
+    private bool showSuccessMessage;
 
     protected override async Task OnInitializedAsync()
     {
+        try
+        {
+            var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+
+            var query = uri.Query;
+
+            if (query.Contains("updated=true", StringComparison.OrdinalIgnoreCase))
+            {
+                showSuccessMessage = true;
+            }
+
+            await LoadCourses();           
+            
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+     private async Task LoadCourses()
+    {
+        isLoading = true;
+        errorMessage = null;
         try
         {
             var result = await ApiService.GetAsync<List<CourseDto>>("api/courses");

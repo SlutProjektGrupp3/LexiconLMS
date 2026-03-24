@@ -7,5 +7,5 @@ public interface IUnitOfWork
     ICourseRepository CourseRepository { get; }
     IModuleRepository ModuleRepository { get; }
     IUserRepository UserRepository { get; }
-    Task CompleteAsync();
+    Task CompleteAsync();    
 }

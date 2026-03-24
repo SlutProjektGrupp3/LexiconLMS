@@ -33,6 +33,9 @@ public class ApiProxyController : ControllerBase
     {
         ArgumentException.ThrowIfNullOrEmpty(endpoint);
 
+        // Enable buffering IMMEDIATELY so the body can be read multiple times
+        //Request.EnableBuffering();
+
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized("User ID not found");

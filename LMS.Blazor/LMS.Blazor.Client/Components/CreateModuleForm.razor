@@ -1,7 +1,9 @@
-﻿@using LMS.Shared.DTOs.Activity
+﻿@inject IApiService ApiService
+@using LMS.Shared.DTOs.Course
+@using LMS.Shared.DTOs.Modules
 
 <div class="card mt-3 p-3 bg-light mb-3">
-    <h5>Create New Activity</h5>
+    <h5>Create New Module</h5>
 
     <EditForm Model="Model" OnValidSubmit="HandleSubmit">
         <DataAnnotationsValidator />
@@ -12,13 +14,8 @@
         </div>
 
         <div class="mb-2">
-            <label class="form-label">Type</label>
-            <InputText class="form-control" @bind-Value="Model.ActivityTypeName" />
-        </div>
-
-        <div class="mb-2">
             <label class="form-label">Description</label>
-            <InputText class="form-control" @bind-Value="Model.Description" />
+            <InputTextArea class="form-control" @bind-Value="Model.Description" />
         </div>
 
         <div class="row mb-2">
@@ -33,23 +30,21 @@
         </div>
 
         <button type="submit" class="btn btn-success mt-2">
-            Save Activity
+            Save Module
         </button>
     </EditForm>
 </div>
 
 @code {
-    [Parameter] 
-    public Guid ModuleId { get; set; }  
 
-    [Parameter] 
-    public CreateActivityDto Model { get; set; } = default!;
-    
-    [Parameter] 
-    public EventCallback<Guid> OnSubmit { get; set; }
+    [Parameter]
+    public CreateModuleDto Model { get; set; }
+
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
 
     private async Task HandleSubmit()
     {
-        await OnSubmit.InvokeAsync(ModuleId);
+        await OnSubmit.InvokeAsync();
     }
 }

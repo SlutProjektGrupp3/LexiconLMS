@@ -132,7 +132,9 @@ else
         try
         {
             await ApiService.PutAsync($"api/courses/{Id}", course);
+            Navigation.NavigateTo("/teacher/courses?updated=true");
             successMessage = "Course updated successfully.";
+
         }
         catch (Exception ex)
         {

@@ -4,7 +4,7 @@
 @using LMS.Shared.DTOs.Activity
 @using LMS.Blazor.Shared.Components.Icons
 
-<PageTitle>Kursdetaljer</PageTitle>
+<PageTitle>Course Details</PageTitle>
 
 @if (isLoading)
 {
@@ -33,13 +33,13 @@ else if (_course != null)
 
                 <button class="btn btn-primary d-flex align-items-center gap-1">
                     <CirclePlusIcon Size="18" />
-                    Ny Modul
+                    New Module
                 </button>
             </div>
 
-            if (_course.Modules == null || !_course.Modules.Any())
+            @if (_course.Modules == null || !_course.Modules.Any())
             {
-            <p class="text-muted">Kursen har inga moduler.</p>
+            <p class="text-muted">This course has no modules.</p>
             }
             else
             {
@@ -78,7 +78,7 @@ else if (_course != null)
 
                                 @if (_loadingModules.Contains(module.Id))
                                 {
-                                    <div class="text-muted small">Laddar aktiviteter...</div>
+                                    <div class="text-muted small">Loading activities...</div>
                                 }
                                 else if (_moduleActivities.TryGetValue(module.Id, out var activities))
                                 {
@@ -113,7 +113,7 @@ else if (_course != null)
                                     else
                                     {
                                         <div class="text-muted small">
-                                            Inga aktiviteter hittades.
+                                            This module has no activities.
                                         </div>
                                     }
                                 }
@@ -123,11 +123,11 @@ else if (_course != null)
                 }
 
             </div>
-        </div>
-    </div>
 }
 
-
+        </div>
+    </div>
+ }
 
 @code {
     [Parameter]
@@ -165,31 +165,6 @@ else if (_course != null)
         }
     }
 
-    private async Task LoadActivitiesIfNeeded(Guid moduleId)
-    {
-        if (_moduleActivities.ContainsKey(moduleId))
-            return;
-
-        _loadingModules.Add(moduleId);
-        StateHasChanged();
-
-        try
-        {
-            var activities = await ApiService
-                .GetAsync<List<ActivityDto>>($"api/activities/modules/{moduleId}");
-
-            _moduleActivities[moduleId] = activities ?? new List<ActivityDto>();
-        }
-        catch
-        {
-            _moduleActivities[moduleId] = new List<ActivityDto>();
-        }
-        finally
-        {
-            _loadingModules.Remove(moduleId);
-        }
-    }
-
     private async Task ToggleModuleAsync(Guid moduleId)
     {
         if (_openModules.Contains(moduleId))
@@ -204,6 +179,7 @@ else if (_course != null)
         if (!_moduleActivities.ContainsKey(moduleId))
         {
             _loadingModules.Add(moduleId);
+
             StateHasChanged();
 
             try

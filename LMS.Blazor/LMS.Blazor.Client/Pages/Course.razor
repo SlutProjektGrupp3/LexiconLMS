@@ -2,6 +2,7 @@
 @inject IApiService ApiService
 @using LMS.Shared.DTOs.Course
 @using LMS.Shared.DTOs.Activity
+@using LMS.Blazor.Client.Components
 @using LMS.Blazor.Shared.Components.Icons
 
 <PageTitle>Course Details</PageTitle>
@@ -82,6 +83,17 @@ else if (_course != null)
                                 }
                                 else if (_moduleActivities.TryGetValue(module.Id, out var activities))
                                 {
+                                    <button class="btn btn-success btn-sm ms-2" @onclick="() => ToggleCreateForm(module.Id)">
+                                        @(_showCreateForm.GetValueOrDefault(module.Id) ? "Cancel" : "Add Activity")
+                                    </button>
+
+                                    @if (_showCreateForm.GetValueOrDefault(module.Id))
+                                    {
+                                        <AddActivityForm ModuleId="module.Id"
+                                                            Model="_newActivities[module.Id]"
+                                                            OnSubmit="HandleCreateActivity" />
+                                    }
+
                                     @if (activities.Any())
                                     {
                                         <div class="list-group list-group-flush">
@@ -233,7 +245,7 @@ else if (_course != null)
                 }
                 else
                 {
-                    await ToggleActivitiesAsync(moduleId);
+                    // await ToggleActivitiesAsync(moduleId);
                 }
 
                 _showCreateForm[moduleId] = false;

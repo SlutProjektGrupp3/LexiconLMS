@@ -11,6 +11,7 @@ namespace LMS.Presentation.Controllers;
 public class CoursesController : ControllerBase
 {
     private readonly IServiceManager serviceManager;
+
     public CoursesController(IServiceManager serviceManager)
     {
         this.serviceManager = serviceManager;
@@ -22,12 +23,11 @@ public class CoursesController : ControllerBase
     public async Task<IActionResult> GetCourses()
     {
         var courses = await serviceManager.CourseService.GetAllCoursesAsync();
-        //var dto = _mapper.Map<List<CourseDto>>(courses);
         return Ok(courses);
     }
 
     [HttpGet("{id:guid}")]
-    [Authjorize] 
+    [Authorize] 
     public async Task<IActionResult> GetCourseById(Guid id)
     {
         var courseDetails = await serviceManager.CourseService.GetCourseByIdAsync(id);

@@ -13,47 +13,17 @@ public class CourseService : ICourseService
 {
     private IUnitOfWork uow;
     private readonly IMapper mapper;
+
     public CourseService(IUnitOfWork uow, IMapper mapper)
     {
-
-        private IUnitOfWork uow;
-        private readonly IMapper mapper;
-        public CourseService(IUnitOfWork uow, IMapper mapper)
-        {
-            this.uow = uow;
-            this.mapper = mapper;
-        }
-        
-        public async Task<IEnumerable<CourseDto>> GetAllCoursesAsync(bool trackChanges = false)
-        {
-            var courses = await uow.CourseRepository.GetAllCoursesAsync(trackChanges);
-            return mapper.Map<IEnumerable<CourseDto>>(courses);
-        }
-
-        public async Task<(IEnumerable<CourseDto> courseDtos, MetaData metaData)> GetCoursesAsync(CourseRequestParams requestParams, bool trackChanges = false)
-        {
-            var pagedList = await uow.CourseRepository.GetCoursesAsync(requestParams, trackChanges);
-            var courseDtos = mapper.Map<IEnumerable<CourseDto>>(pagedList.Items);
-            return (courseDtos, pagedList.MetaData);
-        }
-
-        public async Task<CourseDto> CreateCourseAsync(CourseCreateDto dto)
-        {
-            var course = mapper.Map<Course>(dto);
-        }
-
+        this.uow = uow;
+        this.mapper = mapper;
+    }
 
     public async Task<IEnumerable<CourseDto>> GetAllCoursesAsync(bool trackChanges = false)
     {
         var courses = await uow.CourseRepository.GetAllCoursesAsync(trackChanges);
         return mapper.Map<IEnumerable<CourseDto>>(courses);
-    }
-    
-    public async Task<(IEnumerable<CourseDto> courseDtos, MetaData metaData)> GetCoursesAsync(CourseRequestParams requestParams, bool trackChanges = false)
-    {
-        var pagedList = await uow.CourseRepository.GetCoursesAsync(requestParams, trackChanges);
-        var courseDtos = mapper.Map<IEnumerable<CourseDto>>(pagedList.Items);
-        return (courseDtos, pagedList.MetaData);
     }
     
     public async Task<CourseDto> CreateCourseAsync(CourseCreateDto dto)

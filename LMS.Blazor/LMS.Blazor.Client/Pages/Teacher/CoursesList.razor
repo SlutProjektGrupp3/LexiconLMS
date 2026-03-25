@@ -28,6 +28,10 @@ else
                              href="@($"/teacher/courses/edit/{course.Id}")">
                         Edit
                     </NavLink>
+                    <button class="btn btn-sm btn-outline-danger"
+                            @onclick="() => OnDeleteClicked.InvokeAsync(course.Id)">
+                        Delete
+                    </button>
                 </tr>
             }
         </tbody>
@@ -37,4 +41,7 @@ else
 @code {
     [Parameter]
     public List<CourseDto> Courses { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<Guid> OnDeleteClicked { get; set; }
 }

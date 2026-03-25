@@ -104,16 +104,23 @@ else if (_course != null)
 
                                         @if (activities.Any())
                                         {
-                                            <div class="list-group list-group-flush">
+                                            <div class="list-group-item px-0">
                                                 @foreach (var activity in activities)
                                                 {
                                                     <div class="list-group-item px-0">
-
-                                                        <div class="fw-semibold">
-                                                            @activity.Name
-                                                            <span class="text-muted fw-normal small">
-                                                                (@activity.TypeName)
-                                                            </span>
+    
+                                                        <div class="d-flex justify-content-between align-items-start">
+                                                            <div class="fw-semibold">
+                                                                @activity.Name
+                                                                <span class="text-muted fw-normal small">
+                                                                    (@activity.TypeName)
+                                                                </span>
+                                                            </div>
+        
+                                                            <button class="btn btn-sm btn-outline-danger"
+                                                                    @onclick="() => HandleDeleteActivity(module.Id, activity.Id)">
+                                                                Delete
+                                                            </button>
                                                         </div>
 
                                                         <div class="text-muted small">
@@ -297,6 +304,27 @@ else if (_course != null)
         catch (Exception ex)
         {
             error = "Failed to create activity: " + ex.Message;
+        }
+    }
+
+    private async Task HandleDeleteActivity(Guid moduleId, Guid activityId)
+    {
+        try
+        {
+            await ApiService.DeleteAsync($"api/activities/{activityId}");
+
+            if (_moduleActivities.ContainsKey(moduleId))
+            {
+                var activityToRemove = _moduleActivities[moduleId].FirstOrDefault(a => a.Id == activityId);
+                if (activityToRemove != null)
+                {
+                    _moduleActivities[moduleId].Remove(activityToRemove);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            error = "Failed to delete activity: " + ex.Message;
         }
     }
 }

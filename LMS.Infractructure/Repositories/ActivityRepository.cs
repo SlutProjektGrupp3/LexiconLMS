@@ -19,5 +19,10 @@ namespace LMS.Infractructure.Repositories
                 .Include(a => a.Type)
                 .ToListAsync();
         }
+        public async Task<ModuleActivity?> GetActivityByIdAsync(Guid activityId, bool trackChanges)
+        {
+            return await FindByCondition(a => a.Id == activityId, trackChanges)
+                        .SingleOrDefaultAsync();
+        }
     }
 }

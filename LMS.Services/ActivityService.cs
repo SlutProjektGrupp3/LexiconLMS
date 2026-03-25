@@ -64,6 +64,16 @@ namespace LMS.Services
                 newActivity.EndDate
             );
         }
+
+        public async Task DeleteActivityAsync(Guid activityId)
+        {
+            var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: false);
+            if (activity != null)
+            {
+                _repository.Delete(activity); 
+                await _unitOfWork.CompleteAsync();
+            }
+        }
     }
 
 }

@@ -31,4 +31,10 @@ public class ActivitiesController : ControllerBase
         var createdActivity = await _serviceManager.ActivityService.CreateActivityAsync(dto);
         return StatusCode(StatusCodes.Status201Created, createdActivity);
     }
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteActivity(Guid id)
+    {
+        await _serviceManager.ActivityService.DeleteActivityAsync(id);
+        return NoContent(); 
+    }
 }

@@ -7,7 +7,9 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace LMS.Presentation.Controllers
 {
-    [Route("api/modules/create")]
+    [Route("api/modules")]
+    [ApiController]
+    [Authorize]
     public class ModulesController : ControllerBase
     {
         private readonly IServiceManager serviceManager;
@@ -28,7 +30,7 @@ namespace LMS.Presentation.Controllers
         {
             var result = await serviceManager.ModuleService.CreateModuleAsync(createModuleDto);
 
-            return result.Succeeded ? StatusCode(StatusCodes.Status201Created) : BadRequest(result.Errors); 
+            return result.Succeeded ? StatusCode(StatusCodes.Status201Created, result) : BadRequest(result.Errors); 
         }
     }
 }

@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Components;
-using System.Text.Json;
+﻿using LMS.Shared.DTOs.Modules;
+using Microsoft.AspNetCore.Components;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace LMS.Blazor.Client.Services;
 
@@ -39,6 +40,9 @@ public class ClientApiService : IApiService
 
     public async Task<TResponse?> PostAsync<TRequest, TResponse>(string endpoint, TRequest data, CancellationToken ct = default)
     {
+        var json = JsonSerializer.Serialize(data, _jsonOptions);
+        System.Diagnostics.Debug.WriteLine($"DEBUG: PostAsync: {json}");
+
         var response = await _httpClient.PostAsJsonAsync($"api/proxy/{endpoint}", data, _jsonOptions, ct);
 
         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized ||
@@ -50,6 +54,19 @@ public class ClientApiService : IApiService
         response.EnsureSuccessStatusCode();
 
         return await JsonSerializer.DeserializeAsync<TResponse>(await response.Content.ReadAsStreamAsync(ct), _jsonOptions, ct);
+    }
+    public async Task PutAsync<T>(string endpoint, T data, CancellationToken ct = default)
+    {
+        var response = await _httpClient.PutAsJsonAsync($"api/proxy/{endpoint}", data, _jsonOptions, ct);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized ||
+            response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+        {
+            _navigationManager.NavigateTo("/Account/Login", forceLoad: true);
+            return;
+        }
+
+        response.EnsureSuccessStatusCode();
     }
 
     public async Task DeleteAsync(string endpoint, CancellationToken ct = default)

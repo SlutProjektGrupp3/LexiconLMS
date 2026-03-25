@@ -13,8 +13,16 @@ public class UserRepository : RepositoryBase<ApplicationUser>, IUserRepository
     }
     public async Task<IEnumerable<ApplicationUser>> GetAllUsersAsync(bool trackChanges = false)
     {
-        //All users with their roles
         return await FindAll(trackChanges)
             .ToListAsync();
+    }
+
+    public async Task DeleteUserAsync(Guid id)
+    {
+        var user = await FindByCondition(u => u.Id == id.ToString(), trackChanges: true).FirstOrDefaultAsync();
+        if (user != null)
+        {
+            Delete(user);
+        }
     }
 }

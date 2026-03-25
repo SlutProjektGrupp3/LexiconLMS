@@ -104,7 +104,8 @@ else if (_course != null)
 
                                         @if (activities.Any())
                                         {
-                                            <div class="list-group-item px-0">
+                                            <div class="list-group list-group-flush">
+
                                                 @foreach (var activity in activities)
                                                 {
                                                     <div class="list-group-item px-0">
@@ -116,7 +117,7 @@ else if (_course != null)
                                                                     (@activity.TypeName)
                                                                 </span>
                                                             </div>
-        
+
                                                             <button class="btn btn-sm btn-outline-danger"
                                                                     @onclick="() => HandleDeleteActivity(module.Id, activity.Id)">
                                                                 Delete

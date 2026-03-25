@@ -72,4 +72,14 @@ public class CourseService : ICourseService
 
         await uow.CompleteAsync();
     }
+    public async Task DeleteCourseAsync(Guid id, bool trackChanges)
+    {
+        var courseEntity = await uow.CourseRepository.GetCourseByIdAsync(id, trackChanges);
+
+        if (courseEntity is null)
+            throw new Exception($"Course with id {id} was not found.");
+
+        uow.CourseRepository.Delete(courseEntity);
+        await uow.CompleteAsync();
+    }
 }

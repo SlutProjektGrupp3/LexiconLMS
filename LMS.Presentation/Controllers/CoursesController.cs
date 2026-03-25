@@ -57,4 +57,12 @@ public class CoursesController : ControllerBase
 
         return NoContent();
     }
+
+    [Authorize(Roles = "Teacher")]
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteCourse(Guid id)
+    {
+        await serviceManager.CourseService.DeleteCourseAsync(id, trackChanges: true);
+        return NoContent();
+    }
 }

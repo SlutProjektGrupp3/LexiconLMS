@@ -16,6 +16,7 @@ public class UserService : IUserService
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _userManager = userManager;
     }
+
     public async Task<IEnumerable<UserListDto>> GetAllUsersAsync()
     {
         var users = await _unitOfWork.UserRepository.GetAllUsersAsync();
@@ -28,6 +29,7 @@ public class UserService : IUserService
 
             dtoList.Add(new UserListDto
             (
+                Id: Guid.Parse(user.Id),
                 FirstName: user.FirstName,
                 LastName: user.LastName,
                 Email: user.Email,
@@ -36,6 +38,13 @@ public class UserService : IUserService
         }
 
         return dtoList;
+    }
+
+    public async Task DeleteUserAsync(Guid id)
+    {
+        await _unitOfWork.UserRepository.DeleteUserAsync(id);
+
+        await _unitOfWork.CompleteAsync();
     }
 }
 

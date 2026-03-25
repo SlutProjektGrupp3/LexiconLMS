@@ -8,6 +8,7 @@
                 <th>Last Name</th>
                 <th>Email</th>
                 <th>Role</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -18,6 +19,14 @@
                     <td>@user.LastName</td>
                     <td>@user.Email</td>
                     <td>@user.RoleName</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteUserModal"
+                                @onclick="() => OnDelete.InvokeAsync(user.Id)">
+                            Delete
+                        </button>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -27,4 +36,6 @@
 @code {
     [Parameter]
     public IEnumerable<UserListDto> Users { get; set; } = [];
+    [Parameter]
+    public EventCallback<Guid> OnDelete { get; set; }
 }

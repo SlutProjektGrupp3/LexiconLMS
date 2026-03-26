@@ -118,7 +118,9 @@ else if (_course != null)
                                                             </div>
 
                                                             <button class="btn btn-sm btn-outline-danger"
-                                                                    @onclick="() => HandleDeleteActivity(module.Id, activity.Id)">
+                                                                    data-bs-toggle="modal"
+                                                                    data-bs-target="#deleteActivityModal"
+                                                                    @onclick="() => PrepareToDelete(module.Id, activity.Id)">
                                                                 Delete
                                                             </button>
                                                         </div>
@@ -136,6 +138,10 @@ else if (_course != null)
                                                     </div>
                                                 }
                                             </div>
+                                            <ConfirmModal ModalId="deleteActivityModal"
+                                                          Title="Confirm Deletion"
+                                                          Message="Are you sure you want to delete this activity?"
+                                                          OnConfirm="() => HandleDeleteActivity(_moduleIdToRemember, _activityIdToRemember)" />
                                         }
                                         else
                                         {
@@ -172,6 +178,8 @@ else if (_course != null)
 
     private Dictionary<Guid, bool> _showCreateForm = new();
     private Dictionary<Guid, CreateActivityDto> _newActivities = new();
+    private Guid _moduleIdToRemember;
+    private Guid _activityIdToRemember;
     protected override async Task OnInitializedAsync()
     {
         //This method run in prerender
@@ -326,5 +334,10 @@ else if (_course != null)
         {
             error = "Failed to delete activity: " + ex.Message;
         }
+    }
+    private void PrepareToDelete(Guid moduleId, Guid activityId)
+    {
+        _moduleIdToRemember = moduleId;
+        _activityIdToRemember = activityId;
     }
 }

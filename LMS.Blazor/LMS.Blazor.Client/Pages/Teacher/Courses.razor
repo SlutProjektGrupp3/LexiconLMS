@@ -1,5 +1,7 @@
 ﻿@page "/teacher/courses"
 @using LMS.Shared.DTOs.CourseDtos
+@using LMS.Blazor.Client.Components.Shared
+@using LMS.Blazor.Client.Components.Courses
 @inject IApiService ApiService
 @inject NavigationManager Navigation
 @attribute [Authorize(Roles = "Teacher")]
@@ -16,6 +18,29 @@
 {
     <div class="alert alert-success">
         Course deleted successfully.
+    </div>
+}
+@if (!string.IsNullOrWhiteSpace(successMessage))
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @successMessage
+        <button type="button" class="btn-close" @onclick="() => successMessage = null"></button>
+    </div>
+}
+
+<div class="mb-4">
+    <QuickActionButton Text="Create new course"
+                       Icon="+"
+                       OnClick="ToggleCreateForm" />
+</div>
+
+@if (showCreateForm)
+{
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <CreateCourseForm OnCourseCreated="HandleCourseCreated"
+                              OnCancel="HandleCancelCreate" />
+        </div>
     </div>
 }
 
@@ -50,6 +75,28 @@ else
     private bool showDeleteConfirm;
     private bool showDeletedMessage;
     private Guid selectedCourseId;
+    private bool showCreateForm;
+    private string? successMessage;
+
+    private Task ToggleCreateForm()
+    {
+        successMessage = null;
+        showCreateForm = !showCreateForm;
+        return Task.CompletedTask;
+    }
+
+    private Task HandleCourseCreated()
+    {
+        showCreateForm = false;
+        successMessage = "Course added.";
+        return Task.CompletedTask;
+    }
+
+    private Task HandleCancelCreate()
+    {
+        showCreateForm = false;
+        return Task.CompletedTask;
+    }
 
     protected override async Task OnInitializedAsync()
     {

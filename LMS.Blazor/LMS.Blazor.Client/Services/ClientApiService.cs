@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components;
 using System.Net;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 
 namespace LMS.Blazor.Client.Services;
@@ -82,4 +83,28 @@ public class ClientApiService : IApiService
 
         return false;
     }    
+    
+    
+
+    public async Task PostAsync<T>(string endpoint, T data, CancellationToken ct = default)
+    {
+        var json = JsonSerializer.Serialize(data, _jsonOptions);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var response = await _httpClient.PostAsync($"api/proxy/{endpoint}", content, ct);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized ||
+            response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+        {
+            _navigationManager.NavigateTo("/Account/Login", forceLoad: true);
+            return;
+        }
+
+        var responseBody = await response.Content.ReadAsStringAsync(ct);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new InvalidOperationException("Kunde inte slutföra anropet till servern.");
+        }
+    }
 }

@@ -1,0 +1,55 @@
+﻿@using LMS.Shared.DTOs.Activity
+
+<div class="card mt-3 p-3 bg-light mb-3">
+    <h5>Create New Activity</h5>
+
+    <EditForm Model="Model" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+
+        <div class="mb-2">
+            <label class="form-label">Name</label>
+            <InputText class="form-control" @bind-Value="Model.Name" />
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label">Type</label>
+            <InputText class="form-control" @bind-Value="Model.ActivityTypeName" />
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label">Description</label>
+            <InputText class="form-control" @bind-Value="Model.Description" />
+        </div>
+
+        <div class="row mb-2">
+            <div class="col">
+                <label class="form-label">Start Date</label>
+                <InputDate class="form-control" @bind-Value="Model.StartDate" />
+            </div>
+            <div class="col">
+                <label class="form-label">End Date</label>
+                <InputDate class="form-control" @bind-Value="Model.EndDate" />
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-success mt-2">
+            Save Activity
+        </button>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter] 
+    public Guid ModuleId { get; set; }  
+
+    [Parameter] 
+    public CreateActivityDto Model { get; set; } = default!;
+    
+    [Parameter] 
+    public EventCallback<Guid> OnSubmit { get; set; }
+
+    private async Task HandleSubmit()
+    {
+        await OnSubmit.InvokeAsync(ModuleId);
+    }
+}

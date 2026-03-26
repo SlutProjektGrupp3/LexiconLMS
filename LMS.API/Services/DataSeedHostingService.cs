@@ -52,6 +52,7 @@ public class DataSeedHostingService : IHostedService
             await AddRolesAsync([TeacherRole, StudentRole]);
             await AddDemoUsersAsync();
             await AddUsersAsync(20);
+            await AddCoursesAsync(context);
             logger.LogInformation("Seed complete");
         }
         catch (Exception ex)
@@ -76,12 +77,16 @@ public class DataSeedHostingService : IHostedService
     {
         var teacher = new ApplicationUser
         {
+            FirstName = "Teacher",
+            LastName = "Testsson",
             UserName = "teacher@test.com",
             Email = "teacher@test.com"
         };
         
         var student = new ApplicationUser
         {
+            FirstName = "Student",
+            LastName = "Testsson",
             UserName = "student@test.com",
             Email = "student@test.com"
         };
@@ -99,11 +104,76 @@ public class DataSeedHostingService : IHostedService
     {
         var faker = new Faker<ApplicationUser>("sv").Rules((f, e) =>
         {
+            e.FirstName = f.Person.FirstName;
+            e.LastName = f.Person.LastName;
             e.Email = f.Person.Email;
             e.UserName = f.Person.Email;
         });
 
         await AddUserToDb(faker.Generate(nrOfUsers));
+    }
+    private async Task AddCoursesAsync(ApplicationDbContext context)
+    {
+        if (await context.Courses.AnyAsync()) return;
+
+        var course = new Course
+        {
+            Id = Guid.NewGuid(),
+            Name = "C# Backend Development",
+            Description = "Introduction to backend development with C# and ASP.NET Core",
+            StartDate = DateTime.UtcNow,
+            EndDate = DateTime.UtcNow.AddMonths(3),
+
+            Modules = new List<Module>
+        {
+            new Module
+            {
+                Id = Guid.NewGuid(),
+                Name = "ASP.NET Core Basics",
+                Description = "Controllers, routing and dependency injection",
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddMonths(1),
+
+                Activities = new List<ModuleActivity>
+                {
+                    new ModuleActivity
+                    {
+                        Id = Guid.NewGuid(),
+                        Type = new ActivityType { Name = "Assignment" },
+                        Name = "Build First API",
+                        Description = "Create your first CRUD API",
+                        StartDate = DateTime.UtcNow,
+                        EndDate = DateTime.UtcNow.AddDays(7)
+                    }
+                }
+            },
+
+            new Module
+            {
+                Id = Guid.NewGuid(),
+                Name = "Entity Framework Core",
+                Description = "Database handling and migrations",
+                StartDate = DateTime.UtcNow.AddMonths(1),
+                EndDate = DateTime.UtcNow.AddMonths(2),
+
+                Activities = new List<ModuleActivity>
+                {
+                    new ModuleActivity
+                    {
+                        Id = Guid.NewGuid(),
+                        Type = new ActivityType { Name = "Exercise" },
+                        Name = "EF Core Relations",
+                        Description = "One-to-many and many-to-many",
+                        StartDate = DateTime.UtcNow,
+                        EndDate = DateTime.UtcNow.AddDays(5)
+                    }
+                }
+            }
+        }
+        };
+
+        context.Courses.Add(course);
+        await context.SaveChangesAsync();
     }
 
     private async Task AddUserToDb(IEnumerable<ApplicationUser> users)

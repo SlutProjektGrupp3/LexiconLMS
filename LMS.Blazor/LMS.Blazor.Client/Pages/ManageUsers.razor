@@ -1,0 +1,89 @@
+﻿@page "/manageusers"
+@inject IApiService ApiService
+@using LMS.Shared.DTOs.User
+
+@if (isLoading)
+{
+    <p><em>Loading...</em></p>
+}
+else if (error != null)
+{
+    <div class="alert alert-danger">
+        <strong>Error:</strong> @error
+    </div>
+}
+else if (_users.Any())
+{
+    <div class="card shadow-sm rounded border-0">
+
+        <div class="card-header bg-white border-bottom py-3 px-4">
+            <h2 class="h5 mb-1">Manage Users</h2>
+            <p class="text-muted small mb-0">Overview of all users</p>
+        </div>
+
+        <UserTable Users="_users" OnDelete="ConfirmDelete"></UserTable>
+
+    </div>
+
+    <ConfirmModal ModalId="deleteUserModal"
+                  Title="Confirm Deletion"
+                  Message="Are you sure you want to delete this user?"
+                  OnConfirm="DeleteUser" />
+}
+else
+{
+    <p>No users found.</p>
+}
+
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private IEnumerable<UserListDto> _users = new List<UserListDto>();
+    private string? error;
+    private bool isLoading;
+    private Guid? userToDelete;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //This method run in prerender
+        await CallApi();
+    }
+
+    private async Task CallApi()
+    {
+        isLoading = true;
+        error = null;
+
+        try
+        {
+            _users = await ApiService.GetAsync<IEnumerable<UserListDto>>($"api/users/") ?? new List<UserListDto>();
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void ConfirmDelete(Guid id)
+    {
+        userToDelete = id;
+    }
+
+    private async Task DeleteUser()
+    {
+        if (userToDelete == null)
+            return;
+
+        await ApiService.DeleteAsync($"api/users/{userToDelete}");
+
+        _users = _users.Where(u => u.Id != userToDelete).ToList();
+
+        userToDelete = null;
+    }
+}

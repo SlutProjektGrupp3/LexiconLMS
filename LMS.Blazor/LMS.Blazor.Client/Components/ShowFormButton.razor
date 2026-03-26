@@ -1,0 +1,53 @@
+﻿@using LMS.Blazor.Shared.Components.Icons
+
+@if (ShowForm)
+{
+    <button class="btn btn-danger d-flex align-items-center gap-1" @onclick="HandleClick">
+        @CancelText
+    </button>
+}
+else
+{
+    <button class="btn btn-primary d-flex align-items-center gap-1" @onclick="HandleClick">
+        <CirclePlusIcon Size="18" />
+        @HiddenText
+    </button>
+}
+
+@code {
+    [Parameter]
+    public bool ShowForm { get; set; }
+
+    // For simple toggles without an id
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+
+    // For toggles that require an id (e.g., ToggleCreateForm(moduleId))
+    [Parameter]
+    public EventCallback<Guid> OnClickWithId { get; set; }
+
+    // Optional id to pass to OnClickWithId
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    // Labels (customizable)
+    [Parameter]
+    public string HiddenText { get; set; } = "New";
+
+    [Parameter]
+    public string CancelText { get; set; } = "Cancel";
+
+    private async Task HandleClick()
+    {
+        if (OnClickWithId.HasDelegate && Id.HasValue)
+        {
+            await OnClickWithId.InvokeAsync(Id.Value);
+            return;
+        }
+
+        if (OnClick.HasDelegate)
+        {
+            await OnClick.InvokeAsync();
+        }
+    }
+}

@@ -1,0 +1,50 @@
+﻿@inject IApiService ApiService
+@using LMS.Shared.DTOs.Course
+@using LMS.Shared.DTOs.Modules
+
+<div class="card mt-3 p-3 bg-light mb-3">
+    <h5>Create New Module</h5>
+
+    <EditForm Model="Model" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+
+        <div class="mb-2">
+            <label class="form-label">Name</label>
+            <InputText class="form-control" @bind-Value="Model.Name" />
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label">Description</label>
+            <InputTextArea class="form-control" @bind-Value="Model.Description" />
+        </div>
+
+        <div class="row mb-2">
+            <div class="col">
+                <label class="form-label">Start Date</label>
+                <InputDate class="form-control" @bind-Value="Model.StartDate" />
+            </div>
+            <div class="col">
+                <label class="form-label">End Date</label>
+                <InputDate class="form-control" @bind-Value="Model.EndDate" />
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-success mt-2">
+            Save Module
+        </button>
+    </EditForm>
+</div>
+
+@code {
+
+    [Parameter]
+    public CreateModuleDto Model { get; set; }
+
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    private async Task HandleSubmit()
+    {
+        await OnSubmit.InvokeAsync();
+    }
+}

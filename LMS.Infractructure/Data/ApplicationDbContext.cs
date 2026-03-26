@@ -20,17 +20,30 @@ namespace LMS.Infractructure.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            builder.Entity<Course>()
-                .HasMany(c => c.Modules)
-                .WithOne()
-                .HasForeignKey(m => m.CourseId)
-                .OnDelete(DeleteBehavior.Cascade);
-            builder.Entity<Module>()
-                .HasMany(m => m.Activities)
-                .WithOne()
-                .HasForeignKey(a => a.ModuleId)
-                .OnDelete(DeleteBehavior.Cascade);
-        }
+            
+            builder.Entity<ApplicationUser>()
+                .HasOne(u => u.Course)
+                .WithMany(c => c.Students)
+                .HasForeignKey(u => u.CourseId)
+                .OnDelete(DeleteBehavior.SetNull);
 
+            builder.Entity<Module>()
+                .HasOne(m => m.Course)
+                .WithMany(c => c.Modules)
+                .HasForeignKey(m => m.CourseId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<ModuleActivity>()
+                .HasOne(a => a.Module)
+                .WithMany(m => m.Activities)
+                .HasForeignKey(a => a.ModuleId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<ModuleActivity>()
+                .HasOne(a => a.Type)
+                .WithMany(t => t.Activities)
+                .HasForeignKey(a => a.ActivityTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
     }
 }

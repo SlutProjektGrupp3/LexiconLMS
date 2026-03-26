@@ -67,8 +67,6 @@
 
     private async Task HandleSubmit()
     {
-        var response = await ApiService.PostAsync<CreateActivityDto, ActivityDto>("api/activities", Model);
-
         await OnSubmit.InvokeAsync(ModuleId);
     }
 

@@ -10,6 +10,6 @@ namespace Service.Contracts.Courses
 {
     public interface ICourseService
     {
-        Task<Course> CreateCourseAsync(CreateCourseDto dto);
+        Task<CourseDto> CreateCourseAsync(CreateCourseDto dto);
     }
 }

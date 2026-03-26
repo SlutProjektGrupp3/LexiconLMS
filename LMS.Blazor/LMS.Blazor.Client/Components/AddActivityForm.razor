@@ -24,7 +24,7 @@
                     }
                 }
             </InputSelect>
-            <ValidationMessage For="@(() => activityDto.TypeId)" />
+            <ValidationMessage For="@(() => Model.TypeId)" />
         </div>
 
         <div class="mb-2">
@@ -58,8 +58,6 @@
     
     [Parameter] 
     public EventCallback<Guid> OnSubmit { get; set; }
-
-    private CreateActivityDto activityDto = new CreateActivityDto();
     private List<ActivityTypeDto> availableTypes = new();
 
     protected override async Task OnInitializedAsync()

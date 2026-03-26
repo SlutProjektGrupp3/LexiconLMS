@@ -1,9 +1,6 @@
-﻿using LMS.API.Services;
-using LMS.Infractructure.Data;
-using LMS.Infractructure.Repositories;
+﻿using LMS.Infractructure.Repositories;
 using LMS.Presentation;
 using LMS.Services;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;

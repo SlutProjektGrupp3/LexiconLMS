@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS.Infractructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260317150718_Init")]
+    [Migration("20260318144902_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace LMS.Infractructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.3")
+                .HasAnnotation("ProductVersion", "10.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -356,18 +356,16 @@ namespace LMS.Infractructure.Migrations
 
             modelBuilder.Entity("Domain.Models.Entities.Module", b =>
                 {
-                    b.HasOne("Domain.Models.Entities.Course", "Course")
+                    b.HasOne("Domain.Models.Entities.Course", null)
                         .WithMany("Modules")
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Course");
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.ModuleActivity", b =>
                 {
-                    b.HasOne("Domain.Models.Entities.Module", "Module")
+                    b.HasOne("Domain.Models.Entities.Module", null)
                         .WithMany("Activities")
                         .HasForeignKey("ModuleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -378,8 +376,6 @@ namespace LMS.Infractructure.Migrations
                         .HasForeignKey("TypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Module");
 
                     b.Navigation("Type");
                 });

@@ -2,7 +2,7 @@
 @using LMS.Shared.DTOs
 @inject IApiService ApiService
 
-<h3 class="mb-4">Lägg till en ny kurs</h3>
+<h3 class="mb-4">Add new course</h3>
 
 @if (!string.IsNullOrWhiteSpace(errorMessage))
 {
@@ -43,11 +43,11 @@
 
     <div class="d-flex justify-content-end gap-2 mt-4">
         <button type="button" class="btn btn-outline-secondary" @onclick="HandleCancel" disabled="@isSubmitting">
-            Avbryt
+            Cancel
         </button>
 
         <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
-            @(isSubmitting ? "Sparar..." : "Spara kurs")
+            @(isSubmitting ? "Saving..." : "Save")
         </button>
     </div>
 </EditForm>
@@ -80,7 +80,7 @@
 
         if (model.EndDate <= model.StartDate)
         {
-            errorMessage = "Slutdatum måste vara efter startdatum.";
+            errorMessage = "The end date must be later than the start date.";
             return;
         }
 
@@ -114,15 +114,15 @@
 
     public class CreateCourseFormModel
     {
-        [Required(ErrorMessage = "Namn måste anges")]
+        [Required(ErrorMessage = "Name is required.")]
         public string Name { get; set; } = string.Empty;
 
         public string? Description { get; set; }
 
-        [Range(typeof(DateTime), "2000-01-01", "2100-12-31", ErrorMessage = "Startdatum måste anges")]
+        [Range(typeof(DateTime), "2000-01-01", "2100-12-31", ErrorMessage = "Start date is required.")]
         public DateTime StartDate { get; set; } = DateTime.Today;
 
-        [Range(typeof(DateTime), "2000-01-01", "2100-12-31", ErrorMessage = "Slutdatum måste anges")]
+        [Range(typeof(DateTime), "2000-01-01", "2100-12-31", ErrorMessage = "End date is required.")]
         public DateTime EndDate { get; set; } = DateTime.Today.AddDays(30);
     }
 }

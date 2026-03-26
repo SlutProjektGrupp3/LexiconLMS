@@ -1,11 +1,11 @@
-using Application.Services;
+
 using LMS.API.Extensions;
 using LMS.API.Services;
 using LMS.Infractructure.Data;
 using LMS.Infractructure.Repositories;
 using Microsoft.OpenApi;
 using NuGet.Protocol.Core.Types;
-using Service.Contracts.Courses;
+
 
 namespace LMS.API;
 
@@ -31,7 +31,7 @@ public class Program
 
         builder.Services.AddScoped<ICourseRepository, CourseRepository>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-        builder.Services.AddScoped<ICourseService, CourseService>();
+   
 
 
 
@@ -41,14 +41,14 @@ public class Program
         // Configure the HTTP request pipeline.
         app.ConfigureExceptionHandler();
 
-        if (app.Environment.IsDevelopment())
-        {
+        //if (app.Environment.IsDevelopment())
+        //{
             app.UseSwagger();
             app.UseSwaggerUI(opt =>
             {
                 opt.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
             });
-        }
+        //}
 
         app.UseHttpsRedirection();
         app.UseCors("AllowAll"); 

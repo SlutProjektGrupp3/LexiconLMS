@@ -1,0 +1,303 @@
+@page "/courses/{Id:guid}"
+@inject IApiService ApiService
+@using LMS.Shared.DTOs.Course
+@using LMS.Shared.DTOs.Activity
+@using LMS.Shared.DTOs.Modules
+@using LMS.Shared.DTOs.Module
+@using LMS.Blazor.Client.Components
+@using LMS.Blazor.Shared.Components.Icons
+
+<PageTitle>Course Details</PageTitle>
+
+
+@if (isLoading)
+{
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <p><em>Loading...</em></p>
+        </div>
+    </div>
+}
+else if (error != null)
+{
+    <div class="alert alert-danger">
+        <strong>Error:</strong> @error
+    </div>
+}
+else if (_course != null)
+{
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="mb-0">@_course.Name</h4>
+                </div>
+
+                <ShowFormButton ShowForm="_showCreateModuleForm"
+                                OnClick="ToggleCreateModuleForm"
+                                HiddenText="New Module" />
+            </div>
+
+            @if(_showCreateModuleForm)
+            {
+                <CreateModuleForm Model="_moduleToCreate" OnSubmit="HandleCreateModule" />
+            }
+            
+
+            @if (_course.Modules == null || !_course.Modules.Any())
+            {
+                <p class="text-muted">This course has no modules.</p>
+            }
+            else
+            {
+                <div class="accordion" id="modulesAccordion">
+                    @foreach (var module in _course.Modules)
+                    {
+                        var collapseId = $"collapse-{module.Id}";
+                        var headingId = $"heading-{module.Id}";
+                        var accordionIsOpen = _openModules.Contains(module.Id);
+
+                        <div class="accordion-item">
+
+                            <!-- Header -->
+                            <h2 class="accordion-header" id="@headingId">
+                                <button class="accordion-button @(accordionIsOpen ? "" : "collapsed")"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#@collapseId"
+                                        aria-expanded="@accordionIsOpen"
+                                        aria-controls="@collapseId"
+                                        @onclick="() => ToggleModuleAsync(module.Id)">
+                                    <div class="d-flex flex-column text-start">
+                                        <span class="fw-semibold">@module.Name</span>
+                                        <small class="text-muted">@module.Description</small>
+                                    </div>
+
+                                </button>
+                            </h2>
+
+                            <!-- Body -->
+                            <div id="@collapseId"
+                                 class="accordion-collapse collapse @(accordionIsOpen ? "show" : "")"
+                                 data-bs-parent="#modulesAccordion">
+
+                                <div class="accordion-body">
+
+                                    @if (_loadingModules.Contains(module.Id))
+                                    {
+                                        <div class="text-muted small">Loading activities...</div>
+                                    }
+                                    else if (_moduleActivities.TryGetValue(module.Id, out var activities))
+                                    {
+                                        <ShowFormButton ShowForm="_showCreateForm.GetValueOrDefault(module.Id)"
+                                                        OnClickWithId="ToggleCreateForm"
+                                                        Id="module.Id"
+                                                        HiddenText="New Activity" />
+
+                                        @if (_showCreateForm.GetValueOrDefault(module.Id))
+                                        {
+                                            <AddActivityForm ModuleId="module.Id"
+                                                             Model="_newActivities[module.Id]"
+                                                             OnSubmit="HandleCreateActivity" />
+                                        }
+
+                                        @if (activities.Any())
+                                        {
+                                            <div class="list-group list-group-flush">
+                                                @foreach (var activity in activities)
+                                                {
+                                                    <div class="list-group-item px-0">
+
+                                                        <div class="fw-semibold">
+                                                            @activity.Name
+                                                            <span class="text-muted fw-normal small">
+                                                                (@activity.TypeName)
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="text-muted small">
+                                                            @activity.Description
+                                                        </div>
+
+                                                        <div class="text-muted small">
+                                                            @activity.StartDate.ToShortDateString()
+                                                            -
+                                                            @activity.EndDate.ToShortDateString()
+                                                        </div>
+
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="text-muted small">
+                                                This module has no activities.
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                </div>
+            }
+
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+    private CourseDetailsDto? _course;
+    private string? error;
+    private bool isLoading = true;
+    private bool _showCreateModuleForm = false;
+
+    private CreateModuleDto _moduleToCreate { get; set; }
+
+    private Dictionary<Guid, List<ActivityDto>> _moduleActivities = new();
+    private HashSet<Guid> _loadingModules = new();
+    private HashSet<Guid> _openModules = new();
+
+    private Dictionary<Guid, bool> _showCreateForm = new();
+    private Dictionary<Guid, CreateActivityDto> _newActivities = new();
+    protected override async Task OnInitializedAsync()
+    {
+        //This method run in prerender
+        await CallApi();
+    }
+
+    private async Task CallApi()
+    {
+        isLoading = true;
+        error = null;
+        _course = null;
+        try
+        {
+            _course = await ApiService.GetAsync<CourseDetailsDto>($"api/courses/{Id}");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task ToggleModuleAsync(Guid moduleId)
+    {
+        if (_openModules.Contains(moduleId))
+        {
+            _openModules.Remove(moduleId);
+            return;
+        }
+
+        _openModules.Add(moduleId);
+
+        // Load data if needed
+        if (!_moduleActivities.ContainsKey(moduleId))
+        {
+            _loadingModules.Add(moduleId);
+
+            StateHasChanged();
+
+            try
+            {
+                var activities = await ApiService.GetAsync<List<ActivityDto>>($"api/activities/modules/{moduleId}");
+
+                _moduleActivities[moduleId] = activities ?? new List<ActivityDto>();
+            }
+            catch
+            {
+                _moduleActivities[moduleId] = new List<ActivityDto>();
+            }
+            finally
+            {
+                _loadingModules.Remove(moduleId);
+            }
+        }
+    }
+
+    private void ToggleCreateForm(Guid moduleId)
+    {
+        var isCurrentlyShown = _showCreateForm.GetValueOrDefault(moduleId);
+        _showCreateForm[moduleId] = !isCurrentlyShown;
+        if (_showCreateForm[moduleId] && !_newActivities.ContainsKey(moduleId))
+        {
+            _newActivities[moduleId] = new CreateActivityDto
+            {
+                ModuleId = moduleId,
+                StartDate = DateTime.Now,
+                EndDate = DateTime.Now.AddDays(1)
+            };
+        }
+    }
+
+    private void ToggleCreateModuleForm()
+    {
+        _showCreateModuleForm = !_showCreateModuleForm;
+
+        if (_course != null && _showCreateModuleForm)
+        {
+            _moduleToCreate = new CreateModuleDto
+            {
+                CourseId = _course.Id,
+                Name = string.Empty,
+                Description = string.Empty,
+                StartDate = DateTime.Now,
+                EndDate = DateTime.Now.AddDays(1)
+            };
+        }
+    }
+
+    private async Task HandleCreateModule()
+    {
+        var dtoToSave = _moduleToCreate;
+
+        try
+        {
+           var result = await ApiService.PostAsync<CreateModuleDto, CreateModuleResultDto>("api/modules", dtoToSave);
+
+            if (result is { Succeeded: true, CreatedModule: { } createdModule })
+            {
+                _course!.Modules.Add(createdModule);
+                _showCreateModuleForm = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            error = "Failed to create module: " + ex.Message;
+        }
+    }
+
+    private async Task HandleCreateActivity(Guid moduleId)
+    {
+        var dtoToSave = _newActivities[moduleId];
+        try
+        {
+            var createdActivity = await ApiService.PostAsync<CreateActivityDto, ActivityDto>("api/activities", dtoToSave);
+
+            if (createdActivity != null)
+            {
+                if (_moduleActivities.ContainsKey(moduleId))
+                {
+                    _moduleActivities[moduleId].Add(createdActivity);
+                }
+
+                _showCreateForm[moduleId] = false;
+                _newActivities.Remove(moduleId);
+            }
+        }
+        catch (Exception ex)
+        {
+            error = "Failed to create activity: " + ex.Message;
+        }
+    }
+}

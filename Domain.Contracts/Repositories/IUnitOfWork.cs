@@ -1,6 +1,11 @@
-﻿namespace Domain.Contracts.Repositories;
+﻿using Service.Contracts;
+
+namespace Domain.Contracts.Repositories;
 
 public interface IUnitOfWork
 {
-    Task CompleteAsync();
+    ICourseRepository CourseRepository { get; }
+    IModuleRepository ModuleRepository { get; }
+    IUserRepository UserRepository { get; }
+    Task CompleteAsync();    
 }

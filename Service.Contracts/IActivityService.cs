@@ -10,5 +10,6 @@ namespace Service.Contracts
         Task<IEnumerable<ActivityDto>> GetActivitiesForModuleAsync(Guid moduleId);
         Task<ActivityDto> CreateActivityAsync(CreateActivityDto dto);
         Task<IEnumerable<ActivityTypeDto>> GetAllActivityTypesAsync();
+        Task DeleteActivityAsync(Guid id);
     }
 }

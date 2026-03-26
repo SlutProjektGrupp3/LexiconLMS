@@ -38,4 +38,10 @@ public class ActivitiesController : ControllerBase
         var types = await _serviceManager.ActivityService.GetAllActivityTypesAsync();
         return Ok(types);
     }
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteActivity(Guid id)
+    {
+        await _serviceManager.ActivityService.DeleteActivityAsync(id);
+        return NoContent(); 
+    }
 }

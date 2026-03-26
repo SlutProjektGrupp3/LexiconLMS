@@ -45,7 +45,7 @@ namespace LMS.Services
                 StartDate = dto.StartDate,
                 EndDate = dto.EndDate,
                 ModuleId = dto.ModuleId,
-                TypeId = dto.TypeId
+                TypeId = dto.TypeId.Value
             };
 
             _repository.Create(newActivity);

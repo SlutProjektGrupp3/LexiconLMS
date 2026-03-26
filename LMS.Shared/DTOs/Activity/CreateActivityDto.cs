@@ -19,7 +19,7 @@ namespace LMS.Shared.DTOs.Activity
         public DateTime EndDate { get; set; } = DateTime.Now.AddDays(1);
 
         [Required(ErrorMessage = "Selecting an activity type is required")]
-        public Guid TypeId { get; set; }
+        public Guid? TypeId { get; set; }
 
         public Guid ModuleId { get; set; }
     }

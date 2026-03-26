@@ -31,6 +31,13 @@ public class ActivitiesController : ControllerBase
         var createdActivity = await _serviceManager.ActivityService.CreateActivityAsync(dto);
         return StatusCode(StatusCodes.Status201Created, createdActivity);
     }
+
+    [HttpGet("types")]
+    public async Task<IActionResult> GetActivityTypes()
+    {
+        var types = await _serviceManager.ActivityService.GetAllActivityTypesAsync();
+        return Ok(types);
+    }
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteActivity(Guid id)
     {

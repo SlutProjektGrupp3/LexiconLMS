@@ -1,0 +1,128 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using LMS.Shared.DTOs
+@inject IApiService ApiService
+
+<h3 class="mb-4">Add new course</h3>
+
+@if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+
+<EditForm Model="model" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label" for="course-name">Title</label>
+        <InputText id="course-name" placeholder="E.g Lexicon LTU" class="form-control" @bind-Value="model.Name" />
+        <ValidationMessage For="@(() => model.Name)" class="text-danger" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label" for="course-description">Description</label>
+        <InputTextArea id="course-description" placeholder="Course description (optional)" class="form-control" rows="4" @bind-Value="model.Description" />
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label" for="course-startdate">Start date</label>
+            <InputDate id="course-startdate" @bind-Value="model.StartDate" class="form-control" />
+            <ValidationMessage For="@(() => model.StartDate)" class="text-danger" />
+          
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label class="form-label" for="course-enddate">End date</label>
+            <InputDate id="course-enddate" @bind-Value="model.EndDate" class="form-control" />
+            <ValidationMessage For="@(() => model.EndDate)" class="text-danger" />
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2 mt-4">
+        <button type="button" class="btn btn-outline-secondary" @onclick="HandleCancel" disabled="@isSubmitting">
+            Cancel
+        </button>
+
+        <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+            @(isSubmitting ? "Saving..." : "Save")
+        </button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public EventCallback OnCourseCreated { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private bool isSubmitting;
+    private CreateCourseFormModel model = new();
+    private string? errorMessage;
+
+    private async Task HandleCancel()
+    {
+        errorMessage = null;
+        model = new CreateCourseFormModel();
+
+        await OnCancel.InvokeAsync();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (isSubmitting)
+            return;
+
+        errorMessage = null;
+
+        if (model.EndDate <= model.StartDate)
+        {
+            errorMessage = "The end date must be later than the start date.";
+            return;
+        }
+
+        var dto = new CreateCourseDto
+        {
+            Name = model.Name,
+            Description = string.IsNullOrWhiteSpace(model.Description) ? null : model.Description,
+            StartDate = model.StartDate,
+            EndDate = model.EndDate
+        };
+
+        isSubmitting = true;
+
+        try
+        {
+            await ApiService.PostAsync("api/courses", dto);
+
+            model = new CreateCourseFormModel();
+
+            await OnCourseCreated.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    public class CreateCourseFormModel
+    {
+        [Required(ErrorMessage = "Name is required.")]
+        public string Name { get; set; } = string.Empty;
+
+        public string? Description { get; set; }
+
+        [Range(typeof(DateTime), "2000-01-01", "2100-12-31", ErrorMessage = "Start date is required.")]
+        public DateTime StartDate { get; set; } = DateTime.Today;
+
+        [Range(typeof(DateTime), "2000-01-01", "2100-12-31", ErrorMessage = "End date is required.")]
+        public DateTime EndDate { get; set; } = DateTime.Today.AddDays(30);
+    }
+}

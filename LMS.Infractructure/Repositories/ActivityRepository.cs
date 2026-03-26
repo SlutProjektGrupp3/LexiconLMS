@@ -10,8 +10,10 @@ namespace LMS.Infractructure.Repositories
 {
     public class ActivityRepository : RepositoryBase<ModuleActivity>, IActivityRepository
     {
+        private readonly ApplicationDbContext _context;
         public ActivityRepository(ApplicationDbContext context) : base(context)
         {
+            _context = context;
         }
         public async Task<IEnumerable<ModuleActivity>> GetActivitiesByModuleIdAsync(Guid moduleId, bool trackChanges)
         {
@@ -23,6 +25,15 @@ namespace LMS.Infractructure.Repositories
         {
             return await FindByCondition(a => a.Id == activityId, trackChanges)
                         .SingleOrDefaultAsync();
+        }
+
+        public async Task<IEnumerable<ActivityType>> GetAllActivityTypesAsync(bool trackChanges)
+        {
+            return await _context.ActivityTypes.ToListAsync();
+        }
+        public async Task<ActivityType?> GetActivityTypeByIdAsync(Guid typeId)
+        {
+            return await _context.ActivityTypes.FindAsync(typeId);
         }
     }
 }

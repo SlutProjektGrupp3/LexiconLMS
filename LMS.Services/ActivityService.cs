@@ -45,12 +45,12 @@ namespace LMS.Services
                 StartDate = dto.StartDate,
                 EndDate = dto.EndDate,
                 ModuleId = dto.ModuleId,
-                TypeId = dto.TypeId.Value
+                ActivityTypeId = dto.TypeId.Value
             };
 
             _repository.Create(newActivity);
             await _unitOfWork.CompleteAsync();
-            var activityType = await _repository.GetActivityTypeByIdAsync(newActivity.TypeId);
+            var activityType = await _repository.GetActivityTypeByIdAsync(newActivity.ActivityTypeId);
 
             return new ActivityDto(
                 newActivity.Id,

@@ -82,6 +82,34 @@ namespace LMS.Services
                 await _unitOfWork.CompleteAsync();
             }
         }
+        public async Task<ActivityDto> UpdateActivityAsync(Guid activityId, UpdateActivityDto dto)
+        {
+            var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: true);
+
+            if (activity == null)
+            {
+                throw new Exception($"Activity could not be found.");
+            }
+
+            activity.Name = dto.Name;
+            activity.Description = dto.Description;
+            activity.StartDate = dto.StartDate;
+            activity.EndDate = dto.EndDate;
+            activity.TypeId = dto.TypeId;
+
+            await _unitOfWork.CompleteAsync();
+
+            var activityType = await _repository.GetActivityTypeByIdAsync(activity.TypeId);
+
+            return new ActivityDto(
+                activity.Id,
+                activity.Name,
+                activityType?.Name ?? "Unknown",
+                activity.Description,
+                activity.StartDate,
+                activity.EndDate
+            );
+        }
     }
 
 }

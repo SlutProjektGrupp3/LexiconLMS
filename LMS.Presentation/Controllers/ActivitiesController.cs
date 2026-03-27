@@ -44,4 +44,10 @@ public class ActivitiesController : ControllerBase
         await _serviceManager.ActivityService.DeleteActivityAsync(id);
         return NoContent(); 
     }
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateActivity(Guid id, UpdateActivityDto dto)
+    {
+        var updatedActivity = await _serviceManager.ActivityService.UpdateActivityAsync(id, dto);
+        return Ok(updatedActivity);
+    }
 }

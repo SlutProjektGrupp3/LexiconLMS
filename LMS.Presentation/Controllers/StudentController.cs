@@ -33,7 +33,7 @@ namespace LMS.Presentation.Controllers
             var course = await _serviceManager.StudentService.GetMyCourseAsync(userId);
 
             if (course is null)
-                return NotFound("Du deltar inte i någon kurs.");
+                return NotFound("You are not enrolled in any course.");
 
             return Ok(course);
         }

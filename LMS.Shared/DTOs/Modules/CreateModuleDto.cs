@@ -4,20 +4,20 @@ namespace LMS.Shared.DTOs.Modules
 {
     public record CreateModuleDto
     {
-        [Required(ErrorMessage = "Modulen måste ha en namn.")]
-        [MaxLength(100, ErrorMessage = "Namn max längden är 100 bokstaver.")]
-        [MinLength(2, ErrorMessage = "Namn min längden är 2 bokstaver.")]
+        [Required(ErrorMessage = "The module must have a name.")]
+        [MaxLength(100, ErrorMessage = "The maximum length of the name is 100 characters.")]
+        [MinLength(2, ErrorMessage = "The minimum length of the name is 2 characters.")]
         public string Name { get; set; } = string.Empty;
 
         public string? Description { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Modulen måste ha en start datum.")]
+        [Required(ErrorMessage = "The module must have a start date.")]
         public DateTime StartDate { get; set; }
 
-        [Required(ErrorMessage = "Modulen måste ha en slut datum.")]
+        [Required(ErrorMessage = "The module must have an end date.")]
         public DateTime EndDate { get; set; }
 
-        [Required(ErrorMessage = "Modulen måste vara koplad till en kurs.")]
+        [Required(ErrorMessage = "The module must be linked to a course.")]
         public Guid CourseId { get; set; }
     }
 }

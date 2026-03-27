@@ -1,10 +1,10 @@
 # Lexicon LMS
-En system för att hantera kurser och elever i Lexicon
+A system to manage courses and students i Lexicon
 
 ## **Första gång körning:**
 
-1. Höger clicka LMS.API projekt och välja `Manage user secrets`
-2. I filen som öpnas, skriv:
+1. Right-click on the LMS.API project and chosoe `Manage user secrets`
+2. Fill the file that opens with:
 
 	```
 	{
@@ -15,21 +15,21 @@ En system för att hantera kurser och elever i Lexicon
 	}
 	```
 
-3. Bytta `YourSecretPasswordHere` till till valda lösenord.
+3. Change `YourSecretPasswordHere` to a password that you choose.
 
-4. Kör kommanden nedan i Porshell:
+4. Run this command in PowerShell:
 
 	```Powershell
 	 $b = New-Object Byte[] 32; [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); [Convert]::ToBase64String($b)
 	``` 
 
-	Du ska få en random string med rätta längden. Kopiera den.
+	You will get a random string with the correct length. Copy that.
 
-4. Klistra in strängen i json filen som värde till `secretKey`
+4. Paste that string in the json file as the value to t´he `secretKey`
 
-5. Kör `dotnet ef database update`
+5. Run `dotnet ef database update`
 
 
 ## **Swagger!**
 
-Clicka [här](https://localhost:7213/swagger/index.html) för att öopna Swagger UI
+Click [here](https://localhost:7213/swagger/index.html) to open the Swagegr UI.

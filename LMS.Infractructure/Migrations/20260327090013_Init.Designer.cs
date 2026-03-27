@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS.Infractructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260326131622_Init")]
+    [Migration("20260327090013_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -131,7 +131,6 @@ namespace LMS.Infractructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("EndDate")
@@ -351,8 +350,7 @@ namespace LMS.Infractructure.Migrations
                 {
                     b.HasOne("Domain.Models.Entities.Course", "Course")
                         .WithMany("Students")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("CourseId");
 
                     b.Navigation("Course");
                 });
@@ -362,7 +360,7 @@ namespace LMS.Infractructure.Migrations
                     b.HasOne("Domain.Models.Entities.Course", "Course")
                         .WithMany("Modules")
                         .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Course");
@@ -373,13 +371,13 @@ namespace LMS.Infractructure.Migrations
                     b.HasOne("Domain.Models.Entities.ActivityType", "Type")
                         .WithMany("Activities")
                         .HasForeignKey("ActivityTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Domain.Models.Entities.Module", "Module")
                         .WithMany("Activities")
                         .HasForeignKey("ModuleId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Module");

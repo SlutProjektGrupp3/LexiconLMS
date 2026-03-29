@@ -1,4 +1,5 @@
-﻿using Domain.Contracts.Repositories;
+﻿using AutoMapper;
+using Domain.Contracts.Repositories;
 using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.DTOs.Module;
 using Service.Contracts;
@@ -8,10 +9,12 @@ namespace LMS.Services
     public class StudentService : IStudentService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public StudentService(IUnitOfWork unitOfWork)
+        public StudentService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         public async Task<StudentMyCourseDto?> GetMyCourseAsync(Guid userId)
@@ -21,21 +24,7 @@ namespace LMS.Services
             if (student is null || student.Course is null)
                 return null;
 
-            return new StudentMyCourseDto
-            {
-                Id = student.Course.Id,
-                Name = student.Course.Name,
-                Description = student.Course.Description,
-                StartDate = student.Course.StartDate,
-                EndDate = student.Course.EndDate,
-                Modules = student.Course.Modules.Select(m => new ModuleDto(
-                    m.Id,
-                    m.Name,
-                    m.Description,
-                    m.StartDate,
-                    m.EndDate
-                )).ToList()
-            };
+            return _mapper.Map<StudentMyCourseDto?>(student.Course);            
         }
     }
 }

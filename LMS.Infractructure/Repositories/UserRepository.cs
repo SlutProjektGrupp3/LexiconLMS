@@ -24,5 +24,5 @@ public class UserRepository : RepositoryBase<ApplicationUser>, IUserRepository
         {
             Delete(user);
         }
-    }
+    }    
 }

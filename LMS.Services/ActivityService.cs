@@ -45,24 +45,42 @@ namespace LMS.Services
                 StartDate = dto.StartDate,
                 EndDate = dto.EndDate,
                 ModuleId = dto.ModuleId,
-                Type = new ActivityType
-                {
-                    Id = Guid.NewGuid(),
-                    Name = dto.ActivityTypeName
-                }
+                ActivityTypeId = dto.TypeId.Value
             };
 
             _repository.Create(newActivity);
             await _unitOfWork.CompleteAsync();
+            var activityType = await _repository.GetActivityTypeByIdAsync(newActivity.ActivityTypeId);
 
             return new ActivityDto(
                 newActivity.Id,
                 newActivity.Name,
-                newActivity.Type.Name,
+                activityType?.Name ?? "Unknown",
                 newActivity.Description,
                 newActivity.StartDate,
                 newActivity.EndDate
             );
+        }
+
+        public async Task<IEnumerable<ActivityTypeDto>> GetAllActivityTypesAsync()
+        {
+            var typesFromDb = await _repository.GetAllActivityTypesAsync(trackChanges: false);
+
+            return typesFromDb.Select(t => new ActivityTypeDto
+            {
+                Id = t.Id,
+                Name = t.Name
+            }).ToList();
+        }
+
+        public async Task DeleteActivityAsync(Guid activityId)
+        {
+            var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: false);
+            if (activity != null)
+            {
+                _repository.Delete(activity); 
+                await _unitOfWork.CompleteAsync();
+            }
         }
     }
 

@@ -1,4 +1,8 @@
-﻿@inherits LayoutComponentBase
+﻿@implements IDisposable
+@inject NavigationManager NavigationManager
+@using System.Security.Claims
+@using LMS.Blazor.Client.Components.Icons
+@inherits LayoutComponentBase
 
 <div class="page">
     <div class="sidebar">
@@ -6,12 +10,27 @@
     </div>
 
     <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+        <AuthorizeView Context="auth">
+            <Authorized>
+                <div class="top-row px-4">
+                    <NavLink class="nav-link" href="Account/Manage">
+                        <CircleUserIcon Size="28" CssClass="text-secondary" />
+                        @GetFullName(auth.User)
+                    </NavLink>
+                    <form action="Account/Logout" method="post" class="p-4">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                        <button type="submit" class="nav-link">
+                            <LogOutIcon Size="28" CssClass="text-danger" />
+                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                        </button>
+                    </form>
+                </div>
+            </Authorized>
+        </AuthorizeView>
 
         <article class="content px-4">
-            @Body
+           @Body
         </article>
     </main>
 </div>
@@ -21,3 +40,29 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    private string? currentUrl;
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+
+    private string GetFullName(ClaimsPrincipal user)
+    {
+        return $"{user.Identity?.Name}";
+    }
+}

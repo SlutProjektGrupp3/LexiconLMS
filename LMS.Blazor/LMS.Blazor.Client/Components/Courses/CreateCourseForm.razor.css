@@ -1,0 +1,9 @@
+﻿
+
+::deep .form-control::placeholder {
+    color: #6c757d;
+    opacity: 1;
+}
+::deep .form-control:focus::placeholder {
+    color: #ced4da; /* fade out when focus */
+}

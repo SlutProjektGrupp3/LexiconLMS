@@ -30,6 +30,7 @@ public class MapperProfile : Profile
             .ForCtorParam("startDate", opt => opt.MapFrom(src => src.StartDate))
             .ForCtorParam("endDate", opt => opt.MapFrom(src => src.EndDate));
 
-
+        CreateMap<Course, StudentMyCourseDto>()
+            .ForMember(dest => dest.Modules, opt => opt.MapFrom(src => src.Modules));
     }
 }

@@ -1,7 +1,11 @@
+
 using LMS.API.Extensions;
 using LMS.API.Services;
 using LMS.Infractructure.Data;
+using LMS.Infractructure.Repositories;
 using Microsoft.OpenApi;
+using NuGet.Protocol.Core.Types;
+
 
 namespace LMS.API;
 
@@ -24,6 +28,11 @@ public class Program
         builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MapperProfile>());
         builder.Services.ConfigureCors();
         builder.Services.ConfigureSwagger();
+
+        builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+        builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+   
+
 
 
         var app = builder.Build();

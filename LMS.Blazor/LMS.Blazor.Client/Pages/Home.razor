@@ -5,62 +5,30 @@
 
 <PageTitle>Lexicon LMS</PageTitle>
 
-<AuthorizeView>
+<h1>Welcome to Lexicon LMS</h1>
+
+<AuthorizeView Roles="Teacher">
     <Authorized>
-        @switch (userRole)
-        {
-            case "Student":
-                <div>Student overview</div>
-                break;
+        <p>Redirecting to Teacher's Dashboard...</p>
 
-            case "Teacher":
-                <div>Teacher overview</div>
-                break;
-
-            default:
-                <div>No recognized role</div>
-                break;
+        @{
+            Nav.NavigateTo("teacher/dashboard");
         }
     </Authorized>
-    <NotAuthorized>
-        <p>Redirecting to login…</p>
-    </NotAuthorized>
 </AuthorizeView>
 
-@code {
-    private string? userRole = null;
+<AuthorizeView Roles="Student">
+    <Authorized>
+        <p>Redirecting to Student's Dashboard...</p>
 
-    private string? GetPrimaryRole(ClaimsPrincipal user)
-    {
-        var roles = user.FindAll(ClaimTypes.Role)
-                    .Select(c => c.Value)
-                    .ToHashSet(); // fast lookup
-
-        var priorityOrder = new[]
-        {
-            "Student",
-            "Teacher"
-        };
-
-        foreach (var role in priorityOrder)
-        {
-            if (roles.Contains(role)) return role;
+        @{
+            Nav.NavigateTo("student/dashboard");
         }
+    </Authorized>
+</AuthorizeView>
 
-        return null;
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (!user.Identity?.IsAuthenticated ?? true)
-        {
-            Nav.NavigateTo("Account/Login");
-            return;
-        }
-        
-        userRole = GetPrimaryRole(user);
-    }
-}
+<AuthorizeView>
+    <NotAuthorized>
+        <RedirectToLogin />
+    </NotAuthorized>
+</AuthorizeView>

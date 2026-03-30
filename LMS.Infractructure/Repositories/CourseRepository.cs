@@ -3,6 +3,9 @@ using Domain.Models.Entities;
 using LMS.Infractructure.Data;
 using LMS.Shared.Request;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace LMS.Infractructure.Repositories;
 
@@ -16,6 +19,7 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
     }
 
     public async Task<Course?> GetCourseByIdAsync(Guid courseId, bool trackChanges = false, bool includeModules = false)
+
     {
         var query = FindByCondition(c => c.Id == courseId, trackChanges);
 
@@ -23,6 +27,11 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
             query = query.Include(c => c.Modules);
 
         return await query.SingleOrDefaultAsync();
+
+    }
+    public void CreateCourse(Course course)
+    {
+        Create(course);
     }
 
     public async Task<PagedList<Course>> GetCoursesAsync(CourseRequestParams requestParams, bool trackChanges)
@@ -32,6 +41,5 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
 
         return await PagedList<Course>.CreateAsync(courses, requestParams.PageNumber, requestParams.PageSize);
     }
-
-    public void CreateCourse(Course course) => Create(course);
 }
+

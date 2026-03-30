@@ -71,7 +71,7 @@ else if (_course != null)
                         <div class="accordion-item">
 
                             <!-- Header -->
-                            <h2 class="accordion-header" id="@headingId">
+                            <h2 class="accordion-header d-flex align-items-center" id="@headingId">
                                 <button class="accordion-button @(accordionIsOpen ? "" : "collapsed")"
                                         type="button"
                                         data-bs-toggle="collapse"
@@ -80,22 +80,23 @@ else if (_course != null)
                                         aria-controls="@collapseId"
                                         @onclick="() => ToggleModuleAsync(module.Id)">
 
-                                    <div class="d-flex flex-column text-start">
-                                        <span class="fw-semibold">@module.Name</span>
-                                        <small class="text-muted">@module.Description</small>
+                                    <div class="d-flex w-100 align-items-center">
+                                        <div class="d-flex flex-column text-start">
+                                            <span class="fw-semibold">@module.Name</span>
+                                            <small class="text-muted">@module.Description</small>
+                                        </div>
+
+                                        <AuthorizeView Roles="Teacher">
+                                            <Authorized>
+                                                <button class="btn btn-sm btn-outline-danger ms-auto me-3"
+                                                      @onclick="() => PrepareToDelete(module.Id, Guid.Empty)"
+                                                      data-bs-toggle="modal"
+                                                      data-bs-target="#deleteModuleModal">
+                                                    Delete
+                                                </button>
+                                            </Authorized>
+                                        </AuthorizeView>
                                     </div>
-
-                                    <AuthorizeView Roles="Teacher">
-                                        <Authorized>
-                                            <button class="btn btn-sm btn-outline-danger"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#deleteModuleModal"
-                                                    @onclick="() => PrepareToDelete(module.Id, Guid.Empty)">
-                                                Delete
-                                            </button>
-                                        </Authorized>
-                                    </AuthorizeView>
-
                                 </button>
                             </h2>
 
@@ -104,6 +105,17 @@ else if (_course != null)
                             <div id="@collapseId"
                                  class="accordion-collapse collapse @(accordionIsOpen ? "show" : "")"
                                  data-bs-parent="#modulesAccordion">
+
+                               @*  <AuthorizeView Roles="Teacher">
+                                    <Authorized>
+                                        <button class="btn btn-sm btn-outline-danger my-3"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteModuleModal"
+                                                @onclick="() => PrepareToDelete(module.Id, Guid.Empty)">
+                                            Delete Module
+                                        </button>
+                                    </Authorized>
+                                </AuthorizeView> *@
 
                                 <div class="accordion-body">
 
@@ -188,18 +200,19 @@ else if (_course != null)
                                         }
                                     }
                                 </div>
-                                
-                                <AuthorizeView Roles="Teacher">
-                                    <Authorized>
-                                        <ConfirmModal ModalId="deleteModuleModal"
-                                                      Title="Confirm Deletion"
-                                                      Message="Are you sure you want to delete this module?"
-                                                      OnConfirm="() => HandleDeleteModule(_moduleIdToRemember)" />
-                                    </Authorized>
-                                </AuthorizeView>
                             </div>
                         </div>
                     }
+         
+                    
+                    <AuthorizeView Roles="Teacher">
+                        <Authorized>
+                            <ConfirmModal ModalId="deleteModuleModal"
+                                          Title="Confirm Deletion"
+                                          Message="Are you sure you want to delete this module? All activities will also be deleted!"
+                                          OnConfirm="() => HandleDeleteModule(_moduleIdToRemember)" />
+                        </Authorized>
+                    </AuthorizeView>
                 </div>
             }
         </div>
@@ -365,15 +378,12 @@ else if (_course != null)
         {
             await ApiService.DeleteAsync($"api/activities/{activityId}");
 
-            if (_loadingModules.Contains(moduleId))
+            if (_moduleActivities.ContainsKey(moduleId))
             {
-                _loadingModules.Remove(moduleId);
-                _openModules.Remove(moduleId);
-
-                var moduleDto = _course!.Modules.Find(m => m.Id == moduleId);
-                if (moduleDto != null)
+                var activityToRemove = _moduleActivities[moduleId].FirstOrDefault(a => a.Id == activityId);
+                if (activityToRemove != null)
                 {
-                    _course.Modules.Remove(moduleDto);
+                    _moduleActivities[moduleId].Remove(activityToRemove);
                 }
             }
         }
@@ -395,13 +405,13 @@ else if (_course != null)
         {
             await ApiService.DeleteAsync($"api/modules/{moduleId}");
 
-            if (_moduleActivities.ContainsKey(moduleId))
+            _openModules.Remove(moduleId);
+            _moduleActivities.Remove(moduleId);
+            
+            var moduleDto = _course!.Modules.Find(m => m.Id == moduleId);
+            if (moduleDto != null)
             {
-                var moduleToRemove = _moduleActivities[moduleId].FirstOrDefault(a => a.Id == moduleId);
-                if (moduleToRemove != null)
-                {
-                    _moduleActivities[moduleId].Remove(moduleToRemove);
-                }
+                _course.Modules.Remove(moduleDto);
             }
         }
         catch (Exception ex)

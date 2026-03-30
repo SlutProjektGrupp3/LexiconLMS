@@ -1,5 +1,7 @@
 ﻿@page "/Account/Register"
+@layout BlankLayout
 
+@using LMS.Blazor.Client.Layout
 @using System.ComponentModel.DataAnnotations
 @using System.Text
 @using System.Text.Encodings.Web
@@ -16,7 +18,7 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Registrera sig</PageTitle>
+<PageTitle>Register as a new user</PageTitle>
 
 <div class="d-flex vh-100 justify-content-center align-items-center">
     <div class="card col-5 align-self-center shadow border-0">
@@ -29,13 +31,13 @@
                 <DataAnnotationsValidator />
                 <ValidationSummary class="text-danger" role="alert" />
                 <div class="form-floating mb-3">
-                    <InputText @bind-Value="Input.FirstName" id="Input.FirstName" class="form-control" autocomplete="firsName" aria-required="true" placeholder="Din förnamn" />
-                    <label for="Input.FirstName">Förnamn</label>
+                    <InputText @bind-Value="Input.FirstName" id="Input.FirstName" class="form-control" autocomplete="firsName" aria-required="true" placeholder="Your first name" />
+                    <label for="Input.FirstName">First Name</label>
                     <ValidationMessage For="() => Input.FirstName" class="text-danger" />
                 </div>
                 <div class="form-floating mb-3">
-                    <InputText @bind-Value="Input.LastName" id="Input.LastName" class="form-control" autocomplete="lastName" aria-required="true" placeholder="Din efternamn" />
-                    <label for="Input.LastName">Efternamn</label>
+                    <InputText @bind-Value="Input.LastName" id="Input.LastName" class="form-control" autocomplete="lastName" aria-required="true" placeholder="Your last name" />
+                    <label for="Input.LastName">Last Name</label>
                     <ValidationMessage For="() => Input.LastName" class="text-danger" />
                 </div>
                 <div class="form-floating mb-3">
@@ -54,7 +56,7 @@
                     <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
                 </div>
                 <div class="pt-5">
-                    <button type="submit" class="w-100 btn btn-lg btn-primary">Registrera</button>
+                    <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
                 </div>
             </EditForm>
         </div>
@@ -99,9 +101,19 @@
         {
             identityErrors = result.Errors;
             return;
-        }
+        } 
 
         Logger.LogInformation("User created a new account with password.");
+
+        var roleResult = await UserManager.AddToRoleAsync(user, "Student");
+
+        if (!roleResult.Succeeded)
+        {
+            identityErrors = roleResult.Errors;
+            return;
+        }
+
+        Logger.LogInformation("Role Student added to new user.");
 
         var userId = await UserManager.GetUserIdAsync(user);
         var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
@@ -132,6 +144,8 @@
             var user = Activator.CreateInstance<ApplicationUser>();
             user.FirstName = Input.FirstName;
             user.LastName = Input.LastName;
+
+            
             return user;
         }
         catch

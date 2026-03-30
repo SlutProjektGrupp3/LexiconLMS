@@ -80,10 +80,13 @@ public class AuthService : IAuthService
 
         var claims = new List<Claim>()
         {
-            new Claim(ClaimTypes.Name, user.UserName!),
+            new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             
             //Add more claims here if needed
+            //These claims disappear after first content paint?
+            //new Claim("FirstName", user.FirstName),
+            //new Claim("LastName", user.LastName)
             //new Claim("FavoriteColor", "Blue") 
         };
 

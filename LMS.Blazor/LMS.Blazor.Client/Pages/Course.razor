@@ -106,17 +106,6 @@ else if (_course != null)
                                  class="accordion-collapse collapse @(accordionIsOpen ? "show" : "")"
                                  data-bs-parent="#modulesAccordion">
 
-                               @*  <AuthorizeView Roles="Teacher">
-                                    <Authorized>
-                                        <button class="btn btn-sm btn-outline-danger my-3"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#deleteModuleModal"
-                                                @onclick="() => PrepareToDelete(module.Id, Guid.Empty)">
-                                            Delete Module
-                                        </button>
-                                    </Authorized>
-                                </AuthorizeView> *@
-
                                 <div class="accordion-body">
 
                                     @if (_loadingModules.Contains(module.Id))

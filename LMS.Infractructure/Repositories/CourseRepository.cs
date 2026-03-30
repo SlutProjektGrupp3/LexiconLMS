@@ -41,5 +41,11 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
 
         return await PagedList<Course>.CreateAsync(courses, requestParams.PageNumber, requestParams.PageSize);
     }
-}
 
+    public async Task<Course?> GetCourseWithStudentsAsync(Guid courseId, bool trackChanges)
+    {
+        return await FindByCondition(c => c.Id == courseId, trackChanges)
+            .Include(c => c.Students)
+            .FirstOrDefaultAsync();
+    }    
+}

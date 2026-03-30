@@ -29,7 +29,8 @@ namespace LMS.Services
                 a.Type.Name,
                 a.Description,
                 a.StartDate,
-                a.EndDate
+                a.EndDate,
+                a.TypeId
             )).ToList();
 
             return dtoList;
@@ -45,7 +46,7 @@ namespace LMS.Services
                 StartDate = dto.StartDate,
                 EndDate = dto.EndDate,
                 ModuleId = dto.ModuleId,
-                TypeId = dto.TypeId.Value
+                TypeId = dto.TypeId.Value,
             };
 
             _repository.Create(newActivity);
@@ -58,7 +59,8 @@ namespace LMS.Services
                 activityType?.Name ?? "Unknown",
                 newActivity.Description,
                 newActivity.StartDate,
-                newActivity.EndDate
+                newActivity.EndDate,
+                newActivity.TypeId
             );
         }
 
@@ -107,7 +109,8 @@ namespace LMS.Services
                 activityType?.Name ?? "Unknown",
                 activity.Description,
                 activity.StartDate,
-                activity.EndDate
+                activity.EndDate,
+                activity.TypeId
             );
         }
     }

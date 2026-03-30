@@ -108,35 +108,52 @@ else if (_course != null)
                                             <div class="list-group list-group-flush">
                                                 @foreach (var activity in activities)
                                                 {
-                                                    <div class="list-group-item px-0">
+                                                    @if (_editingActivityId == activity.Id && _activityToUpdate != null)
+                                                    {
+                                                        <UpdateActivityForm ActivityId="activity.Id"
+                                                                            Model="_activityToUpdate"
+                                                                            OnSubmit="() => HandleUpdateActivity(module.Id, activity.Id)"
+                                                                            OnCancel="CancelUpdate" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="list-group-item px-0">
     
-                                                        <div class="d-flex justify-content-between align-items-start">
-                                                            <div class="fw-semibold">
-                                                                @activity.Name
-                                                                <span class="text-muted fw-normal small">
-                                                                    (@activity.TypeName)
-                                                                </span>
+                                                            <div class="d-flex justify-content-between align-items-start">
+                                                                <div class="fw-semibold">
+                                                                    @activity.Name
+                                                                    <span class="text-muted fw-normal small">
+                                                                        (@activity.TypeName)
+                                                                    </span>
+                                                                </div>
+
+                                                                <div>
+                                                                    <button class="btn btn-sm btn-outline-warning me-2"
+                                                                            @onclick="() => PrepareToUpdate(module.Id, activity)">
+                                                                        Edit
+                                                                    </button>
+
+                                                                    <button class="btn btn-sm btn-outline-danger"
+                                                                            data-bs-toggle="modal"
+                                                                            data-bs-target="#deleteActivityModal"
+                                                                            @onclick="() => PrepareToDelete(module.Id, activity.Id)">
+                                                                        Delete
+                                                                    </button>
+                                                                </div>
                                                             </div>
 
-                                                            <button class="btn btn-sm btn-outline-danger"
-                                                                    data-bs-toggle="modal"
-                                                                    data-bs-target="#deleteActivityModal"
-                                                                    @onclick="() => PrepareToDelete(module.Id, activity.Id)">
-                                                                Delete
-                                                            </button>
-                                                        </div>
+                                                            <div class="text-muted small">
+                                                                @activity.Description
+                                                            </div>
 
-                                                        <div class="text-muted small">
-                                                            @activity.Description
-                                                        </div>
+                                                            <div class="text-muted small">
+                                                                @activity.StartDate.ToShortDateString()
+                                                                -
+                                                                @activity.EndDate.ToShortDateString()
+                                                            </div>
 
-                                                        <div class="text-muted small">
-                                                            @activity.StartDate.ToShortDateString()
-                                                            -
-                                                            @activity.EndDate.ToShortDateString()
                                                         </div>
-
-                                                    </div>
+                                                    }
                                                 }
                                             </div>
                                             <ConfirmModal ModalId="deleteActivityModal"
@@ -179,6 +196,8 @@ else if (_course != null)
 
     private Dictionary<Guid, bool> _showCreateForm = new();
     private Dictionary<Guid, CreateActivityDto> _newActivities = new();
+    private Guid? _editingActivityId;
+    private UpdateActivityDto? _activityToUpdate;
     private Guid _moduleIdToRemember;
     private Guid _activityIdToRemember;
     protected override async Task OnInitializedAsync()
@@ -216,17 +235,14 @@ else if (_course != null)
 
         _openModules.Add(moduleId);
 
-        // Load data if needed
         if (!_moduleActivities.ContainsKey(moduleId))
         {
             _loadingModules.Add(moduleId);
-
             StateHasChanged();
 
             try
             {
                 var activities = await ApiService.GetAsync<List<ActivityDto>>($"api/activities/modules/{moduleId}");
-
                 _moduleActivities[moduleId] = activities ?? new List<ActivityDto>();
             }
             catch
@@ -244,6 +260,9 @@ else if (_course != null)
     {
         var isCurrentlyShown = _showCreateForm.GetValueOrDefault(moduleId);
         _showCreateForm[moduleId] = !isCurrentlyShown;
+        
+        _editingActivityId = null;
+
         if (_showCreateForm[moduleId] && !_newActivities.ContainsKey(moduleId))
         {
             _newActivities[moduleId] = new CreateActivityDto
@@ -278,7 +297,7 @@ else if (_course != null)
 
         try
         {
-           var result = await ApiService.PostAsync<CreateModuleDto, CreateModuleResultDto>("api/modules", dtoToSave);
+            var result = await ApiService.PostAsync<CreateModuleDto, CreateModuleResultDto>("api/modules", dtoToSave);
 
             if (result is { Succeeded: true, CreatedModule: { } createdModule })
             {
@@ -340,5 +359,47 @@ else if (_course != null)
     {
         _moduleIdToRemember = moduleId;
         _activityIdToRemember = activityId;
+    }
+
+    private void PrepareToUpdate(Guid moduleId, ActivityDto activity)
+    {
+        _showCreateForm[moduleId] = false;
+        
+        _editingActivityId = activity.Id;
+        
+        _activityToUpdate = new UpdateActivityDto
+        {
+            Name = activity.Name,
+            Description = activity.Description,
+            StartDate = activity.StartDate,
+            EndDate = activity.EndDate,
+            TypeId = activity.TypeId
+        };
+    }
+
+    private void CancelUpdate()
+    {
+        _editingActivityId = null;
+        _activityToUpdate = null;
+    }
+
+    private async Task HandleUpdateActivity(Guid moduleId, Guid activityId)
+    {
+        if (_activityToUpdate == null) return;
+
+        try
+        {
+            await ApiService.PutAsync($"api/activities/{activityId}", _activityToUpdate);
+
+            var activities = await ApiService.GetAsync<List<ActivityDto>>($"api/activities/modules/{moduleId}");
+            _moduleActivities[moduleId] = activities ?? new List<ActivityDto>();
+
+            _editingActivityId = null;
+            _activityToUpdate = null;
+        }
+        catch (Exception ex)
+        {
+            error = "Failed to update activity: " + ex.Message;
+        }
     }
 }

@@ -24,11 +24,22 @@ public class UsersController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteUser(Guid id)
+    public async Task<IActionResult> DeleteUser(string id)
     {
-        await _serviceManager.UserService.DeleteUserAsync(id);
+        try
+        {
+            await _serviceManager.UserService.DeleteUserAsync(id);
+            return NoContent();
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
+        catch (Exception ex) 
+        {
+            return BadRequest(ex.Message);
+        }
 
-        return NoContent();
     }
 
 }

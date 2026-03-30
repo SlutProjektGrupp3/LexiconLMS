@@ -6,5 +6,5 @@ namespace Service.Contracts;
 public interface IUserService
 {
     Task<IEnumerable<UserListDto>> GetAllUsersAsync();
-    Task DeleteUserAsync(Guid id);
+    Task DeleteUserAsync(string id);
 }

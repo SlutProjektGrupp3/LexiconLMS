@@ -29,7 +29,7 @@ public class UserService : IUserService
 
             dtoList.Add(new UserListDto
             (
-                Id: Guid.Parse(user.Id),
+                Id: user.Id,
                 FirstName: user.FirstName,
                 LastName: user.LastName,
                 Email: user.Email,
@@ -40,11 +40,17 @@ public class UserService : IUserService
         return dtoList;
     }
 
-    public async Task DeleteUserAsync(Guid id)
+    public async Task DeleteUserAsync(string id)
     {
-        await _unitOfWork.UserRepository.DeleteUserAsync(id);
+        var user = await _userManager.FindByIdAsync(id);
 
-        await _unitOfWork.CompleteAsync();
+        if (user == null)
+            throw new KeyNotFoundException("User not found.");
+
+        var result = await _userManager.DeleteAsync(user);
+
+        if (!result.Succeeded)
+            throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
     }
 }
 

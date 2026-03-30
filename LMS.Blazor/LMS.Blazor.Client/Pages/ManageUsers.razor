@@ -1,7 +1,14 @@
 ﻿@page "/manageusers"
 @inject IApiService ApiService
+@using LMS.Blazor.Client.Components
 @using LMS.Shared.DTOs.User
 
+@if (successMessage != null)
+{
+    <div class="alert alert-success">
+        @successMessage
+    </div>
+}
 @if (isLoading)
 {
     <p><em>Loading...</em></p>
@@ -17,9 +24,21 @@ else if (_users.Any())
     <div class="card shadow-sm rounded border-0">
 
         <div class="card-header bg-white border-bottom py-3 px-4">
-            <h2 class="h5 mb-1">Manage Users</h2>
-            <p class="text-muted small mb-0">Overview of all users</p>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="h5 mb-1">Manage Users</h2>
+                    <p class="text-muted small mb-0">Overview of all users</p>
+                </div>
+
+                <ShowFormButton ShowForm="showCreateUserForm"
+                                OnClick="ToggleCreateUserForm"
+                                HiddenText="New User"/>
+            </div>
         </div>
+        @if (showCreateUserForm)
+        {
+            <CreateUserForm Model="userToCreate" Roles="_roles" OnSubmit="HandleCreateUser" />
+        }
 
         <UserTable Users="_users" OnDelete="ConfirmDelete"></UserTable>
 
@@ -40,10 +59,14 @@ else
     [Parameter]
     public Guid Id { get; set; }
 
-    private IEnumerable<UserListDto> _users = new List<UserListDto>();
-    private string? error;
-    private bool isLoading;
-    private Guid? userToDelete;
+    private List<UserDto> _users = new List<UserDto>();
+    private string? error = null;
+    private bool isLoading = true;
+    private string? userIdToDelete;
+    private bool showCreateUserForm;
+    private CreateUserDto userToCreate { get; set; }
+    private List<string> _roles = new();
+    private string? successMessage;
 
     protected override async Task OnInitializedAsync()
     {
@@ -53,12 +76,10 @@ else
 
     private async Task CallApi()
     {
-        isLoading = true;
-        error = null;
-
         try
         {
-            _users = await ApiService.GetAsync<IEnumerable<UserListDto>>($"api/users/") ?? new List<UserListDto>();
+            _users = await ApiService.GetAsync<List<UserDto>>($"api/users") ?? new List<UserDto>();
+            _roles = await ApiService.GetAsync<List<string>>($"api/users/roles") ?? new List<string>();
         }
         catch (Exception ex)
         {
@@ -70,20 +91,56 @@ else
         }
     }
 
-    private void ConfirmDelete(Guid id)
+    private async Task HandleCreateUser()
     {
-        userToDelete = id;
+        error = null;
+        successMessage = null;
+
+        try
+        {
+            var result = await ApiService.PostAsync<CreateUserDto, CreateUserResultDto>("api/users", userToCreate);
+
+            if (result is { Succeeded: true, CreatedUser: { } createdUser })
+            {
+                _users.Add(createdUser);
+                successMessage = "User created successfully.";
+                showCreateUserForm = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            error = "Failed to create user: " + ex.Message;
+        }
+    }
+
+    private void ToggleCreateUserForm()
+    {
+        showCreateUserForm = !showCreateUserForm;
+
+        if (showCreateUserForm)
+        {
+            successMessage = null;
+            userToCreate = new CreateUserDto();
+        }
+
+    }
+
+    private void ConfirmDelete(string id)
+    {
+        successMessage = null;
+        userIdToDelete = id;
     }
 
     private async Task DeleteUser()
     {
-        if (userToDelete == null)
+        if (userIdToDelete == null)
             return;
 
-        await ApiService.DeleteAsync($"api/users/{userToDelete}");
+        await ApiService.DeleteAsync($"api/users/{userIdToDelete}");
 
-        _users = _users.Where(u => u.Id != userToDelete).ToList();
+        _users = _users.Where(u => u.Id != userIdToDelete).ToList();
 
-        userToDelete = null;
+        successMessage = "User deleted successfully.";
+        userIdToDelete = null;
     }
 }

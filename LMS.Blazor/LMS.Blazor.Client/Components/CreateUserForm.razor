@@ -1,0 +1,67 @@
+﻿@inject IApiService ApiService
+@using LMS.Shared.DTOs.User
+
+<div class="card mt-3 p-3 bg-light mb-3">
+    <h5>Create New User</h5>
+
+    <EditForm Model="Model" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-2">
+            <label class="form-label">First Name</label>
+            <InputText class="form-control" @bind-Value="Model.FirstName" />
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label">Last Name</label>
+            <InputText class="form-control" @bind-Value="Model.LastName" />
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label">Email</label>
+            <InputText class="form-control" @bind-Value="Model.Email" />
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label">Password</label>
+            <InputText type="password" class="form-control" @bind-Value="Model.Password" />
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label">Confirm Password</label>
+            <InputText type="password" class="form-control" @bind-Value="Model.ConfirmPassword" />
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label">Role</label>
+            <InputSelect class="form-select" @bind-Value="Model.RoleName">
+                @foreach (var role in Roles)
+                {
+                    <option value="@role">@role</option>
+                }
+            </InputSelect>
+        </div>
+
+        <button type="submit" class="btn btn-success mt-2">
+            Save User
+        </button>
+
+    </EditForm>
+</div>
+
+@code {
+
+    [Parameter]
+    public CreateUserDto Model { get; set; }
+    [Parameter]
+    public List<string> Roles { get; set; }
+
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    private async Task HandleSubmit()
+    {
+        await OnSubmit.InvokeAsync();
+    }
+}

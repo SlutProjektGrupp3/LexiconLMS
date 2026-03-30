@@ -1,0 +1,68 @@
+﻿@using LMS.Shared.DTOs.Modules
+
+<div class="card mt-3 p-3 bg-light mb-3">
+    <h5>Edit Module</h5>
+
+    <EditForm Model="Model" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-2">
+            <label class="form-label">Name</label>
+            <InputText class="form-control" @bind-Value="Model.Name" />
+            <ValidationMessage For="@(() => Model.Name)" />
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label">Description</label>
+            <InputTextArea class="form-control" @bind-Value="Model.Description" />
+            <ValidationMessage For="@(() => Model.Description)" />
+        </div>
+
+        <div class="row mb-2">
+            <div class="col">
+                <label class="form-label">Start Date</label>
+                <InputDate class="form-control" @bind-Value="Model.StartDate" />
+                <ValidationMessage For="@(() => Model.StartDate)" />
+            </div>
+            <div class="col">
+                <label class="form-label">End Date</label>
+                <InputDate class="form-control" @bind-Value="Model.EndDate" />
+                <ValidationMessage For="@(() => Model.EndDate)" />
+            </div>
+        </div>
+
+        <div class="mt-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary" disabled="@IsSubmitting">
+                @(IsSubmitting ? "Saving..." : "Update Module")
+            </button>
+
+            <button type="button" class="btn btn-secondary" @onclick="OnCancel" disabled="@IsSubmitting">
+                Cancel
+            </button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter]
+    public UpdateModuleDto Model { get; set; } = new();
+
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+    [Parameter]
+    public bool IsSubmitting { get; set; }
+
+    private async Task HandleSubmit()
+    {
+        await OnSubmit.InvokeAsync();
+    }
+
+    private async Task Cancel()
+    {
+        await OnCancel.InvokeAsync();
+    }
+}

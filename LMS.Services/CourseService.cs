@@ -50,7 +50,8 @@ public class CourseService : ICourseService
                 m.Name,
                 m.Description,
                 m.StartDate,
-                m.EndDate
+                m.EndDate,
+                 m.CourseId
             )).ToList()
         );
     }

@@ -13,66 +13,47 @@
     </div>    
 </div>
 
-@if (isLoading)
-{
-    <p>Loading...</p>
-}
-else if (!string.IsNullOrEmpty(errorMessage))
-{
-    <p class="text-danger">@errorMessage</p>
-}
-else
-{
-    <div class="row">
-        <div class="col">
-            <div class="card p-3">
-                <h5>Active Courses</h5>
-                <h2>@Courses.Count</h2>
-            </div>
-        </div>
-    </div>
-    <hr />
-    <div class="row">
+<div class="row">
+    @if (isLoading)
+    {
+        <p>Loading...</p>
+    }
+    else if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <p class="text-danger">@errorMessage</p>
+    }
+    else
+    {
         @foreach (var course in Courses)
         {
-            <div class="col-4 mb-3">
-                <div class="card shadow-sm p-3">
-                    <h5>@course.Name</h5>
-
+            <div class="col-4">
+                <div class="card p-3">
+                    <h5>📚 @course.Name</h5>
                     <button class="btn btn-primary btn-sm"
-                            @onclick="() => SelectCourse(course.Id)">
+                            @onclick="() => LoadParticipants(course.Id)">
                         Show participants
                     </button>
+                    @if (SelectedCourseId == course.Id)
+                    {
+                        @if (participants.Any())
+                        {
+                            <ul class="mt-2">
+                                @foreach (var student in participants)
+                                {
+                                    <li>@student.FirstName @student.LastName</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p>No participants found</p>
+                        }
+                    }
                 </div>
             </div>
         }
-    </div>
-
-    @if (SelectedCourse != null)
-    {
-        <hr />
-        <h4>📚 @SelectedCourse.Name</h4>
-        <p>@participants.Count participants</p>
-        @if (participants.Any())
-        {
-            <div class="row">
-                @foreach (var p in participants)
-                {
-                    <div class="col-4 mb-2">
-                        <div class="card p-2">
-                            <strong>@p.FirstName @p.LastName</strong>
-                            <div class="text-muted small">@p.Email</div>
-                        </div>
-                    </div>
-                }
-            </div>
-        }
-        else
-        {
-            <p>No participants found</p>
-        }
     }
-}
+</div>
 
 @code {
     private bool isLoading = true;
@@ -81,7 +62,7 @@ else
     List<StudentMyCourseDto> Courses = new();
     List<ParticipantDto> participants = new();
 
-    private bool showParticipants = false;
+    Guid? SelectedCourseId = null;
 
     StudentMyCourseDto? SelectedCourse;
 
@@ -93,8 +74,8 @@ else
     {        
         try
         {
-            var result = await ApiService.GetAsync<List<StudentMyCourseDto>>("api/courses");
-            Courses = result ?? new();
+            Courses = await ApiService.GetAsync<List<StudentMyCourseDto>>("api/courses")
+                  ?? new();
 
         }
         catch (Exception ex)
@@ -106,16 +87,13 @@ else
             isLoading = false;
         }
     }
-    async Task SelectCourse(Guid courseId)
-    {
-        SelectedCourse = Courses.FirstOrDefault(c => c.Id == courseId);
-        await LoadParticipants(courseId);
-    }
+
     private async Task LoadParticipants(Guid courseId)
     {
+        SelectedCourseId = courseId;
+
         participants = await ApiService.GetAsync<List<ParticipantDto>>(
             $"api/courses/{courseId}/participants") ?? new();
 
-    }
-   
+    }   
 }

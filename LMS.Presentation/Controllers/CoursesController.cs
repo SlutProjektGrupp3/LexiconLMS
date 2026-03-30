@@ -1,8 +1,8 @@
-using LMS.Shared.DTOs.CourseDtos;
+﻿using LMS.Shared.DTOs.CourseDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
-using System;
+using LMS.Shared.DTOs;
 
 namespace LMS.Presentation.Controllers;
 
@@ -11,10 +11,13 @@ namespace LMS.Presentation.Controllers;
 
 public class CoursesController : ControllerBase
 {
+    private readonly ICourseService _courseService;
     private readonly IServiceManager serviceManager;
 
-    public CoursesController(IServiceManager serviceManager)
+    public CoursesController(IServiceManager serviceManager, ICourseService courseService)
+ 
     {
+        _courseService = courseService;
         this.serviceManager = serviceManager;
     }
 
@@ -28,7 +31,7 @@ public class CoursesController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    [Authorize] 
+    [Authorize]
     public async Task<IActionResult> GetCourseById(Guid id)
     {
         var courseDetails = await serviceManager.CourseService.GetCourseByIdAsync(id);
@@ -39,26 +42,34 @@ public class CoursesController : ControllerBase
 
     [HttpPost]
     [Authorize(Roles = "Teacher")]
-    public async Task<ActionResult<CourseDto>> PostCourse(CourseCreateDto dto)
-    {
-        var createdDto = await serviceManager.CourseService.CreateCourseAsync(dto);
 
-        return CreatedAtAction(nameof(GetCourseById), new { id = createdDto.Id }, createdDto);
+    public async Task<IActionResult> CreateCourse([FromBody] CreateCourseDto dto)
+    {
+        try
+        {
+            var createdCourse = await _courseService.CreateCourseAsync(dto);
+            return Ok(createdCourse);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
-    [Authorize(Roles = "Teacher")]
-    [HttpPut("{id:guid}")]
-    public async Task<IActionResult> UpdateCourse(Guid id, [FromBody] UpdateCourseDto updateCourseDto)
-    {
-        if (updateCourseDto is null)
-            return BadRequest("UpdateCourseDto is null.");
-
-        await serviceManager.CourseService.UpdateCourseAsync(id, updateCourseDto, trackChanges: true);
-
-        return NoContent();
-    }
 
     [Authorize(Roles = "Teacher")]
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> UpdateCourse(Guid id, [FromBody] UpdateCourseDto updateCourseDto)
+        {
+            if (updateCourseDto is null)
+                return BadRequest("UpdateCourseDto is null.");
+
+            await serviceManager.CourseService.UpdateCourseAsync(id, updateCourseDto, trackChanges: true);
+
+            return NoContent();
+        }
+
+        [Authorize(Roles = "Teacher")]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteCourse(Guid id)
     {

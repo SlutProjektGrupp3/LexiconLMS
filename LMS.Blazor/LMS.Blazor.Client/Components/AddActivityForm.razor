@@ -1,5 +1,5 @@
 ﻿@using LMS.Shared.DTOs.Activity
-
+@inject IApiService ApiService
 <div class="card mt-3 p-3 bg-light mb-3">
     <h5>Create New Activity</h5>
 
@@ -11,9 +11,20 @@
             <InputText class="form-control" @bind-Value="Model.Name" />
         </div>
 
-        <div class="mb-2">
-            <label class="form-label">Type</label>
-            <InputText class="form-control" @bind-Value="Model.ActivityTypeName" />
+        <div class="mb-3">
+            <label>Activity Type</label>
+        
+            <InputSelect @bind-Value="Model.TypeId" class="form-select">
+                <option value="">Activity type</option>
+                @if (availableTypes != null)
+                {
+                    @foreach (var type in availableTypes)
+                    {
+                        <option value="@type.Id">@type.Name</option>
+                    }
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => Model.TypeId)" />
         </div>
 
         <div class="mb-2">
@@ -47,9 +58,16 @@
     
     [Parameter] 
     public EventCallback<Guid> OnSubmit { get; set; }
+    private List<ActivityTypeDto> availableTypes = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        availableTypes = await ApiService.GetAsync<List<ActivityTypeDto>>("api/activities/types");
+    }
 
     private async Task HandleSubmit()
     {
         await OnSubmit.InvokeAsync(ModuleId);
     }
+
 }

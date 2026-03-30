@@ -1,5 +1,5 @@
 ﻿@page "/Account/Login"
-@layout LoginLayout
+@layout BlankLayout
 
 @using LMS.Blazor.Client.Layout
 @using System.ComponentModel.DataAnnotations
@@ -58,28 +58,20 @@
                 <hr /> *@
             </EditForm>
 
-            <div>
+            <div class="d-flex flex-column justify-content-center align-items-center">
                 <p class="pt-5 pb-3">
                     <a href="Account/ForgotPassword">Have you forgotten your password?</a>
                 </p>
+
+                <p>
+                <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = "/" }))">Register as a new user</a>
+                </p> 
                 @* <p>
-                <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
-                </p> *@
-                            @* <p>
                     <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
                 </p> *@
             </div>
         </div>
     </div>
-
-    @* Lämna den här så att vi kan ställa tillbacka senare, kanske *@
-    @* <div class="col-lg-4 col-lg-offset-2">
-        <section>
-            <h3>Use another service to log in.</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
-    </div> *@
 </div>
 
 

@@ -5,7 +5,7 @@
 @using LMS.Shared.DTOs.Modules
 @using LMS.Shared.DTOs.Module
 @using LMS.Blazor.Client.Components
-@using LMS.Blazor.Shared.Components.Icons
+@using LMS.Blazor.Client.Components.Icons
 
 
 <PageTitle>Course Details</PageTitle>
@@ -145,12 +145,21 @@ else if (_course != null)
                                                 @foreach (var activity in activities)
                                                 {
                                                     <div class="list-group-item px-0">
+    
+                                                        <div class="d-flex justify-content-between align-items-start">
+                                                            <div class="fw-semibold">
+                                                                @activity.Name
+                                                                <span class="text-muted fw-normal small">
+                                                                    (@activity.TypeName)
+                                                                </span>
+                                                            </div>
 
-                                                        <div class="fw-semibold">
-                                                            @activity.Name
-                                                            <span class="text-muted fw-normal small">
-                                                                (@activity.TypeName)
-                                                            </span>
+                                                            <button class="btn btn-sm btn-outline-danger"
+                                                                    data-bs-toggle="modal"
+                                                                    data-bs-target="#deleteActivityModal"
+                                                                    @onclick="() => PrepareToDelete(module.Id, activity.Id)">
+                                                                Delete
+                                                            </button>
                                                         </div>
 
                                                         <div class="text-muted small">
@@ -166,6 +175,10 @@ else if (_course != null)
                                                     </div>
                                                 }
                                             </div>
+                                            <ConfirmModal ModalId="deleteActivityModal"
+                                                          Title="Confirm Deletion"
+                                                          Message="Are you sure you want to delete this activity?"
+                                                          OnConfirm="() => HandleDeleteActivity(_moduleIdToRemember, _activityIdToRemember)" />
                                         }
                                         else
                                         {
@@ -204,6 +217,8 @@ else if (_course != null)
 
     private Dictionary<Guid, bool> _showCreateForm = new();
     private Dictionary<Guid, CreateActivityDto> _newActivities = new();
+    private Guid _moduleIdToRemember;
+    private Guid _activityIdToRemember;
 
     private Dictionary<Guid, bool> _showEditModuleForm = new();
     private Dictionary<Guid, UpdateModuleDto> _modulesToEdit = new();
@@ -427,5 +442,31 @@ else if (_course != null)
         {
             error = "Failed to create activity: " + ex.Message;
         }
+    }
+
+    private async Task HandleDeleteActivity(Guid moduleId, Guid activityId)
+    {
+        try
+        {
+            await ApiService.DeleteAsync($"api/activities/{activityId}");
+
+            if (_moduleActivities.ContainsKey(moduleId))
+            {
+                var activityToRemove = _moduleActivities[moduleId].FirstOrDefault(a => a.Id == activityId);
+                if (activityToRemove != null)
+                {
+                    _moduleActivities[moduleId].Remove(activityToRemove);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            error = "Failed to delete activity: " + ex.Message;
+        }
+    }
+    private void PrepareToDelete(Guid moduleId, Guid activityId)
+    {
+        _moduleIdToRemember = moduleId;
+        _activityIdToRemember = activityId;
     }
 }

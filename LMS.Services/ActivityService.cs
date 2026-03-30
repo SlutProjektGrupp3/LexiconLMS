@@ -51,7 +51,7 @@ namespace LMS.Services
 
             _repository.Create(newActivity);
             await _unitOfWork.CompleteAsync();
-            var activityType = await _repository.GetActivityTypeByIdAsync(newActivity.TypeId);
+            var activityType = await _repository.GetActivityTypeByIdAsync(newActivity.ActivityTypeId);
 
             return new ActivityDto(
                 newActivity.Id,

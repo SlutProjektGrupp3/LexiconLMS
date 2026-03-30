@@ -181,6 +181,9 @@ namespace LMS.Infractructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("ActivityTypeId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -198,14 +201,11 @@ namespace LMS.Infractructure.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("TypeId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("ModuleId");
+                    b.HasIndex("ActivityTypeId");
 
-                    b.HasIndex("TypeId");
+                    b.HasIndex("ModuleId");
 
                     b.ToTable("Activities");
                 });
@@ -345,33 +345,39 @@ namespace LMS.Infractructure.Migrations
 
             modelBuilder.Entity("Domain.Models.Entities.ApplicationUser", b =>
                 {
-                    b.HasOne("Domain.Models.Entities.Course", null)
+                    b.HasOne("Domain.Models.Entities.Course", "Course")
                         .WithMany("Students")
                         .HasForeignKey("CourseId");
+
+                    b.Navigation("Course");
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Module", b =>
                 {
-                    b.HasOne("Domain.Models.Entities.Course", null)
+                    b.HasOne("Domain.Models.Entities.Course", "Course")
                         .WithMany("Modules")
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Course");
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.ModuleActivity", b =>
                 {
-                    b.HasOne("Domain.Models.Entities.Module", null)
+                    b.HasOne("Domain.Models.Entities.ActivityType", "Type")
+                        .WithMany("Activities")
+                        .HasForeignKey("ActivityTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Entities.Module", "Module")
                         .WithMany("Activities")
                         .HasForeignKey("ModuleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Models.Entities.ActivityType", "Type")
-                        .WithMany()
-                        .HasForeignKey("TypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Module");
 
                     b.Navigation("Type");
                 });
@@ -425,6 +431,11 @@ namespace LMS.Infractructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.ActivityType", b =>
+                {
+                    b.Navigation("Activities");
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Course", b =>

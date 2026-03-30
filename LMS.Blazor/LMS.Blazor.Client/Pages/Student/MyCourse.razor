@@ -1,0 +1,86 @@
+﻿@page "/student/mycourse"
+@using LMS.Shared.DTOs.CourseDtos
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Student")]
+@inject IApiService ApiService
+
+<h3 class="mb-4">MyCourse</h3>
+
+@if (isLoading)
+{
+    <div class="alert alert-info">Loading your course...</div>
+}
+else if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+else if (course is not null)
+{
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4>@course.Name</h4>
+            <p>@course.Description</p>
+            <p>
+                <strong>Start:</strong> @course.StartDate.ToShortDateString()
+                <br />
+                <strong>End:</strong> @course.EndDate.ToShortDateString()
+            </p>
+        </div>
+    </div>
+
+    <h5>Modules</h5>
+
+    @if (course.Modules.Count == 0)
+    {
+        <p>No modules found.</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Start</th>
+                    <th>End</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var module in course.Modules)
+                {
+                    <tr>
+                        <td>@module.Name</td>
+                        <td>@module.Description</td>
+                        <td>@module.StartDate.ToShortDateString()</td>
+                        <td>@module.EndDate.ToShortDateString()</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+@code {
+    private StudentMyCourseDto? course;
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            course = await ApiService.GetAsync<StudentMyCourseDto>("api/student/my-course");
+
+            if (course is null)
+                errorMessage = "You are not enrolled in any course.";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

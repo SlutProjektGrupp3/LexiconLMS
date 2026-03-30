@@ -61,7 +61,20 @@
                 </div>                
             </Authorized>
         </AuthorizeView>
-
+        <AuthorizeView Roles="Student">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="student/dashboard">
+                        <span class="bi bi-speedometer2"></span> Dashboard (Student)
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="student/mycourse">
+                        <span class="bi bi-book"></span> My Courses
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
         <AuthorizeView>
             <Authorized>
                 <div class="nav-item px-3">

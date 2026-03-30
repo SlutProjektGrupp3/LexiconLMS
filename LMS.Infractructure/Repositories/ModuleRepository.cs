@@ -1,6 +1,7 @@
 ﻿using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Infractructure.Data;
+using Microsoft.EntityFrameworkCore;
 using LMS.Infractructure.Repositories;
 using System;
 using System.Collections.Generic;
@@ -12,5 +13,14 @@ namespace LMS.Infractructure.Repositories
     public class ModuleRepository : RepositoryBase<Module>, IModuleRepository
     {
         public ModuleRepository(ApplicationDbContext context) : base(context) { }
+
+        public async Task<Module?> GetModuleByIdAsync(Guid moduleId, bool trackChanges = false, bool includeActivities = false)
+        {
+            var query = FindByCondition(m => m.Id == moduleId, trackChanges);
+            
+            if (includeActivities)
+                query = query.Include(m => m.Activities);
+            return await query.SingleOrDefaultAsync();
+        }
     }
 }

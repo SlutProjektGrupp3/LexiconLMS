@@ -4,6 +4,6 @@ namespace Domain.Contracts.Repositories
 {
     public interface IModuleRepository : IRepositoryBase<Module>
     {
-        
+        Task<Module?> GetModuleByIdAsync(Guid moduleId, bool trackChanges = false, bool includeActivities = false);
     }
 }

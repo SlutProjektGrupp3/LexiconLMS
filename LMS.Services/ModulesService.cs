@@ -22,8 +22,8 @@ namespace LMS.Services
         {
             var module = mapper.Map<Module>(createModuleDto);
             uow.ModuleRepository.Create(module);
-            
-            try  
+
+            try
             {
                 await uow.CompleteAsync();
 
@@ -38,6 +38,47 @@ namespace LMS.Services
                 };
                 return CreateModuleResultDto.Failed(errors);
             }
+        }
+
+        public async Task<DeleteModuleResultDto> DeleteModuleAsync(Guid moduleId)
+        {
+            if (moduleId == Guid.Empty)
+            {
+                return DeleteModuleResultDto.Failed(new ModuleError
+                {
+                    Code = "MODULE_ERROR:VALIDATION",
+                    Description = "Module ID is required and cannot be empty.",
+                    StatusCode = ErrorStatusCode.BadRequest
+                });
+            }
+
+            var module = await uow.ModuleRepository.GetModuleByIdAsync(moduleId, trackChanges: false);
+            if (module != null)
+            {
+                uow.ModuleRepository.Delete(module);
+
+                try
+                {
+                    await uow.CompleteAsync();
+                    return DeleteModuleResultDto.Success;
+                }
+                catch (Exception ex)
+                {
+                    return DeleteModuleResultDto.Failed(new ModuleError
+                    {
+                        Code = "MODULE_ERROR:DB",
+                        Description = "An error occurred while deleting the module to the database.",
+                        StatusCode = ErrorStatusCode.Database
+                    });
+                }
+            }
+
+            return DeleteModuleResultDto.Failed(new ModuleError
+            {
+                Code = "MODULE_ERROR:DELETE",
+                Description = "Can't delete module: not found",
+                StatusCode = ErrorStatusCode.NotFound
+            });
         }
     }
 }

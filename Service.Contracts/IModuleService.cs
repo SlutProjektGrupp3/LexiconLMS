@@ -5,5 +5,6 @@ namespace Service.Contracts
     public interface IModuleService
     {
         Task<CreateModuleResultDto> CreateModuleAsync(CreateModuleDto createModuleDto);
+        Task<DeleteModuleResultDto> DeleteModuleAsync(Guid moduleId);
     }
 }

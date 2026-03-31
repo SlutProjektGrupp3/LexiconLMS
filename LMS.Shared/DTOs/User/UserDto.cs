@@ -1,8 +1,8 @@
 ﻿
 namespace LMS.Shared.DTOs.User;
 
-public record UserListDto(
-    Guid Id,
+public record UserDto(
+    string Id,
     string FirstName,
     string LastName,
     string Email,

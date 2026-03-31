@@ -1,0 +1,88 @@
+﻿@using LMS.Shared.DTOs.Activity
+@inject IApiService ApiService
+<div class="card mt-3 p-3 bg-light mb-3">
+    <h5>Update Activity</h5>
+
+    <EditForm Model="Model" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+
+        <div class="mb-2">
+            <label class="form-label">Name</label>
+            <InputText class="form-control" @bind-Value="Model.Name" />
+            <ValidationMessage For="@(() => Model.Name)" />
+        </div>
+
+        <div class="mb-3">
+            <label>Activity Type</label>
+        
+            <InputSelect @bind-Value="Model.TypeId" class="form-select">
+                <option value="">Activity type</option>
+                @if (availableTypes != null)
+                {
+                    @foreach (var type in availableTypes)
+                    {
+                        <option value="@type.Id">@type.Name</option>
+                    }
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => Model.TypeId)" />
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label">Description</label>
+            <InputText class="form-control" @bind-Value="Model.Description" />
+        </div>
+
+        <div class="row mb-2">
+            <div class="col">
+                <label class="form-label">Start Date</label>
+                <InputDate class="form-control" @bind-Value="Model.StartDate" />
+            </div>
+            <div class="col">
+                <label class="form-label">End Date</label>
+                <InputDate class="form-control" @bind-Value="Model.EndDate" />
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-2">
+            Update Activity
+        </button>
+        <button type="button" class="btn btn-secondary mt-2 ms-2" @onclick="HandleCancel">
+            Cancel
+        </button>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter]
+    public Guid ActivityId { get; set; }
+
+    [Parameter]
+    public UpdateActivityDto Model { get; set; } = default!;
+    
+    [Parameter]
+    public EventCallback<Guid> OnSubmit { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private List<ActivityTypeDto> availableTypes = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        availableTypes = await ApiService.GetAsync<List<ActivityTypeDto>>("api/activities/types");
+    }
+
+    private async Task HandleSubmit()
+    {
+        await OnSubmit.InvokeAsync(ActivityId);
+    }
+
+    private async Task HandleCancel()
+    {
+        if (OnCancel.HasDelegate)
+        {
+            await OnCancel.InvokeAsync();
+        }
+    }
+}

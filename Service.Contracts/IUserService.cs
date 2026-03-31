@@ -7,6 +7,6 @@ public interface IUserService
 {
     Task<List<UserDto>> GetAllUsersAsync();
     Task<CreateUserResultDto> CreateUserAsync(CreateUserDto userCreateDto);
-    Task DeleteUserAsync(Guid id);
+    Task DeleteUserAsync(string id);
     Task<List<string?>> GetAllRolesAsync();
 }

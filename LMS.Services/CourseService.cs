@@ -14,16 +14,11 @@ public class CourseService : ICourseService
 {
     private IUnitOfWork uow;
     private readonly IMapper mapper;
-    private readonly ICourseRepository _courseRepository;
-    private readonly IUnitOfWork _unitOfWork;
 
-    public CourseService(ICourseRepository courseRepository,IUnitOfWork uow, IMapper mapper)
- 
+    public CourseService(IUnitOfWork uow, IMapper mapper) 
     {
         this.uow = uow;
-        this.mapper = mapper;
-        _courseRepository = courseRepository;
-       
+        this.mapper = mapper;       
     }
 
     public async Task<IEnumerable<CourseDto>> GetAllCoursesAsync(bool trackChanges = false)
@@ -81,7 +76,7 @@ public class CourseService : ICourseService
             EndDate = dto.EndDate,
         };
 
-        _courseRepository.CreateCourse(course);
+        uow.CourseRepository.CreateCourse(course);
 
         await uow.CompleteAsync();
 
@@ -118,5 +113,21 @@ public class CourseService : ICourseService
 
         uow.CourseRepository.Delete(courseEntity);
         await uow.CompleteAsync();
+    }
+
+    public async Task<IEnumerable<ParticipantDto>> GetParticipantsAsync(Guid courseId)
+    {
+        var course = await uow.CourseRepository
+            .GetCourseWithStudentsAsync(courseId, trackChanges: false);
+
+        if (course is null)
+            return Enumerable.Empty<ParticipantDto>();
+
+        return course.Students.Select(s => new ParticipantDto(
+            Guid.Parse(s.Id),
+            s.FirstName,
+            s.LastName,
+            s.Email!
+        ));
     }
 }

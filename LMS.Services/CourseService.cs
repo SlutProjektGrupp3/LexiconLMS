@@ -51,36 +51,40 @@ public class CourseService : ICourseService
         );
     }
 
-    public async Task<CourseDto> CreateCourseAsync(CreateCourseDto dto)
+    public async Task<ResultDto<CourseDto>> CreateCourseAsync(CreateCourseDto dto)
     {
+        var errors = new List<ErrorDto>();
+
         if (string.IsNullOrWhiteSpace(dto.Name))
-            throw new ArgumentException("Name is required.");
+            errors.Add(new ErrorDto { Code = "InvalidName", Description = "Name is required." });
 
         if (dto.StartDate == default)
-            throw new ArgumentException("Start date is required.");
+            errors.Add(new ErrorDto { Code = "InvalidStartDate", Description = "Start date is required." });
 
         if (dto.EndDate == default)
-            throw new ArgumentException("End date is required.");
+            errors.Add(new ErrorDto { Code = "InvalidEndDate", Description = "End date is required." });
 
         if (dto.EndDate <= dto.StartDate)
-            throw new ArgumentException("End date must be after start date.");
+            errors.Add(new ErrorDto { Code = "InvalidDates", Description = "End date must be after start date." });
 
         if (dto.StartDate < DateTime.Today)
-            throw new ArgumentException("Start date cannot be in the past.");
+            errors.Add(new ErrorDto { Code = "InvalidStartDate", Description = "Start date cannot be in the past." });
+
+        if (errors.Any())
+            return ResultDto<CourseDto>.Failed(errors);
 
         var course = new Course
         {
             Name = dto.Name,
             Description = dto.Description,
             StartDate = dto.StartDate,
-            EndDate = dto.EndDate,
+            EndDate = dto.EndDate
         };
 
         uow.CourseRepository.CreateCourse(course);
-
         await uow.CompleteAsync();
 
-        return new CourseDto
+        var courseDto = new CourseDto
         {
             Id = course.Id,
             Name = course.Name,
@@ -88,6 +92,8 @@ public class CourseService : ICourseService
             StartDate = course.StartDate,
             EndDate = course.EndDate
         };
+
+        return ResultDto<CourseDto>.Success(courseDto);
     }
 
     public async Task UpdateCourseAsync(Guid id, UpdateCourseDto updateCourseDto, bool trackChanges)
@@ -104,15 +110,22 @@ public class CourseService : ICourseService
 
         await uow.CompleteAsync();
     }
-    public async Task DeleteCourseAsync(Guid id, bool trackChanges)
+    public async Task<ResultDto> DeleteCourseAsync(Guid id, bool trackChanges)
     {
         var courseEntity = await uow.CourseRepository.GetCourseByIdAsync(id, trackChanges);
 
         if (courseEntity is null)
-            throw new Exception($"Course with id {id} was not found.");
-
+        {
+            return ResultDto.Failed(new ErrorDto
+            {
+                Code = "CourseNotFound",
+                Description = $"Course with id {id} was not found."
+            });
+        }
         uow.CourseRepository.Delete(courseEntity);
         await uow.CompleteAsync();
+
+        return ResultDto.Success;
     }
 
     public async Task<IEnumerable<ParticipantDto>> GetParticipantsAsync(Guid courseId)

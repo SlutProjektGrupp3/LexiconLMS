@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 using System;
@@ -26,14 +27,24 @@ namespace LMS.Presentation.Controllers
             var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrWhiteSpace(userIdValue))
-                return Unauthorized();
+                return Unauthorized(new ProblemDetails
+                {
+                    Title = "Unauthorized",
+                    Status = StatusCodes.Status401Unauthorized,
+                    Detail = "User identifier not found in token."
+                });
 
             var userId = Guid.Parse(userIdValue);
 
             var course = await _serviceManager.StudentService.GetMyCourseAsync(userId);
 
             if (course is null)
-                return NotFound("You are not enrolled in any course.");
+                return NotFound(new ProblemDetails
+                {
+                    Title = "Course not found",
+                    Status = StatusCodes.Status404NotFound,
+                    Detail = "You are not enrolled in any course."
+                });
 
             return Ok(course);
         }

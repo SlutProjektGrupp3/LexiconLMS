@@ -12,4 +12,5 @@ public interface ICourseService
     Task<CourseDetailsDto?> GetCourseByIdAsync(Guid id);
     Task UpdateCourseAsync(Guid id, UpdateCourseDto updateCourseDto, bool trackChanges);
     Task DeleteCourseAsync(Guid id, bool trackChanges);
+    Task<IEnumerable<ParticipantDto>> GetParticipantsAsync(Guid courseId);
 }    

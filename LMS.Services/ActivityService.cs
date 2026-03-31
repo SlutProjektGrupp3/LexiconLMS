@@ -88,10 +88,6 @@ namespace LMS.Services
         {
             var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: true);
 
-            if (activity == null)
-            {
-                throw new Exception($"Activity could not be found.");
-            }
 
             activity.Name = dto.Name;
             activity.Description = dto.Description;

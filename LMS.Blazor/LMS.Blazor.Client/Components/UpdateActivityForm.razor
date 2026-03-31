@@ -9,6 +9,7 @@
         <div class="mb-2">
             <label class="form-label">Name</label>
             <InputText class="form-control" @bind-Value="Model.Name" />
+            <ValidationMessage For="@(() => Model.Name)" />
         </div>
 
         <div class="mb-3">

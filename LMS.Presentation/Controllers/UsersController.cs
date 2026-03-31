@@ -1,4 +1,6 @@
 ﻿using LMS.Shared.DTOs.User;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 
@@ -6,6 +8,7 @@ namespace LMS.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(Roles = "Teacher")]
 public class UsersController : ControllerBase
 {
     private readonly IServiceManager _serviceManager;
@@ -20,7 +23,14 @@ public class UsersController : ControllerBase
     {
         var users = await _serviceManager.UserService.GetAllUsersAsync();
 
-        return Ok(users ?? new List<UserListDto>());
+        return Ok(users ?? new List<UserDto>());
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateUser([FromBody] CreateUserDto userCreateDto)
+    {
+        var result = await _serviceManager.UserService.CreateUserAsync(userCreateDto);
+        return result.Succeeded ? CreatedAtAction(nameof(GetAllUsers), new { id = result.CreatedUser!.Id }, result) : BadRequest(result.Errors);
     }
 
     [HttpDelete("{id}")]
@@ -40,6 +50,18 @@ public class UsersController : ControllerBase
             return BadRequest(ex.Message);
         }
 
+    }
+
+    [HttpGet]
+    [Route("roles")]
+    public async Task<IActionResult> GetAllRoles()
+    {
+        var roles = await _serviceManager.UserService.GetAllRolesAsync();
+        if(roles == null || !roles.Any())
+        {
+            return NotFound("No roles found.");
+        }
+        return Ok(roles);
     }
 
 }

@@ -2,14 +2,24 @@
 
 @if (ShowForm)
 {
-    <button class="btn btn-danger d-flex align-items-center gap-1" @onclick="HandleClick">
-        @CancelText
-    </button>
+    @if (ShowCancel)
+    {
+        <button class="btn btn-danger d-flex align-items-center gap-1" @onclick="HandleClick">
+            @CancelText
+        </button>
+    }
 }
 else
 {
     <button class="btn btn-primary d-flex align-items-center gap-1" @onclick="HandleClick">
-        <CirclePlusIcon Size="18" />
+        @if (Icon != null)
+        {
+            @Icon
+        }
+        else
+        {
+            <CirclePlusIcon Size="18" />
+        }
         @HiddenText
     </button>
 }
@@ -30,9 +40,17 @@ else
     [Parameter]
     public Guid? Id { get; set; }
 
+
+    // Optional - to change icon (+ default)
+    [Parameter]
+    public RenderFragment? Icon { get; set; }
+
     // Labels (customizable)
     [Parameter]
     public string HiddenText { get; set; } = "New";
+
+    [Parameter]
+    public bool ShowCancel { get; set; } = true;
 
     [Parameter]
     public string CancelText { get; set; } = "Cancel";

@@ -1,0 +1,86 @@
+﻿@page "/modules"
+@using LMS.Shared.DTOs.Modules
+@using LMS.Shared.DTOs.Module
+@inject IApiService ApiService
+
+<h3>Modules</h3>
+
+@if (ModulesList == null)
+{
+    <p>Loading...</p>
+}
+else if (!ModulesList.Any())
+{
+    <p>No modules found.</p>
+}
+else
+{
+    @foreach (var module in ModulesList)
+    {
+        <div class="card p-3 mb-2">
+            <h5>@module.Name</h5>
+            <p>@module.Description</p>
+            <small>@module.StartDate.ToShortDateString() - @module.EndDate.ToShortDateString()</small>
+
+            <button class="btn btn-sm btn-outline-primary mt-2"
+                    @onclick="() => StartEdit(module)">
+                Edit
+            </button>
+
+            @if (EditingModuleId == module.Id)
+            {
+                <EditModuleForm Model="EditModel"
+                                OnSubmit="UpdateModule"
+                                OnCancel="CancelEdit" />
+            }
+        </div>
+    }
+}
+@code {
+    private List<ModuleDto>? ModulesList;
+
+    private Guid? EditingModuleId;
+    private UpdateModuleDto EditModel = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        ModulesList = await ApiService.GetAsync<List<ModuleDto>>("api/modules");
+    }
+
+    private void StartEdit(ModuleDto module)
+    {
+        EditModel = new UpdateModuleDto
+        {
+            Id = module.Id,
+            CourseId = module.CourseId,
+            Name = module.Name,
+            Description = module.Description,
+            StartDate = module.StartDate,
+            EndDate = module.EndDate
+        };
+
+        EditingModuleId = module.Id;
+    }
+
+    private void CancelEdit()
+    {
+        EditingModuleId = null;
+    }
+
+    private async Task UpdateModule()
+    {
+        await ApiService.PutAsync($"api/modules/{EditModel.Id}", EditModel);
+
+        var index = ModulesList!.FindIndex(m => m.Id == EditModel.Id);
+
+        ModulesList[index] = ModulesList[index] with
+        {
+            Name = EditModel.Name,
+            Description = EditModel.Description,
+            StartDate = EditModel.StartDate,
+            EndDate = EditModel.EndDate
+        };
+
+        EditingModuleId = null;
+    }
+}

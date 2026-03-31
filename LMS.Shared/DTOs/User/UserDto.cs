@@ -1,7 +1,7 @@
 ﻿
 namespace LMS.Shared.DTOs.User;
 
-public record UserListDto(
+public record UserDto(
     string Id,
     string FirstName,
     string LastName,

@@ -31,7 +31,7 @@ namespace LMS.Presentation.Controllers
         {
             var result = await _serviceManager.ModuleService.CreateModuleAsync(createModuleDto);
 
-            return result.Succeeded ? StatusCode(StatusCodes.Status201Created, result) : BadRequest(result.Errors); 
+            return result.Succeeded ? StatusCode(StatusCodes.Status201Created, result) : BadRequest(result.Errors);
         }
 
         [HttpDelete("{id}")]
@@ -57,9 +57,9 @@ namespace LMS.Presentation.Controllers
                     ErrorStatusCode.Database => StatusCode(500, result.Error),
                     _ => StatusCode(500, result.Error)
                 };
-             }
-         }
-         
+            }
+        }
+
         [HttpPut("{moduleId}")]
         [Authorize(Roles = "Teacher")]
         [SwaggerOperation(
@@ -75,7 +75,7 @@ namespace LMS.Presentation.Controllers
 
             try
             {
-                await serviceManager.ModuleService.UpdateModuleAsync(moduleId, dto);
+                await _serviceManager.ModuleService.UpdateModuleAsync(moduleId, dto);
                 return NoContent();
             }
             catch (ArgumentException ex)

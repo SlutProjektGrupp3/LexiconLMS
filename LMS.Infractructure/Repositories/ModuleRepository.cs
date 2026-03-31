@@ -3,7 +3,6 @@ using Domain.Models.Entities;
 using LMS.Infractructure.Data;
 using Microsoft.EntityFrameworkCore;
 using LMS.Infractructure.Repositories;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;

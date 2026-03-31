@@ -13,6 +13,6 @@ namespace Domain.Contracts.Repositories
         Task<IEnumerable<Course>> GetAllCoursesAsync(bool trackChanges = false);
         Task<Course?> GetCourseByIdAsync(Guid courseId, bool trackChanges = false, bool includeModules = false);        
         void CreateCourse(Course course);
-        Task<Course> GetCourseWithStudentsAsync(Guid courseId, bool trackChanges);        
+        Task<Course?> GetCourseWithStudentsAsync(Guid courseId, bool trackChanges);        
     }
 }

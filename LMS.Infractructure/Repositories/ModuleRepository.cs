@@ -24,10 +24,15 @@ namespace LMS.Infractructure.Repositories
         }
         
         public async Task<Module?> GetModuleByIdAndCourseIdAsync(Guid moduleId, Guid courseId, bool trackChanges)
-      {
-          return await FindByCondition(m => m.Id == moduleId && m.CourseId == courseId, trackChanges)
-              .FirstOrDefaultAsync();
-      }
+        {
+            return await FindByCondition(m => m.Id == moduleId && m.CourseId == courseId, trackChanges)
+                .FirstOrDefaultAsync();
+        }
+        public async Task<Module?> GetByIdAsync(Guid moduleId, bool trackChanges)
+        {
+            return await FindByCondition(m => m.Id == moduleId, trackChanges)
+                .SingleOrDefaultAsync();
+        }
     }
 }
 

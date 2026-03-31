@@ -3,6 +3,7 @@ using Domain.Models.Entities;
 using LMS.Infractructure.Data;
 using Microsoft.EntityFrameworkCore;
 using LMS.Infractructure.Repositories;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -22,5 +23,14 @@ namespace LMS.Infractructure.Repositories
                 query = query.Include(m => m.Activities);
             return await query.SingleOrDefaultAsync();
         }
+        
+        public async Task<Module?> GetModuleByIdAndCourseIdAsync(Guid moduleId, Guid courseId, bool trackChanges)
+      {
+          return await FindByCondition(m => m.Id == moduleId && m.CourseId == courseId, trackChanges)
+              .FirstOrDefaultAsync();
+      }
     }
 }
+
+
+

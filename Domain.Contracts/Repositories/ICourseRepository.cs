@@ -1,4 +1,5 @@
 ﻿using Domain.Models.Entities;
+using LMS.Shared.DTOs.Course;
 using LMS.Shared.Request;
 using System;
 using System.Collections.Generic;
@@ -12,12 +13,6 @@ namespace Domain.Contracts.Repositories
         Task<IEnumerable<Course>> GetAllCoursesAsync(bool trackChanges = false);
         Task<Course?> GetCourseByIdAsync(Guid courseId, bool trackChanges = false, bool includeModules = false);        
         void CreateCourse(Course course);
-        
+        Task<Course> GetCourseWithStudentsAsync(Guid courseId, bool trackChanges);        
     }
 }
-
-
-
-
-   
-

@@ -3,6 +3,7 @@ using LMS.API.Extensions;
 using LMS.API.Services;
 using LMS.Infractructure.Data;
 using LMS.Infractructure.Repositories;
+using LMS.Services;
 using Microsoft.OpenApi;
 using NuGet.Protocol.Core.Types;
 
@@ -31,8 +32,9 @@ public class Program
 
         builder.Services.AddScoped<ICourseRepository, CourseRepository>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-   
 
+        builder.Services.AddScoped<IModuleRepository, ModuleRepository>();
+   
 
 
         var app = builder.Build();

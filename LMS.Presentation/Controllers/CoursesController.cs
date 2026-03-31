@@ -76,4 +76,13 @@ public class CoursesController : ControllerBase
         await serviceManager.CourseService.DeleteCourseAsync(id, trackChanges: true);
         return NoContent();
     }
+
+    [HttpGet("{courseId}/participants")]
+    public async Task<IActionResult> GetParticipants(Guid courseId)
+    {
+        var participants = await serviceManager.CourseService
+            .GetParticipantsAsync(courseId);
+
+        return Ok(participants);
+    }
 }

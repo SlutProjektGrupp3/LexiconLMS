@@ -2,9 +2,10 @@
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Shared.DTOs;
-using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.DTOs.Course;
+using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.DTOs.Module;
+using LMS.Shared.DTOs.Shared;
 using Service.Contracts;
 
 
@@ -31,24 +32,11 @@ public class CourseService : ICourseService
     public async Task<CourseDetailsDto?> GetCourseByIdAsync(Guid id)
     {
         var course = await uow.CourseRepository.GetCourseByIdAsync(id, includeModules: true);
+        
         if (course == null)
             return null;
 
-        return new CourseDetailsDto(
-            course.Id,
-            course.Name,
-            course.Description,
-            course.StartDate,
-            course.EndDate,
-            course.Modules.Select(m => new ModuleDto(
-                m.Id,
-                m.Name,
-                m.Description,
-                m.StartDate,
-                m.EndDate,
-                 m.CourseId
-            )).ToList()
-        );
+        return mapper.Map<CourseDetailsDto>(course);
     }
 
     public async Task<CourseDto> CreateCourseAsync(CreateCourseDto dto)
@@ -104,6 +92,7 @@ public class CourseService : ICourseService
 
         await uow.CompleteAsync();
     }
+
     public async Task DeleteCourseAsync(Guid id, bool trackChanges)
     {
         var courseEntity = await uow.CourseRepository.GetCourseByIdAsync(id, trackChanges);

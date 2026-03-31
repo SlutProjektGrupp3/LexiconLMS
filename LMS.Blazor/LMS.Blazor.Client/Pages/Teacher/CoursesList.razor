@@ -1,4 +1,5 @@
 ﻿@using LMS.Shared.DTOs.CourseDtos
+@using LMS.Shared.DTOs.Shared
 
 @if (Courses is null || Courses.Count == 0)
 {
@@ -19,13 +20,16 @@ else
         <tbody>
             @foreach (var course in Courses)
             {
+                var selfLink = course.Links.FirstOrDefault(l => l.Rel == "self")?.Href ?? "#";
+                var editLink = course.Links.FirstOrDefault(l => l.Rel == "edit")?.Href ?? "#";
+
                 <tr>
-                    <td><a href="@($"/courses/{course.Id}")">@course.Name</a></td>
+                    <td><a href="@(selfLink)">@course.Name</a></td>
                     <td>@course.Description</td>
                     <td>@course.StartDate.ToShortDateString()</td>
                     <td>@course.EndDate.ToShortDateString()</td>
                     <NavLink class="btn btn-sm btn-outline-primary"
-                             href="@($"/teacher/courses/edit/{course.Id}")">
+                             href="@(editLink)">
                         Edit
                     </NavLink>
                     <button class="btn btn-sm btn-outline-danger"

@@ -58,18 +58,18 @@ public class CoursesController : ControllerBase
 
 
     [Authorize(Roles = "Teacher")]
-        [HttpPut("{id:guid}")]
-        public async Task<IActionResult> UpdateCourse(Guid id, [FromBody] UpdateCourseDto updateCourseDto)
-        {
-            if (updateCourseDto is null)
-                return BadRequest("UpdateCourseDto is null.");
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> UpdateCourse(Guid id, [FromBody] UpdateCourseDto updateCourseDto)
+    {
+        if (updateCourseDto is null)
+            return BadRequest("UpdateCourseDto is null.");
 
-            await serviceManager.CourseService.UpdateCourseAsync(id, updateCourseDto, trackChanges: true);
+        await serviceManager.CourseService.UpdateCourseAsync(id, updateCourseDto, trackChanges: true);
 
-            return NoContent();
-        }
+        return NoContent();
+    }
 
-        [Authorize(Roles = "Teacher")]
+    [Authorize(Roles = "Teacher")]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteCourse(Guid id)
     {

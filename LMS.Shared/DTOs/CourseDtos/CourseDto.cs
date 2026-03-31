@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LMS.Shared.DTOs.Shared;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -11,5 +12,7 @@ namespace LMS.Shared.DTOs.CourseDtos
         public string Description { get; init; }
         public DateTime StartDate { get; init; }
         public DateTime EndDate { get; init; }
+
+        public List<LinkDto> Links { get; set; }
     }
 }

@@ -4,6 +4,7 @@
 @using LMS.Shared.DTOs.Activity
 @using LMS.Shared.DTOs.Modules
 @using LMS.Shared.DTOs.Module
+@using LMS.Shared.DTOs.Shared
 @using LMS.Blazor.Client.Components
 @using LMS.Blazor.Client.Components.Icons
 
@@ -270,6 +271,8 @@ else if (_course != null)
     private Dictionary<Guid, bool> _showEditModuleForm = new();
     private Dictionary<Guid, UpdateModuleDto> _modulesToEdit = new();
 
+    private List<LinkDto> _courseLinks = new();
+
     protected override async Task OnInitializedAsync()
     {
         //This method run in prerender
@@ -284,6 +287,7 @@ else if (_course != null)
         try
         {
             _course = await ApiService.GetAsync<CourseDetailsDto>($"api/courses/{Id}");
+            _courseLinks = _course.Links;
         }
         catch (Exception ex)
         {
@@ -367,7 +371,8 @@ else if (_course != null)
 
         try
         {
-            var result = await ApiService.PostAsync<CreateModuleDto, CreateModuleResultDto>("api/modules", dtoToSave);
+            var apiUrl = _courseLinks.FirstOrDefault(l => l.Rel == "createModule")?.Href ?? "#";
+            var result = await ApiService.PostAsync<CreateModuleDto, CreateModuleResultDto>(apiUrl, dtoToSave);
 
             if (result is { Succeeded: true, CreatedModule: { } createdModule })
             {

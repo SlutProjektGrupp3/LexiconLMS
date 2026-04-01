@@ -20,6 +20,7 @@ public class MapperProfile : Profile
         CreateMap<CreateModuleDto, Module>();
         CreateMap<Module, ModuleDto>();
         CreateMap<UpdateCourseDto, Course>();
+        CreateMap<ApplicationUser, UserDto>();
         CreateMap<ApplicationUser, AvailableStudentDto>();
 
         // Explicit mapping for Module -> ModuleDto record

@@ -54,7 +54,8 @@ public class CourseService : ICourseService
                 m.Name,
                 m.Description,
                 m.StartDate,
-                m.EndDate
+                m.EndDate,
+                 m.CourseId
             )).ToList()
         );
     }
@@ -121,6 +122,22 @@ public class CourseService : ICourseService
 
         uow.CourseRepository.Delete(courseEntity);
         await uow.CompleteAsync();
+    }
+
+    public async Task<IEnumerable<ParticipantDto>> GetParticipantsAsync(Guid courseId)
+    {
+        var course = await uow.CourseRepository
+            .GetCourseWithStudentsAsync(courseId, trackChanges: false);
+
+        if (course is null)
+            return Enumerable.Empty<ParticipantDto>();
+
+        return course.Students.Select(s => new ParticipantDto(
+            Guid.Parse(s.Id),
+            s.FirstName,
+            s.LastName,
+            s.Email!
+        ));
     }
 
     public async Task AddStudentToCourseAsync(Guid courseId, string studentId)

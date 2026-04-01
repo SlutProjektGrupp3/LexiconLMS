@@ -20,7 +20,7 @@ else
             @foreach (var course in Courses)
             {
                 <tr>
-                    <td>@course.Name</td>
+                    <td><a href="@($"/courses/{course.Id}")">@course.Name</a></td>
                     <td>@course.Description</td>
                     <td>@course.StartDate.ToShortDateString()</td>
                     <td>@course.EndDate.ToShortDateString()</td>

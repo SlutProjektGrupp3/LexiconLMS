@@ -86,4 +86,13 @@ public class CoursesController : ControllerBase
         var students = await _courseService.GetAvailableStudentsAsync();
         return Ok(students);
     }
+
+    [HttpGet("{courseId}/participants")]
+    public async Task<IActionResult> GetParticipants(Guid courseId)
+    {
+        var participants = await serviceManager.CourseService
+            .GetParticipantsAsync(courseId);
+
+        return Ok(participants);
+    }
 }

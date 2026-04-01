@@ -15,4 +15,5 @@ public interface ICourseService
     Task DeleteCourseAsync(Guid id, bool trackChanges);
     Task AddStudentToCourseAsync(Guid courseId, string studentId);
     Task<IEnumerable<AvailableStudentDto>> GetAvailableStudentsAsync();
+    Task<IEnumerable<ParticipantDto>> GetParticipantsAsync(Guid courseId);
 }    

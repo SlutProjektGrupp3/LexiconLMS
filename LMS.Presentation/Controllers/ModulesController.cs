@@ -84,7 +84,10 @@ namespace LMS.Presentation.Controllers
                 };
 
                 // CreatedAtAction + Location Header
-                return CreatedAtAction(nameof(GetModuleById), new { id = module.Id }, module);
+                //return CreatedAtAction(nameof(GetModuleById), new { id = module.Id }, module);
+                //return result.Succeeded ? StatusCode(StatusCodes.Status201Created, result) : BadRequest(result.Errors);
+
+                return CreatedAtAction(nameof(GetModuleById),new { id = module.Id },new{succeeded = true,createdModule = module});
             }
             catch (Exception ex)
             {

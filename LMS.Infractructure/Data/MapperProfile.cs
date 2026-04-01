@@ -56,6 +56,7 @@ public class MapperProfile : Profile
                     new LinkDto { Rel = "edit", Href = $"/teacher/courses/edit/{src.Id}" },
                     new LinkDto { Rel = "delete", Href = $"/teacher/courses/delete/{src.Id}" },
 
+                     //new LinkDto { Rel = "GetCourses", Href = Url.Action("GetCourses", "Courses") ?? "#", Method = "GET" },
                     new LinkDto { Rel = "apiSelf", Href = $"/api/courses/{src.Id}" },
                     new LinkDto { Rel = "httpPUT", Href = $"/api/courses/{src.Id}" },
                     new LinkDto { Rel = "httpDELETE", Href = $"/api/courses/{src.Id}" },

@@ -287,7 +287,7 @@ else if (_course != null)
         try
         {
             _course = await ApiService.GetAsync<CourseDetailsDto>($"api/courses/{Id}");
-            _courseLinks = _course.Links;
+            _courseLinks = _course?.Links ?? [];
         }
         catch (Exception ex)
         {

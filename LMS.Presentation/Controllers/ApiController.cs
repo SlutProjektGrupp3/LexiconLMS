@@ -30,7 +30,8 @@ namespace LMS.Presentation.Controllers
         {
             List<LinkDto> apiEndpoints = new List<LinkDto>
             {
-                new LinkDto { Rel = "GetCourses", Href = Url.Action("GetCourses", "Courses") ?? "#", Method = "GET" },
+                new LinkDto { Rel = "Login", Href = Url.Action("Authenticate", "Auth") ?? "#", Method = "POST" },
+                new LinkDto { Rel = "GetCourses", Href = Url.Action("GetCourses", "Courses") ?? "#", Method = "GET" }
             };
 
             return Ok(apiEndpoints);

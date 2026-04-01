@@ -1,11 +1,15 @@
 ﻿using AutoMapper;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
+using Domain.Models.Exceptions;
 using LMS.Shared.DTOs;
-using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.DTOs.Course;
+using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.DTOs.Module;
+using LMS.Shared.DTOs.User;
+using Microsoft.AspNetCore.Identity;
 using Service.Contracts;
+
 
 
 namespace LMS.Services;
@@ -14,16 +18,16 @@ public class CourseService : ICourseService
 {
     private IUnitOfWork uow;
     private readonly IMapper mapper;
-    private readonly ICourseRepository _courseRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public CourseService(ICourseRepository courseRepository,IUnitOfWork uow, IMapper mapper)
+    public CourseService(ICourseRepository courseRepository,IUnitOfWork uow, IMapper mapper, UserManager<ApplicationUser> userManager)
  
     {
         this.uow = uow;
         this.mapper = mapper;
-        _courseRepository = courseRepository;
-       
+        _userManager = userManager;
+
+
     }
 
     public async Task<IEnumerable<CourseDto>> GetAllCoursesAsync(bool trackChanges = false)
@@ -80,7 +84,7 @@ public class CourseService : ICourseService
             EndDate = dto.EndDate,
         };
 
-        _courseRepository.CreateCourse(course);
+        uow.CourseRepository.CreateCourse(course);
 
         await uow.CompleteAsync();
 
@@ -118,4 +122,46 @@ public class CourseService : ICourseService
         uow.CourseRepository.Delete(courseEntity);
         await uow.CompleteAsync();
     }
+
+    public async Task AddStudentToCourseAsync(Guid courseId, string studentId)
+    {
+        var course = await uow.CourseRepository
+            .GetCourseByIdAsync(courseId, trackChanges: false);
+
+        if (course == null)
+            throw new NotFoundException("Course not found.");
+
+        var student = await _userManager.FindByIdAsync(studentId);
+        if (student == null)
+            throw new NotFoundException("Student not found.");
+
+        var roles = await _userManager.GetRolesAsync(student);
+        if (!roles.Contains("Student"))
+            throw new BadRequestException("Selected user is not a student.");
+
+        if (student.CourseId == courseId)
+            throw new BadRequestException("Student is already enrolled in this course.");
+
+        if (student.CourseId != null && student.CourseId != courseId)
+            throw new BadRequestException("Student is already enrolled in another course.");
+
+        student.CourseId = courseId;
+
+        var result = await _userManager.UpdateAsync(student);
+
+        if (!result.Succeeded)
+            throw new BadRequestException("Failed to add student to course.");
+    }
+
+    public async Task<IEnumerable<AvailableStudentDto>> GetAvailableStudentsAsync()
+    {
+        var users = await _userManager.GetUsersInRoleAsync("Student");
+
+        return users
+            .Where(u => u.CourseId == null)
+            .Select(u => mapper.Map<AvailableStudentDto>(u))
+            .ToList();
+    }
+
+
 }

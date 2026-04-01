@@ -41,5 +41,7 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
 
         return await PagedList<Course>.CreateAsync(courses, requestParams.PageNumber, requestParams.PageSize);
     }
+
+  
 }
 

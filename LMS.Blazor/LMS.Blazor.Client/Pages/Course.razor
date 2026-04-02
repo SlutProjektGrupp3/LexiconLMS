@@ -4,6 +4,7 @@
 @using LMS.Shared.DTOs.Activity
 @using LMS.Shared.DTOs.Modules
 @using LMS.Shared.DTOs.Module
+@using LMS.Shared.DTOs.User
 @using LMS.Blazor.Client.Components
 @using LMS.Blazor.Client.Components.Icons
 
@@ -61,6 +62,69 @@ else if (_course != null)
                 </div>
             }
 
+            <button class="btn btn-primary" @onclick="ToggleAddStudent">
+     Add student
+ </button>
+
+
+
+ @if (showAddStudent)
+ {
+     <div class="mt-3">
+
+         <input class="form-control mb-2"
+                placeholder="Search student..."
+                value="@searchTerm"
+                @oninput="OnSearchInput" />
+
+         @if (selectedStudent != null)
+         {
+             <div class="alert alert-light border py-2 px-3 mb-2">
+                 Selected student:
+                 <strong>@selectedStudent.FirstName @selectedStudent.LastName</strong>
+                 <span class="text-muted">(@selectedStudent.Email)</span>
+             </div>
+         }
+
+         <div class="border rounded p-2 bg-white" style="min-height: 60px;">
+             @if (filteredStudents.Any())
+             {
+                 <div class="list-group">
+                     @foreach (var student in filteredStudents)
+                     {
+                         <button type="button"
+                                 class="list-group-item list-group-item-action"
+                                 @onclick="() => SelectStudent(student)">
+                             @student.FirstName @student.LastName
+                             <span class="text-muted small">(@student.Email)</span>
+                         </button>
+                     }
+                 </div>
+             }
+             else if (!string.IsNullOrWhiteSpace(searchTerm))
+             {
+                 <div class="text-muted small">
+                     No students match the search.
+                 </div>
+             }
+             else
+             {
+                 <div class="text-muted small">
+                     Start typing to search for a student.
+                 </div>
+             }
+         </div>
+
+         <button class="btn btn-success mt-2"
+                 @onclick="AddStudent"
+                 disabled="@(selectedStudent is null)">
+             Add to course
+         </button>
+
+     </div>
+ }
+
+            
             @if (_course.Modules == null || !_course.Modules.Any())
             {
                 <p class="text-muted">This course has no modules.</p>
@@ -279,13 +343,29 @@ else if (_course != null)
     private Guid _moduleIdToRemember;
     private Guid _activityIdToRemember;
 
+    private bool showAddStudent = false;
+    // All students that are available to be added to the course
+    private List<AvailableStudentDto> availableStudents = new();
+    private string selectedStudentId = string.Empty;
+    // Current value in the search input
+    private string searchTerm = string.Empty;
+    // Filtered list shown as search results
+    private List<AvailableStudentDto> filteredStudents = new();
+    // The full selected student object (used for display in UI)
+    private AvailableStudentDto? selectedStudent;
+
+   
+
+
     private Dictionary<Guid, bool> _showEditModuleForm = new();
     private Dictionary<Guid, UpdateModuleDto> _modulesToEdit = new();
 
     protected override async Task OnInitializedAsync()
     {
+
         //This method run in prerender
         await CallApi();
+        
     }
 
     private async Task CallApi()
@@ -528,6 +608,99 @@ else if (_course != null)
     {
         _moduleIdToRemember = moduleId;
         _activityIdToRemember = activityId;
+
+    }
+
+    private async Task ToggleAddStudent()
+    {
+        showAddStudent = !showAddStudent;
+
+        if (showAddStudent)
+        {
+            // Reset UI state
+            selectedStudent = null;
+            selectedStudentId = string.Empty;
+            searchTerm = string.Empty;
+
+            // fetch fresh data from API when component open
+            availableStudents = await ApiService.GetAsync<List<AvailableStudentDto>>(
+                $"api/courses/{Id}/available-students"
+            ) ?? new();
+
+            // Do not show results until user starts typing
+            filteredStudents = new List<AvailableStudentDto>();
+        }
+    }
+
+
+    private async Task AddStudent()
+    {
+        if (string.IsNullOrWhiteSpace(selectedStudentId))
+        {
+            error = "Välj en elev först.";
+            return;
+        }
+
+        try
+        {
+            await ApiService.PostAsync<object>($"api/courses/{Id}/students/{selectedStudentId}", new { });
+
+            showAddStudent = false;
+            selectedStudentId = string.Empty;
+            selectedStudent = null;
+            searchTerm = string.Empty;
+            error = null;
+
+            // Refresh available students so the added one disappears from the list
+            availableStudents = await ApiService.GetAsync<List<AvailableStudentDto>>(
+                $"api/courses/{Id}/available-students"
+            ) ?? new();
+
+            filteredStudents = availableStudents;
+            await CallApi();
+        }
+        catch (Exception ex)
+        {
+            error = "Failed to add student: " + ex.Message;
+        }
+    }
+
+    private void FilterStudents()
+    {
+        // If search is empty, do not show any results
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredStudents = new List<AvailableStudentDto>();
+            return;
+        }
+
+        var term = searchTerm.Trim();
+
+        
+        // Filter by first name, last name, full name, or email
+        filteredStudents = availableStudents
+            .Where(s =>
+                s.FirstName.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                s.LastName.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                $"{s.FirstName} {s.LastName}".Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                s.Email.Contains(term, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    private void SelectStudent(AvailableStudentDto student)
+    {
+        selectedStudent = student;
+        selectedStudentId = student.Id;
+        filteredStudents = new List<AvailableStudentDto>();
+    }
+
+    private void OnSearchInput(ChangeEventArgs e)
+    {
+        // Update search term from input field
+        searchTerm = e.Value?.ToString() ?? string.Empty;
+
+        // Trigger filtering as user types
+        FilterStudents();
     }
 
     private void PrepareToUpdate(Guid moduleId, ActivityDto activity)

@@ -12,13 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS.Infractructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-<<<<<<<< HEAD:LMS.Infractructure/Migrations/20260401075403_Init.Designer.cs
-    [Migration("20260401075403_Init")]
+    [Migration("20260402064818_Init")]
     partial class Init
-========
-    [Migration("20260331135433_updateDBContext")]
-    partial class updateDBContext
->>>>>>>> develop:LMS.Infractructure/Migrations/20260331135433_updateDBContext.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -12,13 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS.Infractructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-<<<<<<<< HEAD:LMS.Infractructure/Migrations/20260401075403_Init.Designer.cs
-    [Migration("20260401075403_Init")]
-    partial class Init
-========
     [Migration("20260331135433_updateDBContext")]
     partial class updateDBContext
->>>>>>>> develop:LMS.Infractructure/Migrations/20260331135433_updateDBContext.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -189,6 +184,9 @@ namespace LMS.Infractructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("ActivityTypeId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -206,14 +204,11 @@ namespace LMS.Infractructure.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("TypeId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("ModuleId");
+                    b.HasIndex("ActivityTypeId");
 
-                    b.HasIndex("TypeId");
+                    b.HasIndex("ModuleId");
 
                     b.ToTable("Activities");
                 });
@@ -373,15 +368,15 @@ namespace LMS.Infractructure.Migrations
 
             modelBuilder.Entity("Domain.Models.Entities.ModuleActivity", b =>
                 {
-                    b.HasOne("Domain.Models.Entities.Module", "Module")
+                    b.HasOne("Domain.Models.Entities.ActivityType", "Type")
                         .WithMany("Activities")
-                        .HasForeignKey("ModuleId")
+                        .HasForeignKey("ActivityTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Models.Entities.ActivityType", "Type")
+                    b.HasOne("Domain.Models.Entities.Module", "Module")
                         .WithMany("Activities")
-                        .HasForeignKey("TypeId")
+                        .HasForeignKey("ModuleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

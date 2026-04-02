@@ -1,9 +1,11 @@
 ﻿using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
+using LMS.Shared.DTOs;
 using LMS.Shared.DTOs.Activity;
 using Service.Contracts;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 
 namespace LMS.Services
@@ -30,14 +32,23 @@ namespace LMS.Services
                 a.Description,
                 a.StartDate,
                 a.EndDate,
-                a.TypeId
+                a.TypeId,
+                a.ModuleId
             )).ToList();
 
             return dtoList;
         }
 
-        public async Task<ActivityDto> CreateActivityAsync(CreateActivityDto dto)
+        public async Task<ResultDto<ActivityDto>> CreateActivityAsync(CreateActivityDto dto)
         {
+            var moduleExists = await _repository.ModuleExistsAsync(dto.ModuleId);
+            if (!moduleExists)
+                return ResultDto<ActivityDto>.Failed(new ErrorDto
+                {
+                    Code = "ModuleNotFound",
+                    Description = $"Module with id {dto.ModuleId} was not found."
+                });
+
             var newActivity = new ModuleActivity
             {
                 Id = Guid.NewGuid(),
@@ -51,17 +62,21 @@ namespace LMS.Services
 
             _repository.Create(newActivity);
             await _unitOfWork.CompleteAsync();
+
             var activityType = await _repository.GetActivityTypeByIdAsync(newActivity.TypeId);
 
-            return new ActivityDto(
+            var dtoResult = new ActivityDto(
                 newActivity.Id,
                 newActivity.Name,
                 activityType?.Name ?? "Unknown",
                 newActivity.Description,
                 newActivity.StartDate,
                 newActivity.EndDate,
-                newActivity.TypeId
+                newActivity.TypeId,
+                newActivity.ModuleId
             );
+
+            return ResultDto<ActivityDto>.Success(dtoResult);            
         }
 
         public async Task<IEnumerable<ActivityTypeDto>> GetAllActivityTypesAsync()
@@ -75,19 +90,30 @@ namespace LMS.Services
             }).ToList();
         }
 
-        public async Task DeleteActivityAsync(Guid activityId)
+        public async Task<ResultDto<bool>> DeleteActivityAsync(Guid activityId)
         {
             var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: false);
-            if (activity != null)
-            {
-                _repository.Delete(activity); 
-                await _unitOfWork.CompleteAsync();
-            }
+            if (activity == null)
+                return ResultDto<bool>.Failed(new ErrorDto
+                {
+                    Code = "ActivityNotFound",
+                    Description = $"Activity with id {activityId} was not found."
+                });
+
+            _repository.Delete(activity);
+            await _unitOfWork.CompleteAsync();
+
+            return ResultDto<bool>.Success(true);
         }
-        public async Task<ActivityDto> UpdateActivityAsync(Guid activityId, UpdateActivityDto dto)
+        public async Task<ResultDto<ActivityDto>> UpdateActivityAsync(Guid activityId, UpdateActivityDto dto)
         {
             var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: true);
-
+            if (activity == null)
+                return ResultDto<ActivityDto>.Failed(new ErrorDto
+                {
+                    Code = "ActivityNotFound",
+                    Description = $"Activity with id {activityId} was not found."
+                });
 
             activity.Name = dto.Name;
             activity.Description = dto.Description;
@@ -99,16 +125,18 @@ namespace LMS.Services
 
             var activityType = await _repository.GetActivityTypeByIdAsync(activity.TypeId);
 
-            return new ActivityDto(
+            var dtoResult = new ActivityDto(
                 activity.Id,
                 activity.Name,
                 activityType?.Name ?? "Unknown",
                 activity.Description,
                 activity.StartDate,
                 activity.EndDate,
-                activity.TypeId
+                activity.TypeId,
+                activity.ModuleId
             );
+
+            return ResultDto<ActivityDto>.Success(dtoResult);
         }
     }
-
 }

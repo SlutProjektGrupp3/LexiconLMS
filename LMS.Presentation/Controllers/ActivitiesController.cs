@@ -27,9 +27,7 @@ public class ActivitiesController : ControllerBase
 
     [HttpPost]
     public async Task<IActionResult> CreateActivity([FromBody] CreateActivityDto dto)
-    {
-        //var createdActivity = await _serviceManager.ActivityService.CreateActivityAsync(dto);
-        //return StatusCode(StatusCodes.Status201Created, createdActivity);
+    {        
         try
         {
             var result = await _serviceManager.ActivityService.CreateActivityAsync(dto);
@@ -75,9 +73,7 @@ public class ActivitiesController : ControllerBase
     [HttpDelete("{id}")]
     [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> DeleteActivity(Guid id)
-    {
-        //await _serviceManager.ActivityService.DeleteActivityAsync(id);
-        //return NoContent();
+    {        
         try
         {
             var result = await _serviceManager.ActivityService.DeleteActivityAsync(id);
@@ -120,13 +116,7 @@ public class ActivitiesController : ControllerBase
     [HttpPut("{id}")]
     [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> UpdateActivity(Guid id, UpdateActivityDto dto)
-    {
-        //if (dto.EndDate < dto.StartDate)
-        //{
-        //    return BadRequest("Start date before end date.");
-        //}
-        //var updatedActivity = await _serviceManager.ActivityService.UpdateActivityAsync(id, dto);
-        //return Ok(updatedActivity);
+    {        
         if (dto.EndDate < dto.StartDate)
         {
             return BadRequest(new ProblemDetails

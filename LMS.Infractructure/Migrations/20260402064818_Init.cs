@@ -225,14 +225,14 @@ namespace LMS.Infractructure.Migrations
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ModuleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ActivityTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    TypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Activities", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Activities_ActivityTypes_ActivityTypeId",
-                        column: x => x.ActivityTypeId,
+                        name: "FK_Activities_ActivityTypes_TypeId",
+                        column: x => x.TypeId,
                         principalTable: "ActivityTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -245,14 +245,14 @@ namespace LMS.Infractructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Activities_ActivityTypeId",
-                table: "Activities",
-                column: "ActivityTypeId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Activities_ModuleId",
                 table: "Activities",
                 column: "ModuleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Activities_TypeId",
+                table: "Activities",
+                column: "TypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",

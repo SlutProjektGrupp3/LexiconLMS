@@ -3,6 +3,7 @@ using LMS.Shared.DTOs.CourseDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 
@@ -15,6 +16,7 @@ public class CoursesController : ControllerBase
 {
     private readonly ICourseService _courseService;
     private readonly IServiceManager serviceManager;
+
 
     public CoursesController(IServiceManager serviceManager, ICourseService courseService)
  
@@ -158,7 +160,22 @@ public class CoursesController : ControllerBase
         }
     }
 
-    // GET: api/courses/{courseId}/participants
+    [Authorize(Roles = "Teacher")]
+    [HttpPost("{courseId}/students/{studentId}")]
+    public async Task<IActionResult> AddStudentToCourse(Guid courseId, string studentId)
+    {
+        await _courseService.AddStudentToCourseAsync(courseId, studentId);
+        return NoContent();
+    }
+
+    [Authorize(Roles = "Teacher")]
+    [HttpGet("{courseId}/available-students")]
+    public async Task<IActionResult> GetAvailableStudents()
+    {
+        var students = await _courseService.GetAvailableStudentsAsync();
+        return Ok(students);
+    }
+
     [HttpGet("{courseId}/participants")]
     public async Task<IActionResult> GetParticipants(Guid courseId)
     {

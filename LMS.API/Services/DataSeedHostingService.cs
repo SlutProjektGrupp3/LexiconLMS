@@ -56,7 +56,11 @@ public class DataSeedHostingService : IHostedService
             await AddDemoUsersAsync();
 
             await AddStudentsAsync(20);
-            await AddCoursesAsync(context);
+
+            var activityTypes = await AddActivityTypesAsync(context);
+
+            //await AddCoursesAsync(context);
+            await AddCoursesWithDependenciesAsync(context, activityTypes);
 
             //var course = await AddCourseWithModulesAsync(context, cancellationToken);
 
@@ -157,8 +161,97 @@ public class DataSeedHostingService : IHostedService
             if (!roleResult.Succeeded)
                 throw new Exception(string.Join("\n", roleResult.Errors));
         }
-    }    
-    
+    }
+    private async Task<List<ActivityType>> AddActivityTypesAsync(ApplicationDbContext context)
+    {
+        if (await context.ActivityTypes.AnyAsync())
+            return await context.ActivityTypes.ToListAsync();
+
+        var types = new List<ActivityType>
+        {
+            new() { Id = Guid.NewGuid(), Name = "Lecture" },
+            new() { Id = Guid.NewGuid(), Name = "Assignment" },
+            new() { Id = Guid.NewGuid(), Name = "Exercise" },
+            new() { Id = Guid.NewGuid(), Name = "Quiz" },
+            new() { Id = Guid.NewGuid(), Name = "Project" }
+        };
+
+        context.ActivityTypes.AddRange(types);
+        await context.SaveChangesAsync();
+        return types;
+    }
+    private async Task AddCoursesWithDependenciesAsync(ApplicationDbContext context, List<ActivityType> types)
+    {
+        var faker = new Faker("en");
+        var courses = new List<Course>();
+
+        var courseNames = new[] { "C# Backend", "ASP.NET Core", "EF Core Essentials", "Fullstack Web" };
+
+        for (int i = 0; i < 3; i++)
+        {
+            var courseId = Guid.NewGuid();
+            var course = new Course
+            {
+                Id = courseId,
+                Name = courseNames[i % courseNames.Length],
+                Description = faker.Lorem.Sentence(10),
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddMonths(3),
+                Modules = GenerateModules(faker, courseId, types)
+            };
+            courses.Add(course);
+        }
+
+        context.Courses.AddRange(courses);
+        await context.SaveChangesAsync();
+
+        var students = await userManager.GetUsersInRoleAsync(StudentRole);
+        foreach (var student in students)
+        {
+            student.CourseId = faker.PickRandom(courses).Id;
+        }
+        await context.SaveChangesAsync();
+    }
+    private ICollection<Module> GenerateModules(Faker faker, Guid courseId, List<ActivityType> types)
+    {
+        var modules = new List<Module>();
+        int count = faker.Random.Int(3, 6);
+
+        for (int i = 0; i < count; i++)
+        {
+            var moduleId = Guid.NewGuid();
+            modules.Add(new Module
+            {
+                Id = moduleId,
+                Name = $"Module: {faker.Commerce.Department()}",
+                Description = faker.Lorem.Sentence(5),
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddDays(14),
+                CourseId = courseId,
+                Activities = GenerateActivities(faker, types)
+            });
+        }
+        return modules;
+    }
+    private ICollection<ModuleActivity> GenerateActivities(Faker faker, List<ActivityType> types)
+    {
+        var activities = new List<ModuleActivity>();
+        int count = faker.Random.Int(2, 5);
+
+        for (int i = 0; i < count; i++)
+        {
+            activities.Add(new ModuleActivity
+            {
+                Id = Guid.NewGuid(),
+                Name = faker.Lorem.Word(),
+                Description = faker.Lorem.Sentence(5),
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddDays(3),
+                TypeId = faker.PickRandom(types).Id
+            });
+        }
+        return activities;
+    }
     private async Task AddCoursesAsync(ApplicationDbContext context)
     {
         if (await context.Courses.AnyAsync()) return;

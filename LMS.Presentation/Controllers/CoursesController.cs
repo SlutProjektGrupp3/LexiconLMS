@@ -160,6 +160,22 @@ public class CoursesController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Teacher")]
+    [HttpPost("{courseId}/students/{studentId}")]
+    public async Task<IActionResult> AddStudentToCourse(Guid courseId, string studentId)
+    {
+        await _courseService.AddStudentToCourseAsync(courseId, studentId);
+        return NoContent();
+    }
+
+    [Authorize(Roles = "Teacher")]
+    [HttpGet("{courseId}/available-students")]
+    public async Task<IActionResult> GetAvailableStudents()
+    {
+        var students = await _courseService.GetAvailableStudentsAsync();
+        return Ok(students);
+    }
+
     // GET: api/courses/{courseId}/participants
     [HttpGet("{courseId}/participants")]
     public async Task<IActionResult> GetParticipants(Guid courseId)

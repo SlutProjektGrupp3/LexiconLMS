@@ -11,6 +11,7 @@ namespace LMS.Shared.DTOs.Activity
     string Description,
     DateTime StartDate,
     DateTime EndDate,
-    Guid TypeId
+    Guid TypeId,
+    Guid ModuleId
     );
 }

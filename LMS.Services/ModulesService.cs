@@ -22,7 +22,22 @@ namespace LMS.Services
 
         public async Task<CreateModuleResultDto> CreateModuleAsync(CreateModuleDto createModuleDto)
         {
+            var course = await uow.CourseRepository.GetCourseByIdAsync(createModuleDto.CourseId, trackChanges: false);
+
+            if (course is null)
+            {
+                return CreateModuleResultDto.Failed(new List<ModuleError>
+                {
+                    new ModuleError
+                    {
+                        Code = "CourseNotFound",
+                        Description = $"Course with id {createModuleDto.CourseId} was not found."
+                    }
+                });
+            }
+
             var module = mapper.Map<Module>(createModuleDto);
+            module.CourseId = course.Id;
             uow.ModuleRepository.Create(module);
 
             try
@@ -34,11 +49,14 @@ namespace LMS.Services
             }
             catch (Exception ex)
             {
-                var errors = new List<ModuleError>
+                return CreateModuleResultDto.Failed(new List<ModuleError>
                 {
-                    new ModuleError { Code = "MODULE_ERROR:DB", Description = "An error occurred while saving the module to the database." }
-                };
-                return CreateModuleResultDto.Failed(errors);
+                    new ModuleError
+                    {
+                        Code = "DatabaseError",
+                        Description = "An error occurred while saving the module."
+                    }
+                });
             }
         }
 
@@ -48,7 +66,7 @@ namespace LMS.Services
             {
                 return DeleteModuleResultDto.Failed(new ModuleError
                 {
-                    Code = "MODULE_ERROR:VALIDATION",
+                    Code = "DatabaseError",
                     Description = "Module ID is required and cannot be empty.",
                     StatusCode = ErrorStatusCode.BadRequest
                 });
@@ -122,6 +140,15 @@ namespace LMS.Services
 
             if (dto.EndDate <= dto.StartDate)
                 throw new ArgumentException("End date must be after start date.");
+        }
+        public async Task<ModuleDto?> GetModuleByIdAsync(Guid id)
+        {
+            var module = await uow.ModuleRepository.GetByIdAsync(id, trackChanges: false);
+
+            if (module is null)
+                return null;
+
+            return mapper.Map<ModuleDto>(module);
         }
     }
 }

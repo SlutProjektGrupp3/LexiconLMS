@@ -1,4 +1,5 @@
-﻿using LMS.Shared.DTOs.Modules;
+﻿using LMS.Shared.DTOs.Module;
+using LMS.Shared.DTOs.Modules;
 
 namespace Service.Contracts
 {
@@ -9,5 +10,6 @@ namespace Service.Contracts
         Task<DeleteModuleResultDto> DeleteModuleAsync(Guid moduleId);
    
         Task UpdateModuleAsync(Guid moduleId, UpdateModuleDto dto);
+        Task<ModuleDto?> GetModuleByIdAsync(Guid id);
     }
 }

@@ -9,5 +9,10 @@ namespace Domain.Contracts.Repositories
     {
         Task<IEnumerable<ModuleActivity>> GetActivitiesByModuleIdAsync(Guid moduleId, bool trackChanges);
         void Create(ModuleActivity activity);
+        Task<ModuleActivity?> GetActivityByIdAsync(Guid id, bool trackChanges);
+        void Delete(ModuleActivity activity);
+        Task<IEnumerable<ActivityType>> GetAllActivityTypesAsync(bool trackChanges);
+        Task<ActivityType?> GetActivityTypeByIdAsync(Guid typeId);
+
     }
 }

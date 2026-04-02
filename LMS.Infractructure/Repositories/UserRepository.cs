@@ -15,14 +15,5 @@ public class UserRepository : RepositoryBase<ApplicationUser>, IUserRepository
     {
         return await FindAll(trackChanges)
             .ToListAsync();
-    }
-
-    public async Task DeleteUserAsync(Guid id)
-    {
-        var user = await FindByCondition(u => u.Id == id.ToString(), trackChanges: true).FirstOrDefaultAsync();
-        if (user != null)
-        {
-            Delete(user);
-        }
-    }
+    }   
 }

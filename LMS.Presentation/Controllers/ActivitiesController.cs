@@ -31,4 +31,27 @@ public class ActivitiesController : ControllerBase
         var createdActivity = await _serviceManager.ActivityService.CreateActivityAsync(dto);
         return StatusCode(StatusCodes.Status201Created, createdActivity);
     }
+
+    [HttpGet("types")]
+    public async Task<IActionResult> GetActivityTypes()
+    {
+        var types = await _serviceManager.ActivityService.GetAllActivityTypesAsync();
+        return Ok(types);
+    }
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteActivity(Guid id)
+    {
+        await _serviceManager.ActivityService.DeleteActivityAsync(id);
+        return NoContent(); 
+    }
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateActivity(Guid id, UpdateActivityDto dto)
+    {
+        if (dto.EndDate < dto.StartDate)
+        {
+            return BadRequest("Start date before end date.");
+        }
+        var updatedActivity = await _serviceManager.ActivityService.UpdateActivityAsync(id, dto);
+        return Ok(updatedActivity);
+    }
 }

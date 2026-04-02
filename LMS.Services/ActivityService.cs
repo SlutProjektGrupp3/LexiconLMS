@@ -29,7 +29,8 @@ namespace LMS.Services
                 a.Type.Name,
                 a.Description,
                 a.StartDate,
-                a.EndDate
+                a.EndDate,
+                a.TypeId
             )).ToList();
 
             return dtoList;
@@ -45,23 +46,67 @@ namespace LMS.Services
                 StartDate = dto.StartDate,
                 EndDate = dto.EndDate,
                 ModuleId = dto.ModuleId,
-                Type = new ActivityType
-                {
-                    Id = Guid.NewGuid(),
-                    Name = dto.ActivityTypeName
-                }
+                TypeId = dto.TypeId.Value,
             };
 
             _repository.Create(newActivity);
             await _unitOfWork.CompleteAsync();
+            var activityType = await _repository.GetActivityTypeByIdAsync(newActivity.TypeId);
 
             return new ActivityDto(
                 newActivity.Id,
                 newActivity.Name,
-                newActivity.Type.Name,
+                activityType?.Name ?? "Unknown",
                 newActivity.Description,
                 newActivity.StartDate,
-                newActivity.EndDate
+                newActivity.EndDate,
+                newActivity.TypeId
+            );
+        }
+
+        public async Task<IEnumerable<ActivityTypeDto>> GetAllActivityTypesAsync()
+        {
+            var typesFromDb = await _repository.GetAllActivityTypesAsync(trackChanges: false);
+
+            return typesFromDb.Select(t => new ActivityTypeDto
+            {
+                Id = t.Id,
+                Name = t.Name
+            }).ToList();
+        }
+
+        public async Task DeleteActivityAsync(Guid activityId)
+        {
+            var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: false);
+            if (activity != null)
+            {
+                _repository.Delete(activity); 
+                await _unitOfWork.CompleteAsync();
+            }
+        }
+        public async Task<ActivityDto> UpdateActivityAsync(Guid activityId, UpdateActivityDto dto)
+        {
+            var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: true);
+
+
+            activity.Name = dto.Name;
+            activity.Description = dto.Description;
+            activity.StartDate = dto.StartDate;
+            activity.EndDate = dto.EndDate;
+            activity.TypeId = dto.TypeId;
+
+            await _unitOfWork.CompleteAsync();
+
+            var activityType = await _repository.GetActivityTypeByIdAsync(activity.TypeId);
+
+            return new ActivityDto(
+                activity.Id,
+                activity.Name,
+                activityType?.Name ?? "Unknown",
+                activity.Description,
+                activity.StartDate,
+                activity.EndDate,
+                activity.TypeId
             );
         }
     }

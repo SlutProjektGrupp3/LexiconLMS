@@ -6,5 +6,6 @@ public record ModuleDto(
     string Name,
     string Description,
     DateTime StartDate,
-    DateTime EndDate
-);
+    DateTime EndDate,
+    Guid CourseId 
+    );

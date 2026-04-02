@@ -35,7 +35,7 @@
 
 @code {
     [Parameter]
-    public IEnumerable<UserListDto> Users { get; set; } = [];
+    public IEnumerable<UserDto> Users { get; set; } = [];
     [Parameter]
-    public EventCallback<Guid> OnDelete { get; set; }
+    public EventCallback<string> OnDelete { get; set; }
 }

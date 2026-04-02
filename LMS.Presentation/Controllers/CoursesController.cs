@@ -1,6 +1,7 @@
 ﻿using LMS.Shared.DTOs;
 using LMS.Shared.DTOs.CourseDtos;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,7 @@ public class CoursesController : ControllerBase
 {
     private readonly ICourseService _courseService;
     private readonly IServiceManager serviceManager;
+
 
     public CoursesController(IServiceManager serviceManager, ICourseService courseService)
  

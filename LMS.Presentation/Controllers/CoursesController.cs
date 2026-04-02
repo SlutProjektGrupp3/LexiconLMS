@@ -1,9 +1,9 @@
 ﻿using LMS.Shared.DTOs;
 using LMS.Shared.DTOs.CourseDtos;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 
@@ -176,6 +176,7 @@ public class CoursesController : ControllerBase
         return Ok(students);
     }
 
+    // GET: api/courses/{courseId}/participants
     [HttpGet("{courseId}/participants")]
     public async Task<IActionResult> GetParticipants(Guid courseId)
     {

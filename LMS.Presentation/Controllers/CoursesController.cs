@@ -11,13 +11,13 @@ namespace LMS.Presentation.Controllers;
 public class CoursesController : ControllerBase
 {
     private readonly ICourseService _courseService;
-    private readonly IServiceManager serviceManager;
+    private readonly IServiceManager _serviceManager;
 
     public CoursesController(IServiceManager serviceManager, ICourseService courseService)
  
     {
         _courseService = courseService;
-        this.serviceManager = serviceManager;
+        _serviceManager = serviceManager;
     }
 
     [HttpGet]
@@ -25,7 +25,7 @@ public class CoursesController : ControllerBase
     // GET: api/courses
     public async Task<IActionResult> GetCourses()
     {
-        var courses = await serviceManager.CourseService.GetAllCoursesAsync();
+        var courses = await _serviceManager.CourseService.GetAllCoursesAsync();
         return Ok(courses);
     }
 
@@ -33,7 +33,7 @@ public class CoursesController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetCourseById(Guid id)
     {
-        var courseDetails = await serviceManager.CourseService.GetCourseByIdAsync(id);
+        var courseDetails = await _serviceManager.CourseService.GetCourseByIdAsync(id);
         if (courseDetails == null)
             return NotFound();
         return Ok(courseDetails);
@@ -63,7 +63,7 @@ public class CoursesController : ControllerBase
             if (updateCourseDto is null)
                 return BadRequest("UpdateCourseDto is null.");
 
-            await serviceManager.CourseService.UpdateCourseAsync(id, updateCourseDto, trackChanges: true);
+            await _serviceManager.CourseService.UpdateCourseAsync(id, updateCourseDto, trackChanges: true);
 
             return NoContent();
         }
@@ -72,14 +72,14 @@ public class CoursesController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteCourse(Guid id)
     {
-        await serviceManager.CourseService.DeleteCourseAsync(id, trackChanges: true);
+        await _serviceManager.CourseService.DeleteCourseAsync(id, trackChanges: true);
         return NoContent();
     }
 
     [HttpGet("{courseId}/participants")]
     public async Task<IActionResult> GetParticipants(Guid courseId)
     {
-        var participants = await serviceManager.CourseService
+        var participants = await _serviceManager.CourseService
             .GetParticipantsAsync(courseId);
 
         return Ok(participants);

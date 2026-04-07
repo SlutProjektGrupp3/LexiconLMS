@@ -8,27 +8,27 @@ namespace LMS.Services;
 
 public class ModulesService : IModuleService
 {
-    private readonly IUnitOfWork uow;
-    private readonly IMapper mapper;
+    private readonly IUnitOfWork _uow;
+    private readonly IMapper _mapper;
     private readonly IModuleRepository _moduleRepository;
 
     public ModulesService(IUnitOfWork uow, IMapper mapper, IModuleRepository moduleRepository)
     {
-        this.uow = uow;
-        this.mapper = mapper;
+        _uow = uow;
+        _mapper = mapper;
         _moduleRepository = moduleRepository;
     }
 
     public async Task<CreateModuleResultDto> CreateModuleAsync(CreateModuleDto createModuleDto)
     {
-        var module = mapper.Map<Module>(createModuleDto);
-        uow.ModuleRepository.Create(module);
+        var module = _mapper.Map<Module>(createModuleDto);
+        _uow.ModuleRepository.Create(module);
 
         try
         {
-            await uow.CompleteAsync();
+            await _uow.CompleteAsync();
 
-            var createdModuleDto = mapper.Map<ModuleDto>(module);
+            var createdModuleDto = _mapper.Map<ModuleDto>(module);
             return CreateModuleResultDto.SuccessWith(createdModuleDto);
         }
         catch (Exception ex)
@@ -53,14 +53,14 @@ public class ModulesService : IModuleService
             });
         }
 
-        var module = await uow.ModuleRepository.GetModuleByIdAsync(moduleId, trackChanges: false);
+        var module = await _uow.ModuleRepository.GetModuleByIdAsync(moduleId, trackChanges: false);
         if (module != null)
         {
-            uow.ModuleRepository.Delete(module);
+            _uow.ModuleRepository.Delete(module);
 
             try
             {
-                await uow.CompleteAsync();
+                await _uow.CompleteAsync();
                 return DeleteModuleResultDto.Success;
             }
             catch (Exception ex)
@@ -94,9 +94,9 @@ public class ModulesService : IModuleService
         if (module is null)
             throw new KeyNotFoundException("Module not found.");
 
-        mapper.Map(dto, module);
+        _mapper.Map(dto, module);
 
-        await uow.CompleteAsync();
+        await _uow.CompleteAsync();
     }
 
     private static void ValidateUpdateModule(Guid moduleId, UpdateModuleDto dto)

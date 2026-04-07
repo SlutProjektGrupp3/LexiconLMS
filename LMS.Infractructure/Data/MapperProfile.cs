@@ -19,8 +19,6 @@ public class MapperProfile : Profile
         CreateMap<Course, CourseDto>();
         CreateMap<CreateCourseDto, Course>();
         CreateMap<Course, CourseDetailsDto>();
-
-        //CreateMap<CourseCreateDto, Course>();
         CreateMap<UpdateCourseDto, Course>();
 
         //Module mappings
@@ -32,6 +30,7 @@ public class MapperProfile : Profile
         CreateMap<ModuleActivity, ActivityDto>();
         CreateMap<CreateActivityDto, ModuleActivity>();
         CreateMap<UpdateActivityDto, ModuleActivity>();
+        CreateMap<ActivityType, ActivityTypeDto>();
 
     }
 }

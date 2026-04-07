@@ -16,7 +16,7 @@ public class ModulesController : ControllerBase
 
     public ModulesController(IServiceManager serviceManager)
     {
-        this._serviceManager = serviceManager;
+        _serviceManager = serviceManager;
     }
 
 

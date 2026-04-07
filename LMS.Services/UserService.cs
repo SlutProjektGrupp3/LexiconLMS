@@ -10,26 +10,26 @@ namespace LMS.Services;
 
 public class UserService : IUserService
 {
-    private readonly IUnitOfWork unitOfWork;
-    private readonly UserManager<ApplicationUser> userManager;
-    private readonly RoleManager<IdentityRole> roleManager;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
 
     public UserService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
     {
-        this.unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        this.userManager = userManager;
-        this.roleManager = roleManager;
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _userManager = userManager;
+        _roleManager = roleManager;
     }
 
     public async Task<List<UserDto>> GetAllUsersAsync()
     {
-        var users = await unitOfWork.UserRepository.GetAllUsersAsync();
+        var users = await _unitOfWork.UserRepository.GetAllUsersAsync();
         
         var dtoList = new List<UserDto>();
 
         foreach (var user in users)
         {
-            var role = await userManager.GetRolesAsync(user);
+            var role = await _userManager.GetRolesAsync(user);
 
             dtoList.Add(new UserDto
             (
@@ -56,7 +56,7 @@ public class UserService : IUserService
 
         try
         {
-            var createResult = await userManager.CreateAsync(user, userCreateDto.Password);
+            var createResult = await _userManager.CreateAsync(user, userCreateDto.Password);
 
             if (!createResult.Succeeded)
             {
@@ -71,11 +71,11 @@ public class UserService : IUserService
                 return CreateUserResultDto.Failed(errors);
             }
 
-            var roleResult = await userManager.AddToRoleAsync(user, userCreateDto.RoleName);
+            var roleResult = await _userManager.AddToRoleAsync(user, userCreateDto.RoleName);
 
             if (!roleResult.Succeeded)
             {
-                await userManager.DeleteAsync(user);
+                await _userManager.DeleteAsync(user);
 
                 var errors = roleResult.Errors
                     .Select(e => new UserError
@@ -115,14 +115,14 @@ public class UserService : IUserService
 
     public async Task DeleteUserAsync(Guid id)
     {
-        await unitOfWork.UserRepository.DeleteUserAsync(id);
+        await _unitOfWork.UserRepository.DeleteUserAsync(id);
 
-        await unitOfWork.CompleteAsync();
+        await _unitOfWork.CompleteAsync();
     }
 
     public async Task<List<string?>> GetAllRolesAsync()
     {
-        return await roleManager.Roles.Select(r => r.Name).ToListAsync();
+        return await _roleManager.Roles.Select(r => r.Name).ToListAsync();
     }
 }
 

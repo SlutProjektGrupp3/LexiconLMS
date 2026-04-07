@@ -53,11 +53,11 @@
 </EditForm>
 
 @code {
-        [Parameter]
-        public EventCallback OnCourseCreated { get; set; }
+    [Parameter]
+    public EventCallback OnCourseCreated { get; set; }
 
-        [Parameter]
-        public EventCallback OnCancel { get; set; }
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
 
     private bool isSubmitting;
     private CreateCourseFormModel model = new();

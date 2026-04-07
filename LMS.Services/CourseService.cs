@@ -8,6 +8,7 @@ using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.DTOs.Module;
 using LMS.Shared.DTOs.User;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Service.Contracts;
 
 
@@ -26,8 +27,48 @@ public class CourseService : ICourseService
         this.uow = uow;
         this.mapper = mapper;
         _userManager = userManager;
+    }
 
+    public async Task<(IEnumerable<CourseSummaryDto> Items, int TotalCount)> GetCourseSummariesAsync(string? search = null, bool? active = null, int page = 1, int pageSize = 12)
+    {
+        // Build base query
+        var repoQuery = (uow.CourseRepository as Domain.Contracts.Repositories.ICourseRepository)!.GetCourseQuery(false);
+        var query = repoQuery;
 
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var lower = search.Trim().ToLower();
+            query = query.Where(c => c.Name.ToLower().Contains(lower) || (c.Description != null && c.Description.ToLower().Contains(lower)));
+        }
+
+        if (active.HasValue)
+        {
+            if (active.Value)
+                query = query.Where(c => c.EndDate > DateTime.Now);
+            else
+                query = query.Where(c => c.EndDate <= DateTime.Now);
+        }
+
+        var total = await query.CountAsync(CancellationToken.None);
+
+        var items = await query
+            .OrderBy(c => c.StartDate)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(c => new CourseSummaryDto //TODO: AutoMapper
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Description = c.Description ?? string.Empty,
+                StartDate = c.StartDate,
+                EndDate = c.EndDate,
+                ParticipantsCount = c.Students.Count(),
+                ModulesCount = c.Modules.Count(),
+                Active = c.EndDate > DateTime.Now
+            })
+            .ToListAsync(CancellationToken.None);
+
+        return (items, total);
     }
 
     public async Task<IEnumerable<CourseDto>> GetAllCoursesAsync(bool trackChanges = false)
@@ -192,6 +233,4 @@ public class CourseService : ICourseService
             .Select(u => mapper.Map<AvailableStudentDto>(u))
             .ToList();
     }
-
-
 }

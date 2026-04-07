@@ -9,5 +9,6 @@ namespace Domain.Contracts.Repositories
        
         Task<Module?> GetModuleByIdAndCourseIdAsync(Guid moduleId, Guid courseId, bool trackChanges = false);
         Task<Module?> GetByIdAsync(Guid id, bool trackChanges);
+        IQueryable<Module> GetModuleQuery(bool trackChanges = false);
     }
 }

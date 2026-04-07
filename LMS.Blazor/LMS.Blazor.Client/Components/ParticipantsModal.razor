@@ -1,0 +1,42 @@
+@using LMS.Shared.DTOs.User
+@using Microsoft.AspNetCore.Components
+
+@code {
+    [Parameter] public string Title { get; set; } = "Participants";
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
+    [Parameter] public IEnumerable<LMS.Shared.DTOs.Course.ParticipantDto>? Items { get; set; }
+}
+
+<div class="modal @(Visible ? "show d-block" : "fade")" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.4);">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@Title</h5>
+                <button type="button" class="btn-close" aria-label="Close" @onclick="Close"></button>
+            </div>
+            <div class="modal-body">
+                @if (Items is null || !Items.Any())
+                {
+                    <p>No participants found.</p>
+                }
+                else
+                {
+                    <ul>
+                        @foreach (var p in Items)
+                        {
+                            <li>@p.FirstName @p.LastName (@p.Email)</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @onclick="Close">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private Task Close() => VisibleChanged.InvokeAsync(false);
+}

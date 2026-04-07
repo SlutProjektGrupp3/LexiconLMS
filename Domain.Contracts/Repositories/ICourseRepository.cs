@@ -14,5 +14,6 @@ namespace Domain.Contracts.Repositories
         Task<Course?> GetCourseByIdAsync(Guid courseId, bool trackChanges = false, bool includeModules = false);        
         void CreateCourse(Course course);
         Task<Course?> GetCourseWithStudentsAsync(Guid courseId, bool trackChanges);        
+        IQueryable<Course> GetCourseQuery(bool trackChanges = false);
     }
 }

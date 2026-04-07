@@ -48,4 +48,9 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
             .Include(c => c.Students)
             .FirstOrDefaultAsync();
     }    
+
+    public IQueryable<Course> GetCourseQuery(bool trackChanges = false)
+    {
+        return FindAll(trackChanges);
+    }
 }

@@ -180,9 +180,33 @@ public class CoursesController : ControllerBase
     [HttpGet("{courseId}/participants")]
     public async Task<IActionResult> GetParticipants(Guid courseId)
     {
-        var participants = await serviceManager.CourseService
-            .GetParticipantsAsync(courseId);
+        var participants = await serviceManager.CourseService.GetParticipantsAsync(courseId);
 
         return Ok(participants);
+    }
+
+    // GET: api/courses/{courseId}/modules
+    [HttpGet("{courseId}/modules")]
+    public async Task<IActionResult> GetModulesForCourse(Guid courseId)
+    {
+        // Use module service to fetch modules belonging to a course
+        var modules = await serviceManager.ModuleService.GetModulesByCourseIdAsync(courseId);
+        return Ok(modules);
+    }
+
+    // GET: api/courses/summary
+    [HttpGet("summary")]
+    [Authorize(Roles = "Teacher")]
+    public async Task<IActionResult> GetCourseSummaries([FromQuery] string? search, [FromQuery] bool? active, [FromQuery] int page = 1, [FromQuery] int pageSize = 12)
+    {
+        var (items, total) = await serviceManager.CourseService.GetCourseSummariesAsync(search, active, page, pageSize);
+
+        var dto = new LMS.Shared.DTOs.CourseDtos.CourseSummaryPagedDto
+        {
+            Items = items.ToList(),
+            Total = total
+        };
+
+        return Ok(dto);
     }
 }

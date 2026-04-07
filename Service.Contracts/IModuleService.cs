@@ -11,5 +11,6 @@ namespace Service.Contracts
    
         Task UpdateModuleAsync(Guid moduleId, UpdateModuleDto dto);
         Task<ModuleDto?> GetModuleByIdAsync(Guid id);
+        Task<IEnumerable<ModuleDto>> GetModulesByCourseIdAsync(Guid courseId);
     }
 }

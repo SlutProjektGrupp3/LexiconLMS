@@ -4,6 +4,7 @@ using LMS.Shared.DTOs.Modules;
 using LMS.Shared.DTOs.Module;
 using Domain.Models.Entities;
 using Service.Contracts;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Services
 {
@@ -149,6 +150,16 @@ namespace LMS.Services
                 return null;
 
             return mapper.Map<ModuleDto>(module);
+        }
+
+        public async Task<IEnumerable<ModuleDto>> GetModulesByCourseIdAsync(Guid courseId)
+        {
+            var query = (uow.ModuleRepository as Domain.Contracts.Repositories.IModuleRepository)!.GetModuleQuery(false);
+            var modules = await query.Where(m => m.CourseId == courseId)
+                .Select(m => new ModuleDto(m.Id, m.Name, m.Description, m.StartDate, m.EndDate, m.CourseId))
+                .ToListAsync();
+
+            return modules;
         }
     }
 }

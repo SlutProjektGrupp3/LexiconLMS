@@ -1,0 +1,58 @@
+@using LMS.Shared.DTOs.CourseDtos
+@using LMS.Blazor.Client.Components.Icons
+@using LMS.Shared.DTOs.Module
+
+@inherits Microsoft.AspNetCore.Components.ComponentBase
+
+<div class="col-4">
+    <div class="card p-3">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <BookOpenIcon CssClass="text-primary" />
+            <span class="badge rounded-pill @(CourseIsActive ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger")">
+                @(CourseIsActive ? "Active" : "Inactive")
+            </span>
+        </div>
+
+        <h5><strong>@Course.Name</strong></h5>
+        <p>@Course.Description</p>
+
+        <div class="pb-3">
+            <CalendarIcon CssClass="text-secondary" />
+            <span>Start: @Course.StartDate.ToString("d MMMM yyyy")</span>
+        </div>
+        <div class="pb-3">
+            <ParticipantsIcon CssClass="text-secondary" />
+            <span>@Course.ParticipantsCount participants</span>
+        </div>
+        <div class="pb-3">
+            <BookOpenIcon CssClass="text-secondary" />
+            <span>@Course.ModulesCount modules</span>
+        </div>
+
+        <hr />
+
+        <ProgressBar StartDate="@Course.StartDate" EndDate="@Course.EndDate" />
+
+        <button class="btn btn-primary btn-sm"
+                @onclick="() => OnShowParticipants.InvokeAsync(Course.Id)">
+            Show participants
+        </button>
+        <button class="btn btn-outline-secondary btn-sm ms-2"
+                @onclick="() => OnShowModules.InvokeAsync(Course.Id)">
+            Show modules
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public CourseSummaryDto Course { get; set; } = new CourseSummaryDto();
+
+    [Parameter]
+    public EventCallback<Guid> OnShowParticipants { get; set; }
+
+    [Parameter]
+    public EventCallback<Guid> OnShowModules { get; set; }
+
+    private bool CourseIsActive => DateTime.Now < Course.EndDate;
+}

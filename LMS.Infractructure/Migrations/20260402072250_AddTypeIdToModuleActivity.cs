@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace LMS.Infractructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class AddTypeIdToModuleActivity : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

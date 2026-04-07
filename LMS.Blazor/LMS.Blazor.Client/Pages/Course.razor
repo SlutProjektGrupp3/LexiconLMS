@@ -9,6 +9,7 @@
 @using LMS.Blazor.Client.Components.Icons
 
 
+
 <PageTitle>Course Details</PageTitle>
 
 
@@ -38,6 +39,7 @@ else if (_course != null)
                     <small class="text-muted">@_course.Description</small>
                 </div>
 
+                
                 <AuthorizeView Roles="Teacher">
                     <Authorized>
                         <ShowFormButton ShowForm="_showCreateModuleForm"
@@ -61,6 +63,19 @@ else if (_course != null)
                     @successMessage
                 </div>
             }
+
+
+              <div>
+
+                <ShowFormButton ShowForm="showCreateUserForm"
+                                OnClick="ToggleCreateUserForm"
+                                HiddenText="New User"/>
+            </div>
+      
+        @if (showCreateUserForm)
+        {
+            <CreateUserForm Model="userToCreate" Roles="_roles" OnSubmit="HandleCreateUser" />
+        }
 
             <button class="btn btn-primary" @onclick="ToggleAddStudent">
      Add student
@@ -353,6 +368,10 @@ else if (_course != null)
     private List<AvailableStudentDto> filteredStudents = new();
     // The full selected student object (used for display in UI)
     private AvailableStudentDto? selectedStudent;
+    private bool showCreateUserForm;
+    private CreateUserDto userToCreate { get; set; }
+    private List<string> _roles = new();
+    private List<UserDto> _users = new List<UserDto>();
 
    
 
@@ -376,6 +395,8 @@ else if (_course != null)
         try
         {
             _course = await ApiService.GetAsync<CourseDetailsDto>($"api/courses/{Id}");
+            _users = await ApiService.GetAsync<List<UserDto>>($"api/users") ?? new List<UserDto>();
+            _roles = await ApiService.GetAsync<List<string>>($"api/users/roles") ?? new List<string>();
         }
         catch (Exception ex)
         {
@@ -764,5 +785,39 @@ else if (_course != null)
         {
             error = "Failed to delete activity: " + ex.Message;
         }
+    }
+
+    private async Task HandleCreateUser()
+    {
+        error = null;
+        successMessage = null;
+
+        try
+        {
+            var result = await ApiService.PostAsync<CreateUserDto, CreateUserResultDto>("api/users", userToCreate);
+
+            if (result is { Succeeded: true, CreatedUser: { } createdUser })
+            {
+                _users.Add(createdUser);
+                successMessage = "User created successfully.";
+                showCreateUserForm = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            error = "Failed to create user: " + ex.Message;
+        }
+    }
+
+    private void ToggleCreateUserForm()
+    {
+        showCreateUserForm = !showCreateUserForm;
+
+        if (showCreateUserForm)
+        {
+            successMessage = null;
+            userToCreate = new CreateUserDto();
+        }
+
     }
 }

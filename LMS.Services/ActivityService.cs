@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
+using LMS.Shared.DTOs;
 using LMS.Shared.DTOs.Activity;
 using Service.Contracts;
 
@@ -44,56 +45,37 @@ public class ActivityService : IActivityService
 
         return _mapper.Map<IEnumerable<ActivityTypeDto>>(typesFromDb);
     }
-
-    public async Task DeleteActivityAsync(Guid activityId)
+    public async Task<ResultDto<bool>> DeleteActivityAsync(Guid activityId)
     {
         var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: false);
-        if (activity != null)
-        {
-            _repository.Delete(activity); 
-            await _unitOfWork.CompleteAsync();
-        }
+        if (activity == null)
+            return ResultDto<bool>.Failed(new ErrorDto
+            {
+                Code = "ActivityNotFound",
+                Description = $"Activity with id {activityId} was not found."
+            });
+
+        _repository.Delete(activity);
+        await _unitOfWork.CompleteAsync();
+
+        return ResultDto<bool>.Success(true);
     }
-    //public async Task<ActivityDto> UpdateActivityAsync(Guid activityId, UpdateActivityDto dto)
-    //{
-    //    var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: true);
+    public async Task<ResultDto<ActivityDto>> UpdateActivityAsync(Guid activityId, UpdateActivityDto dto)
+    {
+        var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: true);
+        if (activity == null)
+            return ResultDto<ActivityDto>.Failed(new ErrorDto
+            {
+                Code = "ActivityNotFound",
+                Description = $"Activity with id {activityId} was not found."
+            });
 
-    //    _mapper.Map(dto, activity);
-    //    public async Task<ResultDto<bool>> DeleteActivityAsync(Guid activityId)
-    //    {
-    //        var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: false);
-    //        if (activity == null)
-    //            return ResultDto<bool>.Failed(new ErrorDto
-    //            {
-    //                Code = "ActivityNotFound",
-    //                Description = $"Activity with id {activityId} was not found."
-    //            });
-
-    //        _repository.Delete(activity);
-    //        await _unitOfWork.CompleteAsync();
-
-    //        return ResultDto<bool>.Success(true);
-    //    }
-        public async Task<ResultDto<ActivityDto>> UpdateActivityAsync(Guid activityId, UpdateActivityDto dto)
-        {
-            var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: true);
-            if (activity == null)
-                return ResultDto<ActivityDto>.Failed(new ErrorDto
-                {
-                    Code = "ActivityNotFound",
-                    Description = $"Activity with id {activityId} was not found."
-                });
-
-            activity.Name = dto.Name;
-            activity.Description = dto.Description;
-            activity.StartDate = dto.StartDate;
-            activity.EndDate = dto.EndDate;
-            activity.TypeId = dto.TypeId;
+        _mapper.Map(dto, activity);
 
         await _unitOfWork.CompleteAsync();
 
-        var activityType = await _repository.GetActivityTypeByIdAsync(activity.TypeId);
+        var dtoResult = _mapper.Map<ActivityDto>(activity);
 
-        return _mapper.Map<ActivityDto>(activity);
+        return ResultDto<ActivityDto>.Success(dtoResult);
     }
 }

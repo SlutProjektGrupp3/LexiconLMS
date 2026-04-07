@@ -13,14 +13,11 @@ namespace LMS.Presentation.Controllers;
 
 public class CoursesController : ControllerBase
 {
-    //private readonly ICourseService _courseService;
     private readonly IServiceManager _serviceManager;
-
 
     public CoursesController(IServiceManager serviceManager)
  
     {
-        //_courseService = courseService;
         _serviceManager = serviceManager;
     }
 

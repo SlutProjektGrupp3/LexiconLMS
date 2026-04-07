@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace LMS.Shared.DTOs.Modules
+namespace LMS.Shared.DTOs.Module
 {
     public enum ErrorStatusCode
     {

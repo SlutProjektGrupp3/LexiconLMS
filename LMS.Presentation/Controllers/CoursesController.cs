@@ -1,8 +1,7 @@
-﻿using LMS.Shared.DTOs.CourseDtos;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
-using LMS.Shared.DTOs;
+using LMS.Shared.DTOs.Course;
 
 namespace LMS.Presentation.Controllers;
 

@@ -1,6 +1,5 @@
 ﻿@page "/teacher/dashboard"
 @using LMS.Shared.DTOs.Course
-@using LMS.Shared.DTOs.CourseDtos
 @attribute [Authorize(Roles = "Teacher")]
 @inject IApiService ApiService
 
@@ -59,12 +58,12 @@
     private bool isLoading = true;
     private string? errorMessage;
 
-    List<StudentMyCourseDto> Courses = new();
+    List<CourseDetailsDto> Courses = new();
     List<ParticipantDto> participants = new();
 
     Guid? SelectedCourseId = null;
 
-    StudentMyCourseDto? SelectedCourse;
+    CourseDetailsDto? SelectedCourse;
 
     protected override async Task OnInitializedAsync()
     {
@@ -74,7 +73,7 @@
     {        
         try
         {
-            Courses = await ApiService.GetAsync<List<StudentMyCourseDto>>("api/courses")
+            Courses = await ApiService.GetAsync<List<CourseDetailsDto>>("api/courses")
                   ?? new();
 
         }

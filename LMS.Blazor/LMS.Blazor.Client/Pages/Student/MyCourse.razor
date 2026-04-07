@@ -1,5 +1,5 @@
 ﻿@page "/student/mycourse"
-@using LMS.Shared.DTOs.CourseDtos
+@using LMS.Shared.DTOs.Course
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize(Roles = "Student")]
 @inject IApiService ApiService
@@ -61,7 +61,7 @@ else if (course is not null)
 }
 
 @code {
-    private StudentMyCourseDto? course;
+    private CourseDetailsDto? course;
     private bool isLoading = true;
     private string? errorMessage;
 
@@ -69,7 +69,7 @@ else if (course is not null)
     {
         try
         {
-            course = await ApiService.GetAsync<StudentMyCourseDto>("api/student/my-course");
+            course = await ApiService.GetAsync<CourseDetailsDto>("api/student/my-course");
 
             if (course is null)
                 errorMessage = "You are not enrolled in any course.";

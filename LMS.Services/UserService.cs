@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Domain.Contracts.Repositories;
+﻿using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Shared.DTOs.User;
 using Microsoft.AspNetCore.Identity;

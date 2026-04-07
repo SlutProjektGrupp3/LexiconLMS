@@ -1,9 +1,8 @@
-﻿using LMS.Shared.DTOs.Module;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace LMS.Shared.DTOs.Modules
+namespace LMS.Shared.DTOs.Module
 {
     public class DeleteModuleResultDto
     {

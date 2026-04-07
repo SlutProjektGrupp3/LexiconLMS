@@ -1,4 +1,4 @@
-﻿using LMS.Shared.DTOs.Modules;
+﻿using LMS.Shared.DTOs.Module;
 using Microsoft.AspNetCore.Components;
 using System.Net;
 using System.Net.Http.Json;

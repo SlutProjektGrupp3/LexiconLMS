@@ -1,13 +1,12 @@
-﻿using LMS.Shared.DTOs.Modules;
+﻿using LMS.Shared.DTOs.Module;
 
-namespace Service.Contracts
+namespace Service.Contracts;
+
+public interface IModuleService
 {
-    public interface IModuleService
-    {
-        Task<CreateModuleResultDto> CreateModuleAsync(CreateModuleDto createModuleDto);
-        
-        Task<DeleteModuleResultDto> DeleteModuleAsync(Guid moduleId);
-   
-        Task UpdateModuleAsync(Guid moduleId, UpdateModuleDto dto);
-    }
+    Task<CreateModuleResultDto> CreateModuleAsync(CreateModuleDto createModuleDto);
+    
+    Task<DeleteModuleResultDto> DeleteModuleAsync(Guid moduleId);
+
+    Task UpdateModuleAsync(Guid moduleId, UpdateModuleDto dto);
 }

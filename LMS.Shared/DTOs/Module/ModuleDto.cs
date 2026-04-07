@@ -8,4 +8,4 @@ public record ModuleDto(
     DateTime StartDate,
     DateTime EndDate,
     Guid CourseId 
-    );
+);

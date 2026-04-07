@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿
+namespace LMS.Shared.DTOs.Activity;
 
-namespace LMS.Shared.DTOs.Activity
-{
-    public record ActivityDto(
+public record ActivityDto(
     Guid Id,
     string Name,
     string TypeName, 
@@ -12,5 +9,4 @@ namespace LMS.Shared.DTOs.Activity
     DateTime StartDate,
     DateTime EndDate,
     Guid TypeId
-    );
-}
+);

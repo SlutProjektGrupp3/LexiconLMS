@@ -1,4 +1,4 @@
-﻿namespace LMS.Shared.DTOs.Modules
+﻿namespace LMS.Shared.DTOs.Module
 {
     public class ModuleError
     {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace LMS.Shared.DTOs.Modules
+namespace LMS.Shared.DTOs.Module
 {
     public record CreateModuleDto
     {

@@ -1,28 +1,23 @@
 ﻿using AutoMapper;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
-using LMS.Shared.DTOs;
-using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.DTOs.Course;
-using LMS.Shared.DTOs.Module;
 using Service.Contracts;
-
 
 namespace LMS.Services;
 
 public class CourseService : ICourseService
 {
-    private IUnitOfWork uow;
+    private readonly IUnitOfWork uow;
     private readonly IMapper mapper;
 
     public CourseService(IUnitOfWork uow, IMapper mapper) 
     {
         this.uow = uow;
-        this.mapper = mapper;       
+        this.mapper = mapper;
     }
 
     public async Task<IEnumerable<CourseDto>> GetAllCoursesAsync(bool trackChanges = false)
- 
     {
         var courses = await uow.CourseRepository.GetAllCoursesAsync(trackChanges);
         return mapper.Map<IEnumerable<CourseDto>>(courses);
@@ -34,21 +29,7 @@ public class CourseService : ICourseService
         if (course == null)
             return null;
 
-        return new CourseDetailsDto(
-            course.Id,
-            course.Name,
-            course.Description,
-            course.StartDate,
-            course.EndDate,
-            course.Modules.Select(m => new ModuleDto(
-                m.Id,
-                m.Name,
-                m.Description,
-                m.StartDate,
-                m.EndDate,
-                 m.CourseId
-            )).ToList()
-        );
+        return mapper.Map<CourseDetailsDto>(course);
     }
 
     public async Task<CourseDto> CreateCourseAsync(CreateCourseDto dto)
@@ -68,26 +49,13 @@ public class CourseService : ICourseService
         if (dto.StartDate < DateTime.Today)
             throw new ArgumentException("Start date cannot be in the past.");
 
-        var course = new Course
-        {
-            Name = dto.Name,
-            Description = dto.Description,
-            StartDate = dto.StartDate,
-            EndDate = dto.EndDate,
-        };
+        var course = mapper.Map<Course>(dto);
 
         uow.CourseRepository.CreateCourse(course);
 
         await uow.CompleteAsync();
 
-        return new CourseDto
-        {
-            Id = course.Id,
-            Name = course.Name,
-            Description = course.Description,
-            StartDate = course.StartDate,
-            EndDate = course.EndDate
-        };
+        return mapper.Map<CourseDto>(course);
     }
 
     public async Task UpdateCourseAsync(Guid id, UpdateCourseDto updateCourseDto, bool trackChanges)
@@ -123,11 +91,6 @@ public class CourseService : ICourseService
         if (course is null)
             return Enumerable.Empty<ParticipantDto>();
 
-        return course.Students.Select(s => new ParticipantDto(
-            Guid.Parse(s.Id),
-            s.FirstName,
-            s.LastName,
-            s.Email!
-        ));
+        return mapper.Map<IEnumerable<ParticipantDto>>(course.Students);
     }
 }

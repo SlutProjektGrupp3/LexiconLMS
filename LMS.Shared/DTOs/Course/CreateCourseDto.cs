@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Text;
 
-namespace LMS.Shared.DTOs
+namespace LMS.Shared.DTOs.Course
 {
     public class CreateCourseDto
     {

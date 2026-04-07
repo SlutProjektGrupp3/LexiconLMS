@@ -106,7 +106,7 @@ namespace LMS.Services
 
             return ResultDto<bool>.Success(true);
         }
-        public async Task<ResultDto<ActivityDto>> UpdateActivityAsync(Guid activityId, UpdateActivityDto dto)
+        public async Task<ActivityDto> UpdateActivityAsync(Guid activityId, UpdateActivityDto dto)
         {
             if (dto.EndDate < dto.StartDate)
             {
@@ -129,7 +129,7 @@ namespace LMS.Services
 
             var activityType = await _repository.GetActivityTypeByIdAsync(activity.TypeId);
 
-            var dtoResult = new ActivityDto(
+            return new ActivityDto(
                 activity.Id,
                 activity.Name,
                 activityType?.Name ?? "Unknown",
@@ -139,8 +139,6 @@ namespace LMS.Services
                 activity.TypeId,
                 activity.ModuleId
             );
-
-            return ResultDto<ActivityDto>.Success(dtoResult);
         }
     }
 }

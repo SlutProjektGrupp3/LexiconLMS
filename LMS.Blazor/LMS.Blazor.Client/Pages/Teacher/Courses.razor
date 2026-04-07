@@ -6,7 +6,7 @@
 @inject NavigationManager Navigation
 @attribute [Authorize(Roles = "Teacher")]
 
-<h3>Courses</h3>
+<h3>Course Management</h3>
 
 @if (showSuccessMessage)
 {
@@ -28,8 +28,8 @@
     </div>
 }
 
-<div class="mb-4">
-    <QuickActionButton Text="Create new course"
+<div class="d-flex justify-content-end mt-4 mb-3">
+    <QuickActionButton Text="Create Course"
                        Icon="+"
                        OnClick="ToggleCreateForm" />
 </div>

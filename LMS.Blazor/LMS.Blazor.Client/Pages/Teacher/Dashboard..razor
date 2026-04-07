@@ -3,6 +3,7 @@
 @using LMS.Shared.DTOs.CourseDtos
 @attribute [Authorize(Roles = "Teacher")]
 @inject IApiService ApiService
+@inject NavigationManager Navigation
 
 <PageTitle>Dashboard – Lexicon LMS</PageTitle>
 
@@ -10,7 +11,12 @@
     <div>
         <h4 class="fw-bold mb-0">Teacher Dashboard</h4>
         <p class="text-muted small mb-0">@DateTime.Today.ToString("dddd, dd MMMM yyyy")</p>
-    </div>    
+    </div>
+ </div>
+<div class="d-flex justify-content-end mt-4 mb-3">
+    <button class="create-btn" @onclick="GoToCreateCourse">
+        ➕ Create Course
+    </button>
 </div>
 
 <div class="row">
@@ -95,5 +101,10 @@
         participants = await ApiService.GetAsync<List<ParticipantDto>>(
             $"api/courses/{courseId}/participants") ?? new();
 
-    }   
+    }
+
+    void GoToCreateCourse()
+    {
+        Navigation.NavigateTo("/teacher/courses");
+    }
 }

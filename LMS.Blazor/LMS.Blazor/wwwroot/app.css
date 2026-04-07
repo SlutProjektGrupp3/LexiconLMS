@@ -58,3 +58,14 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+.create-btn {
+    background-color: #4da6ff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    transition: 0.3s;
+}
+.create-btn:hover {
+    background-color: #3399ff;
+}

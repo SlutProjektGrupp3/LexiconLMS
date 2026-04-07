@@ -1,5 +1,6 @@
 ﻿using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
+using Domain.Models.Exceptions;
 using LMS.Shared.DTOs;
 using LMS.Shared.DTOs.Activity;
 using Service.Contracts;
@@ -107,13 +108,16 @@ namespace LMS.Services
         }
         public async Task<ResultDto<ActivityDto>> UpdateActivityAsync(Guid activityId, UpdateActivityDto dto)
         {
+            if (dto.EndDate < dto.StartDate)
+            {
+                throw new BadRequestException("End date must be after start date.", "Invalid Dates");
+            }
+
             var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: true);
             if (activity == null)
-                return ResultDto<ActivityDto>.Failed(new ErrorDto
-                {
-                    Code = "ActivityNotFound",
-                    Description = $"Activity with id {activityId} was not found."
-                });
+            {
+                throw new NotFoundException($"Activity with id {activityId} was not found.", "Activity Not Found");
+            }
 
             activity.Name = dto.Name;
             activity.Description = dto.Description;

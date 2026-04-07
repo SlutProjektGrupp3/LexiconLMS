@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿
+namespace LMS.Shared.DTOs.Module;
 
-namespace LMS.Shared.DTOs.Module
+public enum ErrorStatusCode
 {
-    public enum ErrorStatusCode
-    {
-        NotFound = 404,
-        BadRequest = 400,
-        Database = 500
-    }
+    NotFound = 404,
+    BadRequest = 400,
+    Database = 500
 }

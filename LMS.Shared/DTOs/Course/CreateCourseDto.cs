@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Reflection;
-using System.Text;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace LMS.Shared.DTOs.Course
+namespace LMS.Shared.DTOs.Course;
+
+public class CreateCourseDto
 {
-    public class CreateCourseDto
-    {
 
-        [Required]
-        public string Name { get; set; } = null!;
-        public string? Description { get; set; }
-        [Required]
-        public DateTime StartDate { get; set; }
-        [Required]
-        public DateTime EndDate { get; set; }
-      
-    }
+    [Required]
+    public string Name { get; set; } = null!;
+    public string? Description { get; set; }
+    [Required]
+    public DateTime StartDate { get; set; }
+    [Required]
+    public DateTime EndDate { get; set; }
+  
 }

@@ -30,9 +30,10 @@ public class ActivityService : IActivityService
     {
         var newActivity = _mapper.Map<ModuleActivity>(dto);
 
-        _repository.Create(newActivity);
-        await _unitOfWork.CompleteAsync();
-        var activityType = await _repository.GetActivityTypeByIdAsync(newActivity.TypeId);
+            _repository.Create(newActivity);
+            await _unitOfWork.CompleteAsync();
+
+            var activityType = await _repository.GetActivityTypeByIdAsync(newActivity.TypeId);
 
         return _mapper.Map<ActivityDto>(newActivity);
     }
@@ -53,11 +54,41 @@ public class ActivityService : IActivityService
             await _unitOfWork.CompleteAsync();
         }
     }
-    public async Task<ActivityDto> UpdateActivityAsync(Guid activityId, UpdateActivityDto dto)
-    {
-        var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: true);
+    //public async Task<ActivityDto> UpdateActivityAsync(Guid activityId, UpdateActivityDto dto)
+    //{
+    //    var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: true);
 
-        _mapper.Map(dto, activity);
+    //    _mapper.Map(dto, activity);
+    //    public async Task<ResultDto<bool>> DeleteActivityAsync(Guid activityId)
+    //    {
+    //        var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: false);
+    //        if (activity == null)
+    //            return ResultDto<bool>.Failed(new ErrorDto
+    //            {
+    //                Code = "ActivityNotFound",
+    //                Description = $"Activity with id {activityId} was not found."
+    //            });
+
+    //        _repository.Delete(activity);
+    //        await _unitOfWork.CompleteAsync();
+
+    //        return ResultDto<bool>.Success(true);
+    //    }
+        public async Task<ResultDto<ActivityDto>> UpdateActivityAsync(Guid activityId, UpdateActivityDto dto)
+        {
+            var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: true);
+            if (activity == null)
+                return ResultDto<ActivityDto>.Failed(new ErrorDto
+                {
+                    Code = "ActivityNotFound",
+                    Description = $"Activity with id {activityId} was not found."
+                });
+
+            activity.Name = dto.Name;
+            activity.Description = dto.Description;
+            activity.StartDate = dto.StartDate;
+            activity.EndDate = dto.EndDate;
+            activity.TypeId = dto.TypeId;
 
         await _unitOfWork.CompleteAsync();
 

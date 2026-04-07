@@ -19,39 +19,57 @@ public class ModulesService : IModuleService
         _moduleRepository = moduleRepository;
     }
 
-    public async Task<CreateModuleResultDto> CreateModuleAsync(CreateModuleDto createModuleDto)
-    {
-        var module = _mapper.Map<Module>(createModuleDto);
-        _uow.ModuleRepository.Create(module);
+        public async Task<CreateModuleResultDto> CreateModuleAsync(CreateModuleDto createModuleDto)
+        {
+            var course = await _uow.CourseRepository.GetCourseByIdAsync(createModuleDto.CourseId, trackChanges: false);
+
+            if (course is null)
+            {
+                return CreateModuleResultDto.Failed(new List<ModuleError>
+                {
+                    new ModuleError
+                    {
+                        Code = "CourseNotFound",
+                        Description = $"Course with id {createModuleDto.CourseId} was not found."
+                    }
+                });
+            }
+
+            var module = _mapper.Map<Module>(createModuleDto);
+            module.CourseId = course.Id;
+            _uow.ModuleRepository.Create(module);
 
         try
         {
             await _uow.CompleteAsync();
 
-            var createdModuleDto = _mapper.Map<ModuleDto>(module);
-            return CreateModuleResultDto.SuccessWith(createdModuleDto);
-        }
-        catch (Exception ex)
-        {
-            var errors = new List<ModuleError>
+                var createdModuleDto = _mapper.Map<ModuleDto>(module);
+                return CreateModuleResultDto.SuccessWith(createdModuleDto);
+            }
+            catch (Exception ex)
             {
-                new ModuleError { Code = "MODULE_ERROR:DB", Description = "An error occurred while saving the module to the database." }
-            };
-            return CreateModuleResultDto.Failed(errors);
+                return CreateModuleResultDto.Failed(new List<ModuleError>
+                {
+                    new ModuleError
+                    {
+                        Code = "DatabaseError",
+                        Description = "An error occurred while saving the module."
+                    }
+                });
+            }
         }
-    }
 
-    public async Task<DeleteModuleResultDto> DeleteModuleAsync(Guid moduleId)
-    {
-        if (moduleId == Guid.Empty)
+        public async Task<DeleteModuleResultDto> DeleteModuleAsync(Guid moduleId)
         {
-            return DeleteModuleResultDto.Failed(new ModuleError
+            if (moduleId == Guid.Empty)
             {
-                Code = "MODULE_ERROR:VALIDATION",
-                Description = "Module ID is required and cannot be empty.",
-                StatusCode = ErrorStatusCode.BadRequest
-            });
-        }
+                return DeleteModuleResultDto.Failed(new ModuleError
+                {
+                    Code = "DatabaseError",
+                    Description = "Module ID is required and cannot be empty.",
+                    StatusCode = ErrorStatusCode.BadRequest
+                });
+            }
 
         var module = await _uow.ModuleRepository.GetModuleByIdAsync(moduleId, trackChanges: false);
         if (module != null)
@@ -116,7 +134,17 @@ public class ModulesService : IModuleService
         if (dto.EndDate == default)
             throw new ArgumentException("End date is required.");
 
-        if (dto.EndDate <= dto.StartDate)
-            throw new ArgumentException("End date must be after start date.");
+            if (dto.EndDate <= dto.StartDate)
+                throw new ArgumentException("End date must be after start date.");
+        }
+        public async Task<ModuleDto?> GetModuleByIdAsync(Guid id)
+        {
+            var module = await _uow.ModuleRepository.GetByIdAsync(id, trackChanges: false);
+
+            if (module is null)
+                return null;
+
+            return _mapper.Map<ModuleDto>(module);
+        }
     }
 }

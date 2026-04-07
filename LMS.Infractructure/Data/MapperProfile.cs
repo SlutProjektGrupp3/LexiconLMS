@@ -4,6 +4,7 @@ using LMS.Shared.DTOs.AuthDtos;
 using LMS.Shared.DTOs.Course;
 using LMS.Shared.DTOs.Module;
 using LMS.Shared.DTOs.Activity;
+using LMS.Shared.DTOs.User;
 
 namespace LMS.Infractructure.Data;
 
@@ -14,6 +15,8 @@ public class MapperProfile : Profile
         //User mappings
         CreateMap<UserRegistrationDto, ApplicationUser>();
         CreateMap<ApplicationUser, ParticipantDto>();
+        CreateMap<ApplicationUser, UserDto>();
+        CreateMap<ApplicationUser, AvailableStudentDto>();
 
         //Course mappings
         CreateMap<Course, CourseDto>();
@@ -25,6 +28,7 @@ public class MapperProfile : Profile
         CreateMap<Module, ModuleDto>();
         CreateMap<CreateModuleDto, Module>();
         CreateMap<UpdateModuleDto, Module>();
+        CreateMap<UpdateCourseDto, Course>();
 
         //Activity mappings
         CreateMap<ModuleActivity, ActivityDto>();

@@ -7,5 +7,6 @@ public record ModuleDto(
     string Description,
     DateTime StartDate,
     DateTime EndDate,
-    Guid CourseId 
-);
+    Guid CourseId,
+    List<LinkDto> Links = null
+    );

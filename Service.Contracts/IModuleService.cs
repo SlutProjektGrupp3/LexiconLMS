@@ -9,4 +9,5 @@ public interface IModuleService
     Task<DeleteModuleResultDto> DeleteModuleAsync(Guid moduleId);
 
     Task UpdateModuleAsync(Guid moduleId, UpdateModuleDto dto);
+    Task<ModuleDto?> GetModuleByIdAsync(Guid id);
 }

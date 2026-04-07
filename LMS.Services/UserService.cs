@@ -113,10 +113,17 @@ public class UserService : IUserService
         }
     }
 
-    public async Task DeleteUserAsync(Guid id)
+    public async Task DeleteUserAsync(string id)
     {
-        await _unitOfWork.UserRepository.DeleteUserAsync(id);
+        var user = await _userManager.FindByIdAsync(id);
 
+        if (user == null)
+            throw new KeyNotFoundException("User not found.");
+
+        var result = await _userManager.DeleteAsync(user);
+
+        if (!result.Succeeded)
+            throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
         await _unitOfWork.CompleteAsync();
     }
 

@@ -8,5 +8,7 @@ public record ActivityDto(
     string Description,
     DateTime StartDate,
     DateTime EndDate,
-    Guid TypeId
-);
+    Guid TypeId,
+    Guid ModuleId
+    );
+}

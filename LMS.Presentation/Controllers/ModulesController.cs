@@ -1,4 +1,5 @@
-﻿using LMS.Shared.DTOs.Module;
+﻿using LMS.Shared.DTOs;
+using LMS.Shared.DTOs.Module;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,18 +21,83 @@ public class ModulesController : ControllerBase
     }
 
 
-    [HttpPost]
-    [Authorize(Roles = "Teacher")]
-    [SwaggerOperation(
-        Summary = "Teacher can create a new module in a course",
-        Description = "Creates a new module in a given course. Requires a valid JWT token with Teacher role.")]
-    [SwaggerResponse(StatusCodes.Status201Created, "Module successfully created")]
-    public async Task<IActionResult> CreateModule(CreateModuleDto createModuleDto)
-    {
-        var result = await _serviceManager.ModuleService.CreateModuleAsync(createModuleDto);
+        [HttpPost]
+        [Authorize(Roles = "Teacher")]
+        [SwaggerOperation(
+            Summary = "Teacher can create a new module in a course",
+            Description = "Creates a new module in a given course. Requires a valid JWT token with Teacher role.")]
+        [SwaggerResponse(StatusCodes.Status201Created, "Module successfully created")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid input")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Course not found")]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
+        public async Task<IActionResult> CreateModule(CreateModuleDto createModuleDto)
+        {
+            try
+            {
+                var result = await _serviceManager.ModuleService.CreateModuleAsync(createModuleDto);
 
-        return result.Succeeded ? StatusCode(StatusCodes.Status201Created, result) : BadRequest(result.Errors);
-    }
+                if (!result.Succeeded)
+                {
+                    var error = result.Errors.FirstOrDefault();
+
+                    // 404 → Course not found
+                    if (error?.Code == "CourseNotFound")
+                    {
+                        return NotFound(new ProblemDetails
+                        {
+                            Title = "Course not found",
+                            Status = StatusCodes.Status404NotFound,
+                            Detail = error.Description
+                        });
+                    }
+
+                    // 400 → Validation or other errors
+                    return BadRequest(new ProblemDetails
+                    {
+                        Title = "Bad Request",
+                        Status = StatusCodes.Status400BadRequest,
+                        Detail = error?.Description ?? "Invalid request"
+                    });
+                }
+
+                var module = result.CreatedModule!;
+
+                // HATEOAS
+                module = module with
+                {
+                    Links = new List<LinkDto>
+                    {
+                        new LinkDto
+                        {
+                            Href = Url.Action(nameof(GetModuleById), new { id = module.Id })!,
+                            Rel = "self",
+                            Method = "GET"
+                        },
+                        new LinkDto
+                        {
+                            Href = $"/api/courses/{createModuleDto.CourseId}",
+                            Rel = "course",
+                            Method = "GET"
+                        }
+                    }
+                };
+
+                // CreatedAtAction + Location Header
+                //return CreatedAtAction(nameof(GetModuleById), new { id = module.Id }, module);
+                //return result.Succeeded ? StatusCode(StatusCodes.Status201Created, result) : BadRequest(result.Errors);
+
+                return CreatedAtAction(nameof(GetModuleById),new { id = module.Id },new{succeeded = true,createdModule = module});
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ProblemDetails
+                {
+                    Title = "Internal Server Error",
+                    Status = StatusCodes.Status500InternalServerError,
+                    Detail = "An unexpected error occurred."
+                });
+            }
+        }
 
     [HttpDelete("{id}")]
     [Authorize(Roles = "Teacher")]
@@ -72,18 +138,47 @@ public class ModulesController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        try
-        {
-            await _serviceManager.ModuleService.UpdateModuleAsync(moduleId, dto);
-            return NoContent();
+            try
+            {
+                await _serviceManager.ModuleService.UpdateModuleAsync(moduleId, dto);
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
-        catch (ArgumentException ex)
+        [HttpGet("{id:guid}", Name = "GetModuleById")]
+        [Authorize]
+        public async Task<IActionResult> GetModuleById(Guid id)
         {
-            return BadRequest(ex.Message);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
+            var module = await _serviceManager.ModuleService.GetModuleByIdAsync(id);
+
+            if (module is null)
+            {
+                return NotFound(new ProblemDetails
+                {
+                    Title = "Module not found",
+                    Status = StatusCodes.Status404NotFound,
+                    Detail = $"Module with id {id} was not found."
+                });
+            }
+
+            // HATEOAS links
+            module = module with
+            {
+                Links = new List<LinkDto>
+                {
+                    new LinkDto { Href = Url.Action(nameof(GetModuleById), new { id = module.Id })!, Rel = "self", Method = "GET" },
+                    new LinkDto { Href = $"/api/courses/{module.CourseId}", Rel = "course", Method = "GET" }
+                }
+            };
+            
+            return Ok(module);
         }
     }
 }

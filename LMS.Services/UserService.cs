@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
+using Domain.Models.Exceptions;
 using LMS.Shared.DTOs.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -130,6 +131,52 @@ public class UserService : IUserService
     public async Task<List<string?>> GetAllRolesAsync()
     {
         return await roleManager.Roles.Select(r => r.Name).ToListAsync();
+    }
+    public async Task<UserDto> UpdateUserAsync(string id, UpdateUserDto dto)
+    {
+        var user = await userManager.FindByIdAsync(id);
+        if (user == null)
+        {
+            throw new NotFoundException($"User with ID {id} not found.", "User Not Found");
+        }
+
+        user.FirstName = dto.FirstName;
+        user.LastName = dto.LastName;
+        user.Email = dto.Email;
+        user.UserName = dto.Email; 
+
+        var updateResult = await userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            var errorMsg = string.Join(", ", updateResult.Errors.Select(e => e.Description));
+            throw new BadRequestException(errorMsg, "Update failed");
+        }
+
+        var currentRoles = await userManager.GetRolesAsync(user);
+        var currentRole = currentRoles.FirstOrDefault();
+
+        if (currentRole != dto.RoleName)
+        {
+            if (currentRole != null)
+            {
+                await userManager.RemoveFromRoleAsync(user, currentRole);
+            }
+
+            var roleResult = await userManager.AddToRoleAsync(user, dto.RoleName);
+            if (!roleResult.Succeeded)
+            {
+                var errorMsg = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+                throw new BadRequestException(errorMsg, "Role Update Failed");
+            }
+        }
+
+        return new UserDto(
+            user.Id,
+            user.FirstName,
+            user.LastName,
+            user.Email,
+            dto.RoleName
+        );
     }
 }
 

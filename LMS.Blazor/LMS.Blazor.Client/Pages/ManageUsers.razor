@@ -39,8 +39,12 @@ else if (_users.Any())
         {
             <CreateUserForm Model="userToCreate" Roles="_roles" OnSubmit="HandleCreateUser" />
         }
+        @if (showUpdateUserForm && userToUpdate != null)
+        {
+            <UpdateUserForm Model="userToUpdate" Roles="_roles" OnSubmit="HandleUpdateUser" OnCancel="CancelUpdate" />
+        }
 
-        <UserTable Users="_users" OnDelete="ConfirmDelete"></UserTable>
+        <UserTable Users="_users" OnDelete="ConfirmDelete" OnEdit="PrepareToUpdate"></UserTable>
 
     </div>
 
@@ -67,6 +71,10 @@ else
     private CreateUserDto userToCreate { get; set; }
     private List<string> _roles = new();
     private string? successMessage;
+
+    private bool showUpdateUserForm;
+    private UpdateUserDto? userToUpdate;
+    private string? editingUserId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -119,7 +127,9 @@ else
 
         if (showCreateUserForm)
         {
+            showUpdateUserForm = false;
             successMessage = null;
+            error = null;
             userToCreate = new CreateUserDto();
         }
 
@@ -142,5 +152,60 @@ else
 
         successMessage = "User deleted successfully.";
         userIdToDelete = null;
+    }
+
+    private void PrepareToUpdate(UserDto user)
+    {
+        showCreateUserForm = false;
+        
+        showUpdateUserForm = true;
+        editingUserId = user.Id;
+        successMessage = null;
+        error = null;
+
+        userToUpdate = new UpdateUserDto
+        {
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            RoleName = user.RoleName
+        };
+    }
+
+    private void CancelUpdate()
+    {
+        showUpdateUserForm = false;
+        userToUpdate = null;
+        editingUserId = null;
+    }
+
+    private async Task HandleUpdateUser()
+    {
+        error = null;
+        successMessage = null;
+
+        try
+        {
+            await ApiService.PutAsync($"api/users/{editingUserId}", userToUpdate);
+
+            var userIndex = _users.FindIndex(u => u.Id == editingUserId);
+            if (userIndex != -1)
+            {
+                _users[userIndex] = new UserDto(
+                    editingUserId!,
+                    userToUpdate!.FirstName,
+                    userToUpdate.LastName,
+                    userToUpdate.Email,
+                    userToUpdate.RoleName
+                );
+            }
+
+            successMessage = "User updated successfully.";
+            CancelUpdate(); 
+        }
+        catch (Exception ex)
+        {
+            error = "Failed to update user: " + ex.Message;
+        }
     }
 }

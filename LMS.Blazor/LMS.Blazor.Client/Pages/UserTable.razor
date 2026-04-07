@@ -20,6 +20,10 @@
                     <td>@user.Email</td>
                     <td>@user.RoleName</td>
                     <td>
+                        <button class="btn btn-sm btn-outline-warning me-2"
+                                @onclick="() => OnEdit.InvokeAsync(user)">
+                            Edit
+                        </button>
                         <button class="btn btn-sm btn-danger"
                                 data-bs-toggle="modal"
                                 data-bs-target="#deleteUserModal"
@@ -38,4 +42,6 @@
     public IEnumerable<UserDto> Users { get; set; } = [];
     [Parameter]
     public EventCallback<string> OnDelete { get; set; }
+    [Parameter]
+    public EventCallback<UserDto> OnEdit { get; set; }
 }

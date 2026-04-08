@@ -16,11 +16,11 @@ using System.Text;
 namespace LMS.Services;
 public class AuthService : IAuthService
 {
-    private readonly IMapper mapper;
-    private readonly UserManager<ApplicationUser> userManager;
-    private readonly RoleManager<IdentityRole> roleManager;
-    private readonly JwtSettings jwtSettings;
-    private ApplicationUser? user;
+    private readonly IMapper _mapper;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly JwtSettings _jwtSettings;
+    private ApplicationUser? _user;
 
     public AuthService(
         IMapper mapper,
@@ -29,10 +29,10 @@ public class AuthService : IAuthService
         IOptions<JwtSettings> jwtSettings
         )
     {
-        this.mapper = mapper;
-        this.userManager = userManager;
-        this.roleManager = roleManager;
-        this.jwtSettings = jwtSettings.Value;
+        _mapper = mapper;
+        _userManager = userManager;
+        _roleManager = roleManager;
+        _jwtSettings = jwtSettings.Value;
     }
 
     public async Task<TokenDto> CreateTokenAsync(bool addTime)
@@ -41,17 +41,17 @@ public class AuthService : IAuthService
         IEnumerable<Claim> claims = await GetClaimsAsync();
         JwtSecurityToken token = GenerateToken(signing, claims);
 
-        ArgumentNullException.ThrowIfNull(user);
-        user.RefreshToken = GenerateRefreshToken();
+        ArgumentNullException.ThrowIfNull(_user);
+        _user.RefreshToken = GenerateRefreshToken();
 
         if (addTime)
-            user.RefreshTokenExpireTime = DateTime.UtcNow.AddDays(3);
+            _user.RefreshTokenExpireTime = DateTime.UtcNow.AddDays(3);
 
-        var res = await userManager.UpdateAsync(user);
+        var res = await _userManager.UpdateAsync(_user);
         if (!res.Succeeded) throw new Exception(string.Join("/n", res.Errors));
 
         var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-        return new TokenDto(jwt, user.RefreshToken!);
+        return new TokenDto(jwt, _user.RefreshToken!);
     }
 
     private string? GenerateRefreshToken()
@@ -65,10 +65,10 @@ public class AuthService : IAuthService
     private JwtSecurityToken GenerateToken(SigningCredentials signing, IEnumerable<Claim> claims)
     {
         var token = new JwtSecurityToken(
-                                    issuer: jwtSettings.Issuer,
-                                    audience: jwtSettings.Audience,
+                                    issuer: _jwtSettings.Issuer,
+                                    audience: _jwtSettings.Audience,
                                     claims: claims,
-                                    expires: DateTime.Now.AddMinutes(Convert.ToDouble(jwtSettings.Expires)),
+                                    expires: DateTime.Now.AddMinutes(Convert.ToDouble(_jwtSettings.Expires)),
                                     signingCredentials: signing);
 
         return token;
@@ -76,12 +76,12 @@ public class AuthService : IAuthService
 
     private async Task<IEnumerable<Claim>> GetClaimsAsync()
     {
-        ArgumentNullException.ThrowIfNull(user);
+        ArgumentNullException.ThrowIfNull(_user);
 
         var claims = new List<Claim>()
         {
-            new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, $"{_user.FirstName} {_user.LastName}"),
+            new Claim(ClaimTypes.NameIdentifier, _user.Id.ToString()),
             
             //Add more claims here if needed
             //These claims disappear after first content paint?
@@ -90,7 +90,7 @@ public class AuthService : IAuthService
             //new Claim("FavoriteColor", "Blue") 
         };
 
-        var roles = await userManager.GetRolesAsync(user);
+        var roles = await _userManager.GetRolesAsync(_user);
         foreach (var role in roles)
         {
             claims.Add(new Claim(ClaimTypes.Role, role));
@@ -101,7 +101,7 @@ public class AuthService : IAuthService
 
     private SigningCredentials GetSigningCredentials()
     {
-        var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
+        var key = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
         var secret = new SymmetricSecurityKey(key);
 
         return new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
@@ -115,18 +115,18 @@ public class AuthService : IAuthService
 
         if (isRoleValid)
         {
-            var roleExists = await roleManager.RoleExistsAsync(userRegistrationDto.Role!);
+            var roleExists = await _roleManager.RoleExistsAsync(userRegistrationDto.Role!);
             if (!roleExists)
                 return IdentityResult.Failed(new IdentityError { Description = "Role does not exist" });
         }
 
-        var user = mapper.Map<ApplicationUser>(userRegistrationDto);
-        var result = await userManager.CreateAsync(user, userRegistrationDto.Password);
+        var user = _mapper.Map<ApplicationUser>(userRegistrationDto);
+        var result = await _userManager.CreateAsync(user, userRegistrationDto.Password);
 
         if (!result.Succeeded) return result;
 
         if (isRoleValid)
-            result = await userManager.AddToRoleAsync(user, userRegistrationDto.Role!);
+            result = await _userManager.AddToRoleAsync(user, userRegistrationDto.Role!);
 
         return result;
     }
@@ -135,20 +135,20 @@ public class AuthService : IAuthService
     {
         ArgumentNullException.ThrowIfNull(userDto);
 
-        user = await userManager.FindByNameAsync(userDto.UserName);
+        _user = await _userManager.FindByNameAsync(userDto.UserName);
 
-        return user != null && await userManager.CheckPasswordAsync(user, userDto.Password);
+        return _user != null && await _userManager.CheckPasswordAsync(_user, userDto.Password);
     }
 
     public async Task<TokenDto> RefreshTokenAsync(TokenDto token)
     {
         ClaimsPrincipal principal = GetPrincipalFromExpiredToken(token.AccessToken);
-        ApplicationUser? user = await userManager.FindByNameAsync(principal.Identity?.Name!);
+        ApplicationUser? user = await _userManager.FindByNameAsync(principal.Identity?.Name!);
 
         if (user == null || user.RefreshToken != token.RefreshToken || user.RefreshTokenExpireTime <= DateTime.Now)
             throw new TokenValidationException();
 
-        this.user = user;
+        this._user = user;
 
         return await CreateTokenAsync(addTime: false);
 
@@ -162,9 +162,9 @@ public class AuthService : IAuthService
             ValidateAudience = true,
             ValidateLifetime = false,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtSettings.Issuer,
-            ValidAudience = jwtSettings.Audience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
+            ValidIssuer = _jwtSettings.Issuer,
+            ValidAudience = _jwtSettings.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey))
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();

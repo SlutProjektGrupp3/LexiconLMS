@@ -4,6 +4,7 @@ using Domain.Models.Entities;
 using Domain.Models.Exceptions;
 using LMS.Shared.DTOs;
 using LMS.Shared.DTOs.Course;
+using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.DTOs.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +28,7 @@ public class CourseService : ICourseService
     public async Task<(IEnumerable<CourseSummaryDto> Items, int TotalCount)> GetCourseSummariesAsync(string? search = null, bool? active = null, int page = 1, int pageSize = 12)
     {
         // Build base query
-        var repoQuery = (uow.CourseRepository as Domain.Contracts.Repositories.ICourseRepository)!.GetCourseQuery(false);
+        var repoQuery = (_uow.CourseRepository as Domain.Contracts.Repositories.ICourseRepository)!.GetCourseQuery(false);
         var query = repoQuery;
 
         if (!string.IsNullOrWhiteSpace(search))

@@ -20,25 +20,25 @@ public class ModulesService : IModuleService
         _moduleRepository = moduleRepository;
     }
 
-        public async Task<CreateModuleResultDto> CreateModuleAsync(CreateModuleDto createModuleDto)
+    public async Task<CreateModuleResultDto> CreateModuleAsync(CreateModuleDto createModuleDto)
+    {
+        var course = await _uow.CourseRepository.GetCourseByIdAsync(createModuleDto.CourseId, trackChanges: false);
+
+        if (course is null)
         {
-            var course = await _uow.CourseRepository.GetCourseByIdAsync(createModuleDto.CourseId, trackChanges: false);
-
-            if (course is null)
+            return CreateModuleResultDto.Failed(new List<ModuleError>
             {
-                return CreateModuleResultDto.Failed(new List<ModuleError>
+                new ModuleError
                 {
-                    new ModuleError
-                    {
-                        Code = "CourseNotFound",
-                        Description = $"Course with id {createModuleDto.CourseId} was not found."
-                    }
-                });
-            }
+                    Code = "CourseNotFound",
+                    Description = $"Course with id {createModuleDto.CourseId} was not found."
+                }
+            });
+        }
 
-            var module = _mapper.Map<Module>(createModuleDto);
-            module.CourseId = course.Id;
-            _uow.ModuleRepository.Create(module);
+        var module = _mapper.Map<Module>(createModuleDto);
+        module.CourseId = course.Id;
+        _uow.ModuleRepository.Create(module);
 
         try
         {
@@ -60,46 +60,46 @@ public class ModulesService : IModuleService
             }
         }
 
-        public async Task<DeleteModuleResultDto> DeleteModuleAsync(Guid moduleId)
+    public async Task<DeleteModuleResultDto> DeleteModuleAsync(Guid moduleId)
+    {
+        if (moduleId == Guid.Empty)
         {
-            if (moduleId == Guid.Empty)
+            return DeleteModuleResultDto.Failed(new ModuleError
             {
-                return DeleteModuleResultDto.Failed(new ModuleError
-                {
-                    Code = "DatabaseError",
-                    Description = "Module ID is required and cannot be empty.",
-                    StatusCode = ErrorStatusCode.BadRequest
-                });
-            }
-
-        var module = await _uow.ModuleRepository.GetModuleByIdAsync(moduleId, trackChanges: false);
-        if (module != null)
-        {
-            _uow.ModuleRepository.Delete(module);
-
-            try
-            {
-                await _uow.CompleteAsync();
-                return DeleteModuleResultDto.Success;
-            }
-            catch (Exception ex)
-            {
-                return DeleteModuleResultDto.Failed(new ModuleError
-                {
-                    Code = "MODULE_ERROR:DB",
-                    Description = "An error occurred while deleting the module to the database.",
-                    StatusCode = ErrorStatusCode.Database
-                });
-            }
+                Code = "DatabaseError",
+                Description = "Module ID is required and cannot be empty.",
+                StatusCode = ErrorStatusCode.BadRequest
+            });
         }
 
-        return DeleteModuleResultDto.Failed(new ModuleError
+    var module = await _uow.ModuleRepository.GetModuleByIdAsync(moduleId, trackChanges: false);
+    if (module != null)
+    {
+        _uow.ModuleRepository.Delete(module);
+
+        try
         {
-            Code = "MODULE_ERROR:DELETE",
-            Description = "Can't delete module: not found",
-            StatusCode = ErrorStatusCode.NotFound
-        });
-     }   
+            await _uow.CompleteAsync();
+            return DeleteModuleResultDto.Success;
+        }
+        catch (Exception ex)
+        {
+            return DeleteModuleResultDto.Failed(new ModuleError
+            {
+                Code = "MODULE_ERROR:DB",
+                Description = "An error occurred while deleting the module to the database.",
+                StatusCode = ErrorStatusCode.Database
+            });
+        }
+    }
+
+    return DeleteModuleResultDto.Failed(new ModuleError
+    {
+        Code = "MODULE_ERROR:DELETE",
+        Description = "Can't delete module: not found",
+        StatusCode = ErrorStatusCode.NotFound
+    });
+    }   
         
     public async Task UpdateModuleAsync(Guid moduleId, UpdateModuleDto dto)
     {
@@ -144,19 +144,18 @@ public class ModulesService : IModuleService
 
         if (module is null)
             return null;
+    
 
-            return mapper.Map<ModuleDto>(module);
-        }
-
-        public async Task<IEnumerable<ModuleDto>> GetModulesByCourseIdAsync(Guid courseId)
-        {
-            var query = (uow.ModuleRepository as Domain.Contracts.Repositories.IModuleRepository)!.GetModuleQuery(false);
-            var modules = await query.Where(m => m.CourseId == courseId)
-                .Select(m => new ModuleDto(m.Id, m.Name, m.Description, m.StartDate, m.EndDate, m.CourseId))
-                .ToListAsync();
-
-            return modules;
-        }
+        return _mapper.Map<ModuleDto>(module);
     }
 
+    public async Task<IEnumerable<ModuleDto>> GetModulesByCourseIdAsync(Guid courseId)
+    {
+        var query = (_uow.ModuleRepository as Domain.Contracts.Repositories.IModuleRepository)!.GetModuleQuery(false);
+        var modules = await query.Where(m => m.CourseId == courseId)
+            .Select(m => new ModuleDto(m.Id, m.Name, m.Description, m.StartDate, m.EndDate, m.CourseId))
+            .ToListAsync();
+
+        return modules;
+    }
 }

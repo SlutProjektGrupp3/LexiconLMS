@@ -18,7 +18,7 @@ namespace LMS.Infractructure.Repositories
         public async Task<IEnumerable<ModuleActivity>> GetActivitiesByModuleIdAsync(Guid moduleId, bool trackChanges)
         {
             return await FindByCondition(a => a.ModuleId == moduleId, trackChanges)
-                .Include(a => a.TypeId)
+                .Include(a => a.Type)
                 .ToListAsync();
         }
         public async Task<ModuleActivity?> GetActivityByIdAsync(Guid activityId, bool trackChanges)

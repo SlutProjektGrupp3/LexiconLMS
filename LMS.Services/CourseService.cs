@@ -4,28 +4,23 @@ using Domain.Models.Entities;
 using Domain.Models.Exceptions;
 using LMS.Shared.DTOs;
 using LMS.Shared.DTOs.Course;
-using LMS.Shared.DTOs.CourseDtos;
-using LMS.Shared.DTOs.Module;
 using LMS.Shared.DTOs.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Service.Contracts;
 
-
-
 namespace LMS.Services;
 
 public class CourseService : ICourseService
 {
-    private IUnitOfWork uow;
-    private readonly IMapper mapper;
+    private readonly IUnitOfWork _uow;
+    private readonly IMapper _mapper;
     private readonly UserManager<ApplicationUser> _userManager;
 
     public CourseService(ICourseRepository courseRepository,IUnitOfWork uow, IMapper mapper, UserManager<ApplicationUser> userManager)
- 
     {
-        this.uow = uow;
-        this.mapper = mapper;
+        _uow = uow;
+        _mapper = mapper;
         _userManager = userManager;
     }
 
@@ -72,33 +67,18 @@ public class CourseService : ICourseService
     }
 
     public async Task<IEnumerable<CourseDto>> GetAllCoursesAsync(bool trackChanges = false)
- 
     {
-        var courses = await uow.CourseRepository.GetAllCoursesAsync(trackChanges);
-        return mapper.Map<IEnumerable<CourseDto>>(courses);
+        var courses = await _uow.CourseRepository.GetAllCoursesAsync(trackChanges);
+        return _mapper.Map<IEnumerable<CourseDto>>(courses);
     }
 
     public async Task<CourseDetailsDto?> GetCourseByIdAsync(Guid id)
     {
-        var course = await uow.CourseRepository.GetCourseByIdAsync(id, includeModules: true);
+        var course = await _uow.CourseRepository.GetCourseByIdAsync(id, includeModules: true);
         if (course == null)
             return null;
 
-        return new CourseDetailsDto(
-            course.Id,
-            course.Name,
-            course.Description,
-            course.StartDate,
-            course.EndDate,
-            course.Modules.Select(m => new ModuleDto(
-                m.Id,
-                m.Name,
-                m.Description,
-                m.StartDate,
-                m.EndDate,
-                 m.CourseId
-            )).ToList()
-        );
+        return _mapper.Map<CourseDetailsDto>(course);
     }
 
     public async Task<ResultDto<CourseDto>> CreateCourseAsync(CreateCourseDto dto)
@@ -123,32 +103,20 @@ public class CourseService : ICourseService
         if (errors.Any())
             return ResultDto<CourseDto>.Failed(errors);
 
-        var course = new Course
-        {
-            Name = dto.Name,
-            Description = dto.Description,
-            StartDate = dto.StartDate,
-            EndDate = dto.EndDate
-        };
+        var course = _mapper.Map<Course>(dto);
 
-        uow.CourseRepository.CreateCourse(course);
-        await uow.CompleteAsync();
+        _uow.CourseRepository.CreateCourse(course);
 
-        var courseDto = new CourseDto
-        {
-            Id = course.Id,
-            Name = course.Name,
-            Description = course.Description,
-            StartDate = course.StartDate,
-            EndDate = course.EndDate
-        };
+        await _uow.CompleteAsync();
+
+        var courseDto = _mapper.Map<CourseDto>(course);
 
         return ResultDto<CourseDto>.Success(courseDto);
     }
 
     public async Task UpdateCourseAsync(Guid id, UpdateCourseDto updateCourseDto, bool trackChanges)
     {
-        var courseEntity = await uow.CourseRepository.GetCourseByIdAsync(id, trackChanges, includeModules: false);
+        var courseEntity = await _uow.CourseRepository.GetCourseByIdAsync(id, trackChanges, includeModules: false);
 
         if (courseEntity is null)
             throw new KeyNotFoundException($"Course with id {id} was not found.");
@@ -156,13 +124,13 @@ public class CourseService : ICourseService
         if (updateCourseDto.EndDate < updateCourseDto.StartDate)
             throw new Exception("End date must be after start date.");
 
-        mapper.Map(updateCourseDto, courseEntity);
+        _mapper.Map(updateCourseDto, courseEntity);
 
-        await uow.CompleteAsync();
+        await _uow.CompleteAsync();
     }
     public async Task<ResultDto> DeleteCourseAsync(Guid id, bool trackChanges)
     {
-        var courseEntity = await uow.CourseRepository.GetCourseByIdAsync(id, trackChanges);
+        var courseEntity = await _uow.CourseRepository.GetCourseByIdAsync(id, trackChanges);
 
         if (courseEntity is null)
         {
@@ -172,31 +140,26 @@ public class CourseService : ICourseService
                 Description = $"Course with id {id} was not found."
             });
         }
-        uow.CourseRepository.Delete(courseEntity);
-        await uow.CompleteAsync();
+        _uow.CourseRepository.Delete(courseEntity);
+        await _uow.CompleteAsync();
 
         return ResultDto.Success;
     }
 
     public async Task<IEnumerable<ParticipantDto>> GetParticipantsAsync(Guid courseId)
     {
-        var course = await uow.CourseRepository
+        var course = await _uow.CourseRepository
             .GetCourseWithStudentsAsync(courseId, trackChanges: false);
 
         if (course is null)
             return Enumerable.Empty<ParticipantDto>();
 
-        return course.Students.Select(s => new ParticipantDto(
-            Guid.Parse(s.Id),
-            s.FirstName,
-            s.LastName,
-            s.Email!
-        ));
+        return _mapper.Map<IEnumerable<ParticipantDto>>(course.Students);
     }
 
     public async Task AddStudentToCourseAsync(Guid courseId, string studentId)
     {
-        var course = await uow.CourseRepository
+        var course = await _uow.CourseRepository
             .GetCourseByIdAsync(courseId, trackChanges: false);
 
         if (course == null)
@@ -230,7 +193,7 @@ public class CourseService : ICourseService
 
         return users
             .Where(u => u.CourseId == null)
-            .Select(u => mapper.Map<AvailableStudentDto>(u))
+            .Select(u => _mapper.Map<AvailableStudentDto>(u))
             .ToList();
     }
 }

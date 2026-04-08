@@ -1,142 +1,100 @@
-﻿using Domain.Contracts.Repositories;
+﻿using AutoMapper;
+using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Shared.DTOs;
 using LMS.Shared.DTOs.Activity;
 using Service.Contracts;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
 
-namespace LMS.Services
+namespace LMS.Services;
+
+public class ActivityService : IActivityService
 {
-    public class ActivityService : IActivityService
+    private readonly IActivityRepository _repository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
+
+    public ActivityService(IActivityRepository repository, IUnitOfWork unitOfWork, IMapper mapper)
     {
-        private readonly IActivityRepository _repository;
-        private readonly IUnitOfWork _unitOfWork;
+        _repository = repository;
+        _unitOfWork = unitOfWork;
+        _mapper = mapper;
+    }
 
-        public ActivityService(IActivityRepository repository, IUnitOfWork unitOfWork)
-        {
-            _repository = repository;
-            _unitOfWork = unitOfWork;
-        }
+    public async Task<IEnumerable<ActivityDto>> GetActivitiesForModuleAsync(Guid moduleId)
+    {
+        var activitiesFromDb = await _repository.GetActivitiesByModuleIdAsync(moduleId, trackChanges: false);
 
-        public async Task<IEnumerable<ActivityDto>> GetActivitiesForModuleAsync(Guid moduleId)
-        {
-            var activitiesFromDb = await _repository.GetActivitiesByModuleIdAsync(moduleId, trackChanges: false);
+        return _mapper.Map<IEnumerable<ActivityDto>>(activitiesFromDb);
+    }
 
-            var dtoList = activitiesFromDb.Select(a => new ActivityDto(
-                a.Id,
-                a.Name,
-                a.Type.Name,
-                a.Description,
-                a.StartDate,
-                a.EndDate,
-                a.TypeId,
-                a.ModuleId
-            )).ToList();
-
-            return dtoList;
-        }
-
-        public async Task<ResultDto<ActivityDto>> CreateActivityAsync(CreateActivityDto dto)
-        {
-            var moduleExists = await _repository.ModuleExistsAsync(dto.ModuleId);
-            if (!moduleExists)
-                return ResultDto<ActivityDto>.Failed(new ErrorDto
-                {
-                    Code = "ModuleNotFound",
-                    Description = $"Module with id {dto.ModuleId} was not found."
-                });
-
-            var newActivity = new ModuleActivity
+    public async Task<ResultDto<ActivityDto>> CreateActivityAsync(CreateActivityDto dto)
+    {
+        var moduleExists = await _repository.ModuleExistsAsync(dto.ModuleId);
+        if (!moduleExists)
+            return ResultDto<ActivityDto>.Failed(new ErrorDto
             {
-                Id = Guid.NewGuid(),
-                Name = dto.Name,
-                Description = dto.Description,
-                StartDate = dto.StartDate,
-                EndDate = dto.EndDate,
-                ModuleId = dto.ModuleId,
-                TypeId = dto.TypeId.Value,
-            };
+                Code = "ModuleNotFound",
+                Description = $"Module with id {dto.ModuleId} was not found."
+            });
 
-            _repository.Create(newActivity);
-            await _unitOfWork.CompleteAsync();
+        var newActivity = _mapper.Map<ModuleActivity>(dto);
 
-            var activityType = await _repository.GetActivityTypeByIdAsync(newActivity.TypeId);
+        _repository.Create(newActivity);
+        await _unitOfWork.CompleteAsync();
 
-            var dtoResult = new ActivityDto(
-                newActivity.Id,
-                newActivity.Name,
-                activityType?.Name ?? "Unknown",
-                newActivity.Description,
-                newActivity.StartDate,
-                newActivity.EndDate,
-                newActivity.TypeId,
-                newActivity.ModuleId
-            );
+        var activityType = await _repository.GetActivityTypeByIdAsync(newActivity.TypeId);
 
-            return ResultDto<ActivityDto>.Success(dtoResult);            
-        }
+        var dtoResult = new ActivityDto(
+            newActivity.Id,
+            newActivity.Name,
+            activityType?.Name ?? "Unknown",
+            newActivity.Description,
+            newActivity.StartDate,
+            newActivity.EndDate,
+            newActivity.TypeId,
+            newActivity.ModuleId
+        );
 
-        public async Task<IEnumerable<ActivityTypeDto>> GetAllActivityTypesAsync()
-        {
-            var typesFromDb = await _repository.GetAllActivityTypesAsync(trackChanges: false);
+        return ResultDto<ActivityDto>.Success(dtoResult);
+    }
 
-            return typesFromDb.Select(t => new ActivityTypeDto
+    public async Task<IEnumerable<ActivityTypeDto>> GetAllActivityTypesAsync()
+    {
+        var typesFromDb = await _repository.GetAllActivityTypesAsync(trackChanges: false);
+
+        return _mapper.Map<IEnumerable<ActivityTypeDto>>(typesFromDb);
+    }
+    public async Task<ResultDto<bool>> DeleteActivityAsync(Guid activityId)
+    {
+        var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: false);
+        if (activity == null)
+            return ResultDto<bool>.Failed(new ErrorDto
             {
-                Id = t.Id,
-                Name = t.Name
-            }).ToList();
-        }
+                Code = "ActivityNotFound",
+                Description = $"Activity with id {activityId} was not found."
+            });
 
-        public async Task<ResultDto<bool>> DeleteActivityAsync(Guid activityId)
-        {
-            var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: false);
-            if (activity == null)
-                return ResultDto<bool>.Failed(new ErrorDto
-                {
-                    Code = "ActivityNotFound",
-                    Description = $"Activity with id {activityId} was not found."
-                });
+        _repository.Delete(activity);
+        await _unitOfWork.CompleteAsync();
 
-            _repository.Delete(activity);
-            await _unitOfWork.CompleteAsync();
+        return ResultDto<bool>.Success(true);
+    }
+    public async Task<ResultDto<ActivityDto>> UpdateActivityAsync(Guid activityId, UpdateActivityDto dto)
+    {
+        var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: true);
+        if (activity == null)
+            return ResultDto<ActivityDto>.Failed(new ErrorDto
+            {
+                Code = "ActivityNotFound",
+                Description = $"Activity with id {activityId} was not found."
+            });
 
-            return ResultDto<bool>.Success(true);
-        }
-        public async Task<ResultDto<ActivityDto>> UpdateActivityAsync(Guid activityId, UpdateActivityDto dto)
-        {
-            var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: true);
-            if (activity == null)
-                return ResultDto<ActivityDto>.Failed(new ErrorDto
-                {
-                    Code = "ActivityNotFound",
-                    Description = $"Activity with id {activityId} was not found."
-                });
+        _mapper.Map(dto, activity);
 
-            activity.Name = dto.Name;
-            activity.Description = dto.Description;
-            activity.StartDate = dto.StartDate;
-            activity.EndDate = dto.EndDate;
-            activity.TypeId = dto.TypeId;
+        await _unitOfWork.CompleteAsync();
 
-            await _unitOfWork.CompleteAsync();
+        var dtoResult = _mapper.Map<ActivityDto>(activity);
 
-            var activityType = await _repository.GetActivityTypeByIdAsync(activity.TypeId);
-
-            var dtoResult = new ActivityDto(
-                activity.Id,
-                activity.Name,
-                activityType?.Name ?? "Unknown",
-                activity.Description,
-                activity.StartDate,
-                activity.EndDate,
-                activity.TypeId,
-                activity.ModuleId
-            );
-
-            return ResultDto<ActivityDto>.Success(dtoResult);
-        }
+        return ResultDto<ActivityDto>.Success(dtoResult);
     }
 }

@@ -1,29 +1,28 @@
 ﻿using AutoMapper;
 using Domain.Contracts.Repositories;
-using LMS.Shared.DTOs.Modules;
 using LMS.Shared.DTOs.Module;
 using Domain.Models.Entities;
 using Service.Contracts;
 using Microsoft.EntityFrameworkCore;
 
-namespace LMS.Services
-{
-    public class ModulesService : IModuleService
-    {
-        private readonly IUnitOfWork uow;
-        private readonly IMapper mapper;
-        private readonly IModuleRepository _moduleRepository;
+namespace LMS.Services;
 
-        public ModulesService(IUnitOfWork uow, IMapper mapper, IModuleRepository moduleRepository)
-        {
-            this.uow = uow;
-            this.mapper = mapper;
-            _moduleRepository = moduleRepository;
-        }
+public class ModulesService : IModuleService
+{
+    private readonly IUnitOfWork _uow;
+    private readonly IMapper _mapper;
+    private readonly IModuleRepository _moduleRepository;
+
+    public ModulesService(IUnitOfWork uow, IMapper mapper, IModuleRepository moduleRepository)
+    {
+        _uow = uow;
+        _mapper = mapper;
+        _moduleRepository = moduleRepository;
+    }
 
         public async Task<CreateModuleResultDto> CreateModuleAsync(CreateModuleDto createModuleDto)
         {
-            var course = await uow.CourseRepository.GetCourseByIdAsync(createModuleDto.CourseId, trackChanges: false);
+            var course = await _uow.CourseRepository.GetCourseByIdAsync(createModuleDto.CourseId, trackChanges: false);
 
             if (course is null)
             {
@@ -37,15 +36,15 @@ namespace LMS.Services
                 });
             }
 
-            var module = mapper.Map<Module>(createModuleDto);
+            var module = _mapper.Map<Module>(createModuleDto);
             module.CourseId = course.Id;
-            uow.ModuleRepository.Create(module);
+            _uow.ModuleRepository.Create(module);
 
-            try
-            {
-                await uow.CompleteAsync();
+        try
+        {
+            await _uow.CompleteAsync();
 
-                var createdModuleDto = mapper.Map<ModuleDto>(module);
+                var createdModuleDto = _mapper.Map<ModuleDto>(module);
                 return CreateModuleResultDto.SuccessWith(createdModuleDto);
             }
             catch (Exception ex)
@@ -73,81 +72,78 @@ namespace LMS.Services
                 });
             }
 
-            var module = await uow.ModuleRepository.GetModuleByIdAsync(moduleId, trackChanges: false);
-            if (module != null)
-            {
-                uow.ModuleRepository.Delete(module);
-
-                try
-                {
-                    await uow.CompleteAsync();
-                    return DeleteModuleResultDto.Success;
-                }
-                catch (Exception ex)
-                {
-                    return DeleteModuleResultDto.Failed(new ModuleError
-                    {
-                        Code = "MODULE_ERROR:DB",
-                        Description = "An error occurred while deleting the module to the database.",
-                        StatusCode = ErrorStatusCode.Database
-                    });
-                }
-            }
-
-            return DeleteModuleResultDto.Failed(new ModuleError
-            {
-                Code = "MODULE_ERROR:DELETE",
-                Description = "Can't delete module: not found",
-                StatusCode = ErrorStatusCode.NotFound
-            });
-         }   
-            
-        public async Task UpdateModuleAsync(Guid moduleId, UpdateModuleDto dto)
+        var module = await _uow.ModuleRepository.GetModuleByIdAsync(moduleId, trackChanges: false);
+        if (module != null)
         {
-            ValidateUpdateModule(moduleId, dto);
+            _uow.ModuleRepository.Delete(module);
 
-            var module = await _moduleRepository.GetModuleByIdAndCourseIdAsync(
-                moduleId,
-                dto.CourseId,
-                trackChanges: true);
-
-            if (module is null)
-                throw new KeyNotFoundException("Module not found.");
-
-            module.Name = dto.Name;
-            module.Description = dto.Description;
-            module.StartDate = dto.StartDate;
-            module.EndDate = dto.EndDate;
-
-            await uow.CompleteAsync();
+            try
+            {
+                await _uow.CompleteAsync();
+                return DeleteModuleResultDto.Success;
+            }
+            catch (Exception ex)
+            {
+                return DeleteModuleResultDto.Failed(new ModuleError
+                {
+                    Code = "MODULE_ERROR:DB",
+                    Description = "An error occurred while deleting the module to the database.",
+                    StatusCode = ErrorStatusCode.Database
+                });
+            }
         }
 
-        private static void ValidateUpdateModule(Guid moduleId, UpdateModuleDto dto)
+        return DeleteModuleResultDto.Failed(new ModuleError
         {
-            if (dto.Id != moduleId)
-                throw new ArgumentException("ModuleId in route and body do not match.");
+            Code = "MODULE_ERROR:DELETE",
+            Description = "Can't delete module: not found",
+            StatusCode = ErrorStatusCode.NotFound
+        });
+     }   
+        
+    public async Task UpdateModuleAsync(Guid moduleId, UpdateModuleDto dto)
+    {
+        ValidateUpdateModule(moduleId, dto);
 
-            if (dto.CourseId == Guid.Empty)
-                throw new ArgumentException("CourseId is required.");
+        var module = await _moduleRepository.GetModuleByIdAndCourseIdAsync(
+            moduleId,
+            dto.CourseId,
+            trackChanges: true);
 
-            if (string.IsNullOrWhiteSpace(dto.Name))
-                throw new ArgumentException("Module name is required.");
+        if (module is null)
+            throw new KeyNotFoundException("Module not found.");
 
-            if (dto.StartDate == default)
-                throw new ArgumentException("Start date is required.");
+        _mapper.Map(dto, module);
 
-            if (dto.EndDate == default)
-                throw new ArgumentException("End date is required.");
+        await _uow.CompleteAsync();
+    }
+
+    private static void ValidateUpdateModule(Guid moduleId, UpdateModuleDto dto)
+    {
+        if (dto.Id != moduleId)
+            throw new ArgumentException("ModuleId in route and body do not match.");
+
+        if (dto.CourseId == Guid.Empty)
+            throw new ArgumentException("CourseId is required.");
+
+        if (string.IsNullOrWhiteSpace(dto.Name))
+            throw new ArgumentException("Module name is required.");
+
+        if (dto.StartDate == default)
+            throw new ArgumentException("Start date is required.");
+
+        if (dto.EndDate == default)
+            throw new ArgumentException("End date is required.");
 
             if (dto.EndDate <= dto.StartDate)
                 throw new ArgumentException("End date must be after start date.");
-        }
-        public async Task<ModuleDto?> GetModuleByIdAsync(Guid id)
-        {
-            var module = await uow.ModuleRepository.GetByIdAsync(id, trackChanges: false);
+    }
+    public async Task<ModuleDto?> GetModuleByIdAsync(Guid id)
+    {
+        var module = await _uow.ModuleRepository.GetByIdAsync(id, trackChanges: false);
 
-            if (module is null)
-                return null;
+        if (module is null)
+            return null;
 
             return mapper.Map<ModuleDto>(module);
         }
@@ -162,4 +158,5 @@ namespace LMS.Services
             return modules;
         }
     }
+
 }

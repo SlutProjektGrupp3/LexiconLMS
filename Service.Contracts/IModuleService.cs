@@ -1,5 +1,4 @@
 ﻿using LMS.Shared.DTOs.Module;
-using LMS.Shared.DTOs.Modules;
 
 namespace Service.Contracts
 {

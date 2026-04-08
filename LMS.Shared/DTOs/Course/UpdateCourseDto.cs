@@ -1,12 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace LMS.Shared.DTOs.Activity;
+namespace LMS.Shared.DTOs.Course;
 
-public class UpdateActivityDto
+public class UpdateCourseDto
 {
     [Required]
     public string Name { get; set; } = string.Empty;
 
+    [Required]
     public string Description { get; set; } = string.Empty;
 
     [Required]
@@ -14,7 +15,4 @@ public class UpdateActivityDto
 
     [Required]
     public DateTime EndDate { get; set; }
-
-    [Required(ErrorMessage = "Select an activity type.")]
-    public Guid TypeId { get; set; }
 }

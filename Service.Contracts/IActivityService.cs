@@ -1,18 +1,14 @@
 ﻿using LMS.Shared.DTOs;
 using LMS.Shared.DTOs.Activity;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Service.Contracts
+namespace Service.Contracts;
+
+public interface IActivityService
 {
-    public interface IActivityService
-    {
-        Task<IEnumerable<ActivityDto>> GetActivitiesForModuleAsync(Guid moduleId);
-        Task<ResultDto<ActivityDto>> CreateActivityAsync(CreateActivityDto dto);
-        Task<IEnumerable<ActivityTypeDto>> GetAllActivityTypesAsync();
-        Task<ResultDto<bool>> DeleteActivityAsync(Guid id);
-        Task<ResultDto<ActivityDto>> UpdateActivityAsync(Guid id, UpdateActivityDto dto);
+    Task<IEnumerable<ActivityDto>> GetActivitiesForModuleAsync(Guid moduleId);
+    Task<ResultDto<ActivityDto>> CreateActivityAsync(CreateActivityDto dto);
+    Task<IEnumerable<ActivityTypeDto>> GetAllActivityTypesAsync();
+    Task<ResultDto<bool>> DeleteActivityAsync(Guid id);
+    Task<ResultDto<ActivityDto>> UpdateActivityAsync(Guid id, UpdateActivityDto dto);
 
-    }
 }

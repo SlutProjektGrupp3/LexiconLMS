@@ -137,48 +137,46 @@ public class ModulesController : ControllerBase
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
-
-            try
-            {
-                await _serviceManager.ModuleService.UpdateModuleAsync(moduleId, dto);
-                return NoContent();
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-        }
-        [HttpGet("{id:guid}", Name = "GetModuleById")]
-        [Authorize]
-        public async Task<IActionResult> GetModuleById(Guid id)
+        try
         {
-            var module = await _serviceManager.ModuleService.GetModuleByIdAsync(id);
-
-            if (module is null)
-            {
-                return NotFound(new ProblemDetails
-                {
-                    Title = "Module not found",
-                    Status = StatusCodes.Status404NotFound,
-                    Detail = $"Module with id {id} was not found."
-                });
-            }
-
-            // HATEOAS links
-            module = module with
-            {
-                Links = new List<LinkDto>
-                {
-                    new LinkDto { Href = Url.Action(nameof(GetModuleById), new { id = module.Id })!, Rel = "self", Method = "GET" },
-                    new LinkDto { Href = $"/api/courses/{module.CourseId}", Rel = "course", Method = "GET" }
-                }
-            };
-            
-            return Ok(module);
+            await _serviceManager.ModuleService.UpdateModuleAsync(moduleId, dto);
+            return NoContent();
         }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+    }
+    [HttpGet("{id:guid}", Name = "GetModuleById")]
+    [Authorize]
+    public async Task<IActionResult> GetModuleById(Guid id)
+    {
+        var module = await _serviceManager.ModuleService.GetModuleByIdAsync(id);
+
+        if (module is null)
+        {
+            return NotFound(new ProblemDetails
+            {
+                Title = "Module not found",
+                Status = StatusCodes.Status404NotFound,
+                Detail = $"Module with id {id} was not found."
+            });
+        }
+
+        // HATEOAS links
+        module = module with
+        {
+            Links = new List<LinkDto>
+            {
+                new LinkDto { Href = Url.Action(nameof(GetModuleById), new { id = module.Id })!, Rel = "self", Method = "GET" },
+                new LinkDto { Href = $"/api/courses/{module.CourseId}", Rel = "course", Method = "GET" }
+            }
+        };
+            
+        return Ok(module);
     }
 }

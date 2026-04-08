@@ -27,16 +27,35 @@ public class ActivityService : IActivityService
         return _mapper.Map<IEnumerable<ActivityDto>>(activitiesFromDb);
     }
 
-    public async Task<ActivityDto> CreateActivityAsync(CreateActivityDto dto)
+    public async Task<ResultDto<ActivityDto>> CreateActivityAsync(CreateActivityDto dto)
     {
+        var moduleExists = await _repository.ModuleExistsAsync(dto.ModuleId);
+        if (!moduleExists)
+            return ResultDto<ActivityDto>.Failed(new ErrorDto
+            {
+                Code = "ModuleNotFound",
+                Description = $"Module with id {dto.ModuleId} was not found."
+            });
+
         var newActivity = _mapper.Map<ModuleActivity>(dto);
 
-            _repository.Create(newActivity);
-            await _unitOfWork.CompleteAsync();
+        _repository.Create(newActivity);
+        await _unitOfWork.CompleteAsync();
 
-            var activityType = await _repository.GetActivityTypeByIdAsync(newActivity.TypeId);
+        var activityType = await _repository.GetActivityTypeByIdAsync(newActivity.TypeId);
 
-        return _mapper.Map<ActivityDto>(newActivity);
+        var dtoResult = new ActivityDto(
+            newActivity.Id,
+            newActivity.Name,
+            activityType?.Name ?? "Unknown",
+            newActivity.Description,
+            newActivity.StartDate,
+            newActivity.EndDate,
+            newActivity.TypeId,
+            newActivity.ModuleId
+        );
+
+        return ResultDto<ActivityDto>.Success(dtoResult);
     }
 
     public async Task<IEnumerable<ActivityTypeDto>> GetAllActivityTypesAsync()

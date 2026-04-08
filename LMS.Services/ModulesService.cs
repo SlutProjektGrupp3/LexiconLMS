@@ -136,15 +136,15 @@ public class ModulesService : IModuleService
 
             if (dto.EndDate <= dto.StartDate)
                 throw new ArgumentException("End date must be after start date.");
-        }
-        public async Task<ModuleDto?> GetModuleByIdAsync(Guid id)
-        {
-            var module = await _uow.ModuleRepository.GetByIdAsync(id, trackChanges: false);
-
-            if (module is null)
-                return null;
-
-            return _mapper.Map<ModuleDto>(module);
-        }
     }
+    public async Task<ModuleDto?> GetModuleByIdAsync(Guid id)
+    {
+        var module = await _uow.ModuleRepository.GetByIdAsync(id, trackChanges: false);
+
+        if (module is null)
+            return null;
+
+        return _mapper.Map<ModuleDto>(module);
+    }
+
 }

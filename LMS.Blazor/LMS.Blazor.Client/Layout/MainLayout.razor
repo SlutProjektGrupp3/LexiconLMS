@@ -15,7 +15,10 @@
                 <div class="top-row px-4">
                     <NavLink class="nav-link" href="Account/Manage">
                         <CircleUserIcon Size="28" CssClass="text-secondary" />
-                        @GetFullName(auth.User)
+                        <div class="d-inline-flex flex-column ms-2">
+                            <span class="fw-bold">@GetFullName(auth.User)</span>
+                            <small class="text-muted" style="font-size: 0.75rem;">@GetUserRole(auth.User)</small>
+                        </div>
                     </NavLink>
                     <form action="Account/Logout" method="post" class="p-4">
                         <AntiforgeryToken />
@@ -64,5 +67,10 @@
     private string GetFullName(ClaimsPrincipal user)
     {
         return $"{user.Identity?.Name}";
+    }    
+
+    private string GetUserRole(ClaimsPrincipal user)
+    {
+        return user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value ?? "";
     }
 }

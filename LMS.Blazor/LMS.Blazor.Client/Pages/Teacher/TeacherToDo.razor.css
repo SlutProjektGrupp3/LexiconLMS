@@ -1,0 +1,20 @@
+﻿.card ul {
+    margin: 1.2rem 0 0 0;
+}
+
+.card li::marker {
+    color: var(--bs-warning);
+    font-size: 1.6em;
+}
+
+.card li {
+    position: relative;
+    padding-left: 0.5rem;
+    
+}
+
+/* push content down slightly to fake centering */
+.card li > * {
+    transform: translateY(-0.6rem); 
+    line-height: 0.8em;
+}

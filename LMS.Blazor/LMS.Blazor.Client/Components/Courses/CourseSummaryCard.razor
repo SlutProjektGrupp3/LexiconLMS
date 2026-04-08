@@ -6,14 +6,14 @@
 
 <div class="col-4">
     <div class="card p-3 mb-3">
-        <div class="d-flex justify-content-between align-items-center mb-1">
-            <BookOpenIcon CssClass="text-primary" />
+        <div class="d-flex justify-content-between align-items-center mb-1 text-primary">
+            <BookOpenIcon Size="46" CssClass="bg-primary-subtle p-2 rounded-2" />
             <span class="badge rounded-pill @(Course.Active ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger")">
                 @(Course.Active ? "Active" : "Inactive")
             </span>
         </div>
 
-        <h5 class="fw-bold">@Course.Name</h5>
+        <h5 class="fw-bold my-2">@Course.Name</h5>
         <p>@Course.Description</p>
 
         <div class="pb-3">

@@ -12,7 +12,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">@Title</h5>
+                <h5 class="modal-title fw-bold">@Title</h5>
                 <button type="button" class="btn-close" aria-label="Close" @onclick="Close"></button>
             </div>
             <div class="modal-body">
@@ -22,12 +22,24 @@
                 }
                 else
                 {
-                    <ul>
+                    <div class="list-group list-group-flush">
                         @foreach (var m in Items)
                         {
+                            <div class="list-group-item px-0 py-2">
+                                <div class="fw-semibold">@m.Name</div>
+                                <div class="text-muted small">
+                                    @m.StartDate.ToString("dd/MM/yyyy HH:mm") to @m.EndDate.ToString("dd/MM/yyyy HH:mm")
+                                </div>
+                            </div>
+                        }
+                    </div>
+                   @*  <ul>
+                        @foreach (var m in Items)
+                        {
+
                             <li>@m.Name - @m.StartDate.ToString("d MMM yyyy") to @m.EndDate.ToString("d MMM yyyy")</li>
                         }
-                    </ul>
+                    </ul> *@
                 }
             </div>
             <div class="modal-footer">

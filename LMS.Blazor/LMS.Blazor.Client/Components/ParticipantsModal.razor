@@ -12,22 +12,25 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">@Title</h5>
+                <h5 class="modal-title fw-bold">@Title</h5>
                 <button type="button" class="btn-close" aria-label="Close" @onclick="Close"></button>
             </div>
             <div class="modal-body">
                 @if (Items is null || !Items.Any())
                 {
-                    <p>No participants found.</p>
+                    <p class="text-muted mb-0">No participants found.</p>
                 }
                 else
                 {
-                    <ul>
+                    <div class="list-group list-group-flush">
                         @foreach (var p in Items)
                         {
-                            <li>@p.FirstName @p.LastName (@p.Email)</li>
+                            <div class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold">@p.FirstName @p.LastName</span>
+                                <span class="text-muted small">@p.Email</span>
+                            </div>
                         }
-                    </ul>
+                    </div>
                 }
             </div>
             <div class="modal-footer">

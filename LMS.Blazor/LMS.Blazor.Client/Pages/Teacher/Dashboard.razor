@@ -11,6 +11,8 @@
 
 <PageTitle>Dashboard – Lexicon LMS</PageTitle>
 
+<Statistics ActiveCourses="@GetActiveCoursesNumber()" TotalStudents="@TotalStudents" AssignmentsToGrade=1 />
+
 <ParticipantsModal Title="Participants" Visible="@showParticipantsModal" VisibleChanged="@(v => showParticipantsModal = v)" Items="participants" />
 <ModulesModal Title="Modules" Visible="@showModulesModal" VisibleChanged="@(v => showModulesModal = v)" Items="modulesList" />
 

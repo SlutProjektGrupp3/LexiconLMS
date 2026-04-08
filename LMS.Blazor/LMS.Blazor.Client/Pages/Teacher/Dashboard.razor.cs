@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Components;
 using System.Threading;
+using System.Linq;
+using LMS.Shared.DTOs.Course;
 using LMS.Shared.DTOs.CourseDtos;
+using LMS.Shared.DTOs.Module;
 using LMS.Blazor.Client.Services;
 
 namespace LMS.Blazor.Client.Pages.Teacher
@@ -16,10 +19,11 @@ namespace LMS.Blazor.Client.Pages.Teacher
         protected bool _showCreateForm;
         protected bool _showSuccessMessage;
         protected string? successMessage;
+        protected int TotalStudents { get; set; }
 
         protected List<CourseSummaryDto> Courses { get; set; } = new();
-        protected List<LMS.Shared.DTOs.Course.ParticipantDto> participants { get; set; } = new();
-        protected List<LMS.Shared.DTOs.Module.ModuleDto> modulesList { get; set; } = new();
+        protected List<ParticipantDto> participants { get; set; } = new();
+        protected List<ModuleDto> modulesList { get; set; } = new();
 
         protected int currentPage = 1;
         protected int pageSize = 12;
@@ -57,6 +61,19 @@ namespace LMS.Blazor.Client.Pages.Teacher
             }
 
             await LoadCourses();
+            await LoadStudentCount();
+        }
+
+        protected async Task LoadStudentCount()
+        {
+            try
+            {
+                TotalStudents = await ApiService.GetAsync<int>($"api/users/count-by-role/{Uri.EscapeDataString("Student")} ");
+            }
+            catch
+            {
+                TotalStudents = 0;
+            }
         }
 
         protected async Task LoadCourses(int? page = null)
@@ -153,6 +170,12 @@ namespace LMS.Blazor.Client.Pages.Teacher
         {
             _showCreateForm = false;
             return Task.CompletedTask;
+        }
+
+        protected int GetActiveCoursesNumber(IEnumerable<CourseSummaryDto>? courses = null)
+        {
+            var list = courses ?? Courses;
+            return list?.Count(c => c.Active) ?? 0;
         }
     }
 }

@@ -8,8 +8,8 @@
     <div class="card p-3 mb-3">
         <div class="d-flex justify-content-between align-items-center mb-1">
             <BookOpenIcon CssClass="text-primary" />
-            <span class="badge rounded-pill @(CourseIsActive ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger")">
-                @(CourseIsActive ? "Active" : "Inactive")
+            <span class="badge rounded-pill @(Course.Active ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger")">
+                @(Course.Active ? "Active" : "Inactive")
             </span>
         </div>
 
@@ -55,6 +55,4 @@
 
     [Parameter]
     public EventCallback<Guid> OnShowModules { get; set; }
-
-    private bool CourseIsActive => DateTime.Now < Course.EndDate;
 }

@@ -1,4 +1,4 @@
-﻿@page "/teacher/courses"
+﻿@page "/teacher/managecourses"
 @using LMS.Shared.DTOs.Course
 @using LMS.Blazor.Client.Components.Shared
 @using LMS.Blazor.Client.Components.Courses
@@ -163,7 +163,7 @@ else
         try
         {
             await ApiService.DeleteAsync($"api/courses/{selectedCourseId}");
-            Navigation.NavigateTo("/teacher/courses?deleted=true", forceLoad: true);
+            Navigation.NavigateTo("/teacher/managecourses?deleted=true", forceLoad: true);
         }
         catch (Exception ex)
         {

@@ -134,7 +134,7 @@ public class UserService : IUserService
     }
     public async Task<UserDto> UpdateUserAsync(string id, UpdateUserDto dto)
     {
-        var user = await userManager.FindByIdAsync(id);
+        var user = await _userManager.FindByIdAsync(id);
         if (user == null)
         {
             throw new NotFoundException($"User with ID {id} not found.", "User Not Found");
@@ -145,24 +145,24 @@ public class UserService : IUserService
         user.Email = dto.Email;
         user.UserName = dto.Email; 
 
-        var updateResult = await userManager.UpdateAsync(user);
+        var updateResult = await _userManager.UpdateAsync(user);
         if (!updateResult.Succeeded)
         {
             var errorMsg = string.Join(", ", updateResult.Errors.Select(e => e.Description));
             throw new BadRequestException(errorMsg, "Update failed");
         }
 
-        var currentRoles = await userManager.GetRolesAsync(user);
+        var currentRoles = await _userManager.GetRolesAsync(user);
         var currentRole = currentRoles.FirstOrDefault();
 
         if (currentRole != dto.RoleName)
         {
             if (currentRole != null)
             {
-                await userManager.RemoveFromRoleAsync(user, currentRole);
+                await _userManager.RemoveFromRoleAsync(user, currentRole);
             }
 
-            var roleResult = await userManager.AddToRoleAsync(user, dto.RoleName);
+            var roleResult = await _userManager.AddToRoleAsync(user, dto.RoleName);
             if (!roleResult.Succeeded)
             {
                 var errorMsg = string.Join(", ", roleResult.Errors.Select(e => e.Description));

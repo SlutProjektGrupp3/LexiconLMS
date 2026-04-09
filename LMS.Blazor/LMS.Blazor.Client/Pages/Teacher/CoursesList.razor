@@ -13,11 +13,9 @@ else
                 <p class="text-muted">Overview of all your courses</p>
             </div>            
         </div>
-
-        <div class="toolbar">
+        <div class="toolbar mb-4">
             <input class="form-control" placeholder="Search courses..." @bind="searchTerm" />
         </div>
-
         <div class="courses-container">
             @if (!FilteredCourses.Any())
             {

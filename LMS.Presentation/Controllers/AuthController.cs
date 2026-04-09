@@ -12,11 +12,11 @@ namespace LMS.Presentation.Controllers;
 [ApiController]
 public class AuthController : ControllerBase
 {
-    private readonly IServiceManager serviceManager;
+    private readonly IServiceManager _serviceManager;
 
     public AuthController(IServiceManager serviceManager)
     {
-        this.serviceManager = serviceManager;
+        _serviceManager = serviceManager;
     }
 
     [HttpPost]
@@ -28,7 +28,7 @@ public class AuthController : ControllerBase
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid input or registration failed")]
     public async Task<IActionResult> RegisterUser(UserRegistrationDto userRegistrationDto)
     {
-        IdentityResult result = await serviceManager.AuthService.RegisterUserAsync(userRegistrationDto);
+        IdentityResult result = await _serviceManager.AuthService.RegisterUserAsync(userRegistrationDto);
         return result.Succeeded ? StatusCode(StatusCodes.Status201Created) : BadRequest(result.Errors);
     }
 
@@ -42,10 +42,10 @@ public class AuthController : ControllerBase
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "Invalid username or password")]
     public async Task<IActionResult> Authenticate(UserAuthDto user)
     {
-        if (!await serviceManager.AuthService.ValidateUserAsync(user))
+        if (!await _serviceManager.AuthService.ValidateUserAsync(user))
             return Unauthorized();
 
-        var tokenDto = await serviceManager.AuthService.CreateTokenAsync(addTime: true);
+        var tokenDto = await _serviceManager.AuthService.CreateTokenAsync(addTime: true);
         return Ok(tokenDto);
     }
 }

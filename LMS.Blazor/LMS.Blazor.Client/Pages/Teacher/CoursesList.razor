@@ -1,4 +1,4 @@
-﻿@using LMS.Shared.DTOs.CourseDtos
+﻿@using LMS.Shared.DTOs.Course
 
 @if (Courses is null || Courses.Count == 0)
 {
@@ -24,14 +24,17 @@ else
                     <td>@course.Description</td>
                     <td>@course.StartDate.ToShortDateString()</td>
                     <td>@course.EndDate.ToShortDateString()</td>
-                    <NavLink class="btn btn-sm btn-outline-primary"
-                             href="@($"/teacher/courses/edit/{course.Id}")">
-                        Edit
-                    </NavLink>
-                    <button class="btn btn-sm btn-outline-danger"
-                            @onclick="() => OnDeleteClicked.InvokeAsync(course.Id)">
-                        Delete
-                    </button>
+                    <td>
+                        <NavLink class="btn btn-sm btn-outline-primary"
+                                 href="@($"/teacher/courses/edit/{course.Id}")">
+                            <i class="bi bi-pencil"></i>
+                        </NavLink>
+
+                        <button class="btn btn-sm btn-outline-danger ms-2"
+                                @onclick="() => OnDeleteClicked.InvokeAsync(course.Id)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
                 </tr>
             }
         </tbody>

@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿
+namespace LMS.Shared.DTOs.Course;
 
-namespace LMS.Shared.DTOs.Course
-{
-    public record ParticipantDto(Guid Id, string FirstName, string LastName, string Email);
-};
+public record ParticipantDto(
+    string Id, 
+    string FirstName, 
+    string LastName, 
+    string Email
+);

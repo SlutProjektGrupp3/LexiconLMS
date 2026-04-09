@@ -1,9 +1,8 @@
-﻿using LMS.Shared.DTOs.CourseDtos;
+﻿using LMS.Shared.DTOs.Course;
 
-namespace Service.Contracts
+namespace Service.Contracts;
+
+public interface IStudentService
 {
-    public interface IStudentService
-    {
-        Task<StudentMyCourseDto?> GetMyCourseAsync(Guid userId);
-    }
+    Task<CourseDetailsDto?> GetMyCourseAsync(Guid userId);
 }

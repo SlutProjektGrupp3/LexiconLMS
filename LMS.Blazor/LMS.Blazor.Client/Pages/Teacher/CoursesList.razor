@@ -47,11 +47,13 @@ else
 
                             <div class="course-actions">
 
-                                <NavLink href="@($"/teacher/managecourses/edit/{course.Id}")">
+                                <NavLink class="btn btn-sm btn-outline-primary" 
+                                         href="@($"/teacher/managecourses/edit/{course.Id}")">
                                     <i class="bi bi-pencil"></i>
                                 </NavLink>
 
-                                <button @onclick="() => OnDeleteClicked.InvokeAsync(course.Id)">
+                                <button class="btn btn-sm btn-outline-danger ms-2" 
+                                        @onclick="() => OnDeleteClicked.InvokeAsync(course.Id)">
                                     <i class="bi bi-trash"></i>
                                 </button>
 

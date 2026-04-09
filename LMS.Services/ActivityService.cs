@@ -99,7 +99,7 @@ public class ActivityService : IActivityService
         var dtoResult = new ActivityDto(
                 activity.Id,
                 activity.Name,
-                activityType?.Name ?? "Unknown",
+                activity.Type?.Name ?? "Unknown",
                 activity.Description,
                 activity.StartDate,
                 activity.EndDate,

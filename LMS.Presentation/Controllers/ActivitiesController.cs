@@ -116,53 +116,9 @@ public class ActivitiesController : ControllerBase
     [HttpPut("{id}")]
     [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> UpdateActivity(Guid id, UpdateActivityDto dto)
-    {        
-        if (dto.EndDate < dto.StartDate)
-        {
-            return BadRequest(new ProblemDetails
-            {
-                Title = "Invalid Dates",
-                Status = StatusCodes.Status400BadRequest,
-                Detail = "End date must be after start date."
-            });
-        }
+    {
+        var updatedActivity = await _serviceManager.ActivityService.UpdateActivityAsync(id, dto);
 
-        try
-        {
-            var result = await _serviceManager.ActivityService.UpdateActivityAsync(id, dto);
-
-            if (!result.Succeeded)
-            {
-                var error = result.Errors.FirstOrDefault();
-
-                return error?.Code switch
-                {
-                    "ActivityNotFound" => NotFound(new ProblemDetails
-                    {
-                        Title = "Activity not found",
-                        Status = StatusCodes.Status404NotFound,
-                        Detail = error.Description
-                    }),
-
-                    _ => BadRequest(new ProblemDetails
-                    {
-                        Title = "Bad Request",
-                        Status = StatusCodes.Status400BadRequest,
-                        Detail = error?.Description
-                    })
-                };
-            }
-
-            return Ok(result.Data);
-        }
-        catch
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, new ProblemDetails
-            {
-                Title = "Internal Server Error",
-                Status = StatusCodes.Status500InternalServerError,
-                Detail = "An unexpected error occurred."
-            });
-        }
+        return Ok(updatedActivity);
     }
 }

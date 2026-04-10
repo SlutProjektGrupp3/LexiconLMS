@@ -24,7 +24,7 @@ else
 {
     if (User != null && User.CourseId.HasValue) 
     {
-        <StudentWelcomeHero StudentName="@User?.FirstName" CourseName="@Course?.Name" />
+        <StudentWelcomeHero StudentName="@User?.FirstName" CourseName="@Course?.Name" ClearedModules="@GetClearedModules()" />
 
         <div class="row mx-1 my-3">
             @if (CurrentModule != null)
@@ -55,6 +55,7 @@ else
     public UserDto? User { get; set; } 
     public CourseDetailsDto? Course { get; set; }
     public List<ActivityDto>? Activities { get; set; } = new List<ActivityDto>();
+    public ModuleDto? CurrentModule { get; set; }
 
     public bool isLoading = true;
 
@@ -121,7 +122,11 @@ else
             .FirstOrDefault();
     }
 
-    public ModuleDto? CurrentModule { get; set; }
+    private int GetClearedModules()
+    {
+        var now = DateTime.Now;
+        return Course?.Modules.Where(m => m.EndDate < now).Count() ?? 0;
+    }
 }
 
 

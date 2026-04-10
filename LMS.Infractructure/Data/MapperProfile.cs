@@ -14,7 +14,6 @@ public class MapperProfile : Profile
     {
         //User mappings
         CreateMap<UserRegistrationDto, ApplicationUser>();
-        CreateMap<ApplicationUser, ParticipantDto>();
         CreateMap<ApplicationUser, UserDto>();
         CreateMap<ApplicationUser, AvailableStudentDto>();
 

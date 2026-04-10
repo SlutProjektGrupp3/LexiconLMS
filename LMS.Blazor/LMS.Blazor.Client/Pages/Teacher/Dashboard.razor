@@ -12,9 +12,6 @@
 
 <Statistics ActiveCourses="@GetActiveCoursesNumber()" TotalStudents="@TotalStudents" AssignmentsToGrade=1 />
 
-<ParticipantsModal Title="Participants" Visible="@showParticipantsModal" VisibleChanged="@(v => showParticipantsModal = v)" Items="participants" />
-<ModulesModal Title="Modules" Visible="@showModulesModal" VisibleChanged="@(v => showModulesModal = v)" Items="modulesList" />
-
 <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
     <h4 class="fw-bold mb-0">Courses</h4>
     <ShowFormButton ShowForm="_showCreateForm"
@@ -54,7 +51,7 @@
     {
         @foreach (var course in Courses)
         {
-            <CourseSummaryCard Course="course" OnShowParticipants="@(id => LoadParticipants(id))" OnShowModules="@(id => LoadModules(id))" />
+            <CourseSummaryCard Course="course" />
         }
     }
 </div>

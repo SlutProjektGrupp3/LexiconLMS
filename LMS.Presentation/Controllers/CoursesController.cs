@@ -172,24 +172,6 @@ public class CoursesController : ControllerBase
         return Ok(students);
     }
 
-    // GET: api/courses/{courseId}/participants
-    [HttpGet("{courseId}/participants")]
-    public async Task<IActionResult> GetParticipants(Guid courseId)
-    {
-        var participants = await _serviceManager.CourseService.GetParticipantsAsync(courseId);
-
-        return Ok(participants);
-    }
-
-    // GET: api/courses/{courseId}/modules
-    [HttpGet("{courseId}/modules")]
-    public async Task<IActionResult> GetModulesForCourse(Guid courseId)
-    {
-        // Use module service to fetch modules belonging to a course
-        var modules = await _serviceManager.ModuleService.GetModulesByCourseIdAsync(courseId);
-        return Ok(modules);
-    }
-
     // GET: api/courses/summary
     [HttpGet("summary")]
     [Authorize(Roles = "Teacher")]

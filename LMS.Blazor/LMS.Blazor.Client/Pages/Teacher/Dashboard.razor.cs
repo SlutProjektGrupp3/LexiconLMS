@@ -21,7 +21,6 @@ namespace LMS.Blazor.Client.Pages.Teacher
         protected int TotalStudents { get; set; }
 
         protected List<CourseSummaryDto> Courses { get; set; } = new();
-        protected List<ParticipantDto> participants { get; set; } = new();
         protected List<ModuleDto> modulesList { get; set; } = new();
 
         protected int currentPage = 1;
@@ -116,18 +115,6 @@ namespace LMS.Blazor.Client.Pages.Teacher
             {
                 isLoading = false;
             }
-        }
-
-        protected async Task LoadParticipants(Guid courseId)
-        {
-            participants = await ApiService.GetAsync<List<LMS.Shared.DTOs.Course.ParticipantDto>>($"api/courses/{courseId}/participants") ?? new();
-            showParticipantsModal = true;
-        }
-
-        protected async Task LoadModules(Guid courseId)
-        {
-            modulesList = await ApiService.GetAsync<List<LMS.Shared.DTOs.Module.ModuleDto>>($"api/courses/{courseId}/modules") ?? new();
-            showModulesModal = true;
         }
 
         protected Task OnActiveChanged(ChangeEventArgs e)

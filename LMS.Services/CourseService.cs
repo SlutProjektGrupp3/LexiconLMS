@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using Domain.Models.Exceptions;
@@ -50,17 +51,7 @@ public class CourseService : ICourseService
             .OrderBy(c => c.StartDate)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(c => new CourseSummaryDto //TODO: AutoMapper
-            {
-                Id = c.Id,
-                Name = c.Name,
-                Description = c.Description ?? string.Empty,
-                StartDate = c.StartDate,
-                EndDate = c.EndDate,
-                ParticipantsCount = c.Students.Count(),
-                ModulesCount = c.Modules.Count(),
-                Active = c.EndDate > DateTime.Now
-            })
+            .ProjectTo<CourseSummaryDto>(_mapper.ConfigurationProvider)
             .ToListAsync(CancellationToken.None);
 
         return (items, total);

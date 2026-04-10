@@ -21,6 +21,11 @@ public class MapperProfile : Profile
         CreateMap<Course, CourseDto>();
         CreateMap<CreateCourseDto, Course>();
         CreateMap<Course, CourseDetailsDto>();
+        CreateMap<Course, LMS.Shared.DTOs.Course.CourseSummaryDto>()
+            .ForMember(dest => dest.ParticipantsCount, opt => opt.MapFrom(src => src.Students.Count))
+            .ForMember(dest => dest.ModulesCount, opt => opt.MapFrom(src => src.Modules.Count))
+            .ForMember(dest => dest.Active, opt => opt.MapFrom(src => src.EndDate > DateTime.UtcNow))
+            .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description ?? string.Empty));
         CreateMap<UpdateCourseDto, Course>();
 
         //Module mappings

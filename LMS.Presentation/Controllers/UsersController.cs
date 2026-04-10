@@ -64,4 +64,11 @@ public class UsersController : ControllerBase
         return Ok(roles);
     }
 
+    [HttpGet("teachers")]
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetTeachers()
+    {
+        var teachers = await _serviceManager.UserService.GetTeachersAsync();
+        return Ok(teachers);
+    }
+
 }

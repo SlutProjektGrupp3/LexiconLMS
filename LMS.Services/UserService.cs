@@ -131,5 +131,18 @@ public class UserService : IUserService
     {
         return await roleManager.Roles.Select(r => r.Name).ToListAsync();
     }
+
+    public async Task<IEnumerable<UserDto>> GetTeachersAsync()
+    {
+        var teachers = await userManager.GetUsersInRoleAsync("Teacher");
+
+        return teachers.Select(t => new UserDto(
+            t.Id,
+            t.FirstName,
+            t.LastName,
+            t.Email ?? string.Empty,
+            "Teacher"
+        ));
+    }
 }
 

@@ -218,18 +218,6 @@
             var handler = new JwtSecurityTokenHandler();
             JwtSecurityToken jwt = handler.ReadJwtToken(jwtToken);
 
-            // // Ensure the JWT claims include a NameIdentifier claim so the Blazor app can locate the user id easily.
-            // var claims = jwt.Claims.ToList();
-
-            // // Common name identifier claim types to check for
-            // var nameIdTypes = new[] { ClaimTypes.NameIdentifier, "nameid", "sub", "id", "user_id" };
-
-            // var hasNameId = claims.Any(c => nameIdTypes.Contains(c.Type, StringComparer.OrdinalIgnoreCase));
-            // if (!hasNameId && !string.IsNullOrWhiteSpace(userId))
-            // {
-            //     claims.Add(new Claim(ClaimTypes.NameIdentifier, userId));
-            // }
-
             var identity = new ClaimsIdentity(
                 jwt.Claims,
                 IdentityConstants.ApplicationScheme,
@@ -237,15 +225,6 @@
                 ClaimTypes.Role);
 
             var principal = new ClaimsPrincipal(identity);
-
-            // Ensure email claim exists so server-side code can look up user by email if nameidentifier disappears
-            if (!principal.HasClaim(c => c.Type == ClaimTypes.Email) && !string.IsNullOrWhiteSpace(Input?.Email))
-            {
-                identity.AddClaim(new Claim(ClaimTypes.Email, Input.Email));
-            }
-
-            // Replace any existing application cookie to ensure our claims are stored
-            await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
 
             await HttpContext.SignInAsync(
                 IdentityConstants.ApplicationScheme,
@@ -256,23 +235,14 @@
                     ExpiresUtc =  DateTimeOffset.UtcNow.AddDays(7) // jwt.ValidTo
                 });
 
-            // Log the claims that were just added to the authentication cookie so we can verify they're persisted
-            try
-            {
-                var claimDebug = string.Join(", ", principal.Claims.Select(c => $"{c.Type}={c.Value}"));
-                Logger.LogInformation("Successfully signed in user {UserId} with claims: {Claims}", userId, claimDebug);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogWarning(ex, "Failed to log claims after sign-in for user {UserId}", userId);
-            }
+            var claimDebug = string.Join(", ", principal.Claims.Select(c => $"{c.Type}={c.Value}"));
+            Logger.LogInformation("Successfully signed in user {UserId} with claims: {Claims}", userId, claimDebug);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error adding JWT claims to sign-in for user {UserId}", userId);
         }
     }
-
 
 
     private sealed class InputModel

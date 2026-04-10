@@ -22,8 +22,7 @@
 }
 else
 {
-    <div>OMFG</div>
-    @* if (User.CourseId.HasValue) 
+    if (User != null && User.CourseId.HasValue) 
     {
         <StudentWelcomeHero StudentName="@User?.FirstName" CourseName="@Course?.Name" />
 
@@ -32,7 +31,7 @@ else
             {
                 <div class="d-flex flex-column col-8">
                     <StudentCurrentModuleSummaryCard CurrentModule="@CurrentModule" />
-                    <ActivitiesCard ModuleId="@CurrentModule.Id" />
+                    <ActivitiesCard ActivityList="@Activities" />
                 </div>
             }
 
@@ -47,7 +46,7 @@ else
         <div class="card bg-body-tertiary mx-1 my-3  p-5">
             <span class="text-muted small"> You are not enrolled in any course! please contact us.</span>
         </div>
-    } *@
+    }
 }
 
 
@@ -62,21 +61,11 @@ else
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        if (authState.User.Identity is not null && authState.User.Identity.IsAuthenticated)
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
         {
-            _user = authState.User;
-
-            // Don't rely on client-side name identifier claim — call server endpoint to resolve current user
             await LoadStudentDashboardData();
-
-            Console.WriteLine("User claims:");
-            foreach (var c in _user.Claims)
-            {
-                Console.WriteLine($" - {c.Type} => {c.Value}");
-            }
-
-            var roles = _user.FindAll(ClaimTypes.Role).Select(r => r.Value).ToArray();
-            Console.WriteLine($"Roles: {string.Join(", ", roles)}");
         }
     }
 
@@ -84,21 +73,20 @@ else
     {
         try
         {
-            // Call server-side 'me' endpoint which derives the user id from the authenticated token
             User = await ApiService.GetAsync<UserDto>("api/users/me");
 
-            // if (User != null && User.CourseId.HasValue)
-            // {
-            //     Course = await ApiService.GetAsync<CourseDetailsDto>($"api/courses/{User.CourseId}");
-            //     CurrentModule = Course?.Modules?.FirstOrDefault(m => m.StartDate <= DateTime.Now && m.EndDate >= DateTime.Now);
+            if (User != null && User.CourseId.HasValue)
+            {
+                Course = await ApiService.GetAsync<CourseDetailsDto>($"api/courses/{User.CourseId}");
+                CurrentModule = Course?.Modules?.FirstOrDefault(m => m.StartDate <= DateTime.Now && m.EndDate >= DateTime.Now);
 
-            //     if (CurrentModule != null)
-            //     {
-            //         await LoadActivities(CurrentModule.Id);
-            //     }
+                if (CurrentModule != null)
+                {
+                    await LoadActivities(CurrentModule.Id);
+                }
 
-            //     isLoading = false;
-            // }
+                isLoading = false;
+            }
         }
         catch (Exception ex)
         {

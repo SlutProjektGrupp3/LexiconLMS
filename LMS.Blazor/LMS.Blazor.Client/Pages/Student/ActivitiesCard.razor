@@ -20,19 +20,20 @@
     }
     else
     {
-        <div class="card mx-1 my-3  p-2">
-            <div class="d-flex justify-content-between align-items-center">
-                <ul>
-                    @foreach (ActivityDto activity in ActivityList)
-                    {
-                        <li>
-                            <h6 class="fw-bold">@activity.Name</h6>
-                            <p class="text-muted small"><span class="fw-semibold">Due: </span>@activity.EndDate.ToString("dddd d MMMM")</p>
-                        </li>
-                    }
-                </ul>
-            </div>
-        </div>
+       
+            @foreach (ActivityDto activity in ActivityList)
+            {
+                <div class="card mx-1 my-3  p-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <ul>
+                            <li>
+                                <h6 class="fw-bold">@activity.Name</h6>
+                                <p class="text-muted small"><span class="fw-semibold">Due: </span>@activity.EndDate.ToString("dddd d MMMM HH:mm")</p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            }
     }
 </div>
 

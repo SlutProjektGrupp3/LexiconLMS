@@ -20,6 +20,7 @@ public class MapperProfile : Profile
         //Course mappings
         CreateMap<Course, CourseDto>();
         CreateMap<CreateCourseDto, Course>();
+
         // Map Course to the richer CourseDetailsDto which now also contains optional summary fields
         CreateMap<Course, CourseDetailsDto>()
             .ForMember(dest => dest.Modules, opt => opt.MapFrom(src => src.Modules))

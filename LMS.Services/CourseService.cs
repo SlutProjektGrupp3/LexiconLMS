@@ -25,7 +25,7 @@ public class CourseService : ICourseService
         _userManager = userManager;
     }
 
-    public async Task<(IEnumerable<CourseSummaryDto> Items, int TotalCount)> GetCourseSummariesAsync(string? search = null, bool? active = null, int page = 1, int pageSize = 12)
+    public async Task<(IEnumerable<CourseDetailsDto> Items, int TotalCount)> GetCourseSummariesAsync(string? search = null, bool? active = null, int page = 1, int pageSize = 12)
     {
         // Build base query
         var repoQuery = (_uow.CourseRepository as Domain.Contracts.Repositories.ICourseRepository)!.GetCourseQuery(false);
@@ -51,7 +51,7 @@ public class CourseService : ICourseService
             .OrderBy(c => c.StartDate)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .ProjectTo<CourseSummaryDto>(_mapper.ConfigurationProvider)
+            .ProjectTo<CourseDetailsDto>(_mapper.ConfigurationProvider)
             .ToListAsync(CancellationToken.None);
 
         return (items, total);

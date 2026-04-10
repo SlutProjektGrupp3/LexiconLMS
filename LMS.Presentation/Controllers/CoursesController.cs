@@ -179,9 +179,10 @@ public class CoursesController : ControllerBase
     {
         var (items, total) = await _serviceManager.CourseService.GetCourseSummariesAsync(search, active, page, pageSize);
 
-        var dto = new CourseSummaryPagedDto
+        // Return CourseDetailsDto items directly in the paged response
+        var dto = new
         {
-            Items = items.ToList(),
+            Items = items,
             Total = total
         };
 

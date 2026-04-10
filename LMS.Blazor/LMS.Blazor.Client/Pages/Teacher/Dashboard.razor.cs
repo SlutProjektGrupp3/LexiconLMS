@@ -20,7 +20,7 @@ namespace LMS.Blazor.Client.Pages.Teacher
         protected string? successMessage;
         protected int TotalStudents { get; set; }
 
-        protected List<CourseSummaryDto> Courses { get; set; } = new();
+        protected List<CourseDetailsDto> Courses { get; set; } = new();
         protected List<ModuleDto> modulesList { get; set; } = new();
 
         protected int currentPage = 1;
@@ -104,7 +104,18 @@ namespace LMS.Blazor.Client.Pages.Teacher
                 }
 
                 var dto = await ApiService.GetAsync<CourseSummaryPagedDto>(url);
-                Courses = dto?.Items ?? new();
+                // Map returned CourseSummaryDto items (from controller) to CourseDetailsDto used in UI
+                Courses = dto?.Items.Select(i => new CourseDetailsDto
+                {
+                    Id = i.Id,
+                    Name = i.Name,
+                    Description = i.Description,
+                    StartDate = i.StartDate,
+                    EndDate = i.EndDate,
+                    ParticipantsCount = i.ParticipantsCount,
+                    ModulesCount = i.ModulesCount,
+                    Active = i.Active
+                }).ToList() ?? new();
                 totalCount = dto?.Total ?? 0;
             }
             catch (Exception ex)
@@ -158,10 +169,10 @@ namespace LMS.Blazor.Client.Pages.Teacher
             return Task.CompletedTask;
         }
 
-        protected int GetActiveCoursesNumber(IEnumerable<CourseSummaryDto>? courses = null)
+        protected int GetActiveCoursesNumber(IEnumerable<CourseDetailsDto>? courses = null)
         {
             var list = courses ?? Courses;
-            return list?.Count(c => c.Active) ?? 0;
+            return list?.Count(c => c.Active ?? false) ?? 0;
         }
     }
 }

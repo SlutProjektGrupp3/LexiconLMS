@@ -4,7 +4,7 @@ namespace LMS.Shared.DTOs.Course
 {
     public class CourseSummaryPagedDto
     {
-        public List<CourseSummaryDto> Items { get; set; } = new();
+        public List<CourseDetailsDto> Items { get; set; } = new();
         public int Total { get; set; }
     }
 }

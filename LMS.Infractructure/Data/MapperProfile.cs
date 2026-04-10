@@ -20,8 +20,9 @@ public class MapperProfile : Profile
         //Course mappings
         CreateMap<Course, CourseDto>();
         CreateMap<CreateCourseDto, Course>();
-        CreateMap<Course, CourseDetailsDto>();
-        CreateMap<Course, LMS.Shared.DTOs.Course.CourseSummaryDto>()
+        // Map Course to the richer CourseDetailsDto which now also contains optional summary fields
+        CreateMap<Course, CourseDetailsDto>()
+            .ForMember(dest => dest.Modules, opt => opt.MapFrom(src => src.Modules))
             .ForMember(dest => dest.ParticipantsCount, opt => opt.MapFrom(src => src.Students.Count))
             .ForMember(dest => dest.ModulesCount, opt => opt.MapFrom(src => src.Modules.Count))
             .ForMember(dest => dest.Active, opt => opt.MapFrom(src => src.EndDate > DateTime.UtcNow))

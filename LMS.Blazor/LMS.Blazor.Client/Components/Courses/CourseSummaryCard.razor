@@ -9,8 +9,8 @@
     <div class="card p-3 mb-3">
         <div class="d-flex justify-content-between align-items-center mb-1 text-primary">
             <BookOpenIcon Size="46" CssClass="bg-primary-subtle p-2 rounded-2" />
-            <span class="badge rounded-pill @(Course.Active ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger")">
-                @(Course.Active ? "Active" : "Inactive")
+            <span class="badge rounded-pill @((Course.Active ?? false) ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger")">
+                @((Course.Active ?? false) ? "Active" : "Inactive")
             </span>
         </div>
 
@@ -23,33 +23,22 @@
         </div>
         <div class="pb-3">
             <ParticipantsIcon CssClass="text-secondary" />
-            <span>@Course.ParticipantsCount participants</span>
+            <span>@(Course.ParticipantsCount ?? 0) participants</span>
         </div>
         <div class="pb-3">
             <BookOpenIcon CssClass="text-secondary" />
-            <span>@Course.ModulesCount modules</span>
+            <span>@(Course.ModulesCount ?? 0) modules</span>
         </div>
 
         <hr class="text-secondary" />
 
         <ProgressBar Title="Course progress" StartDate="@Course.StartDate" EndDate="@Course.EndDate" />
-
-       @*  <div class="d-flex justify-content-between align-items-center mb-1">
-            <button class="btn btn-primary btn-sm"
-                    @onclick="() => OnShowParticipants.InvokeAsync(Course.Id)">
-                Show participants
-            </button>
-            <button class="btn btn-outline-secondary btn-sm ms-2"
-                    @onclick="() => OnShowModules.InvokeAsync(Course.Id)">
-                Show modules
-            </button>
-        </div> *@
     </div>
 </div>
 
 @code {
     [Parameter]
-    public CourseSummaryDto Course { get; set; } = new CourseSummaryDto();
+    public CourseDetailsDto Course { get; set; } = new CourseDetailsDto();
 
     // [Parameter]
     // public EventCallback<Guid> OnShowParticipants { get; set; }

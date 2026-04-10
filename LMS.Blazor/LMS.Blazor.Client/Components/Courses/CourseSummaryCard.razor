@@ -14,8 +14,8 @@
             </span>
         </div>
 
-        <h5 class="fw-bold my-2">@Course.Name</h5>
-        <p>@Course.Description</p>
+        <h5 class="fw-bold my-2"><a href="@($"/courses/{Course.Id}")">@Course.Name</a></h5>
+        <p class="descriptionBlockedText">@Course.Description</p>
 
         <div class="pb-3">
             <CalendarIcon CssClass="text-secondary" />
@@ -39,10 +39,4 @@
 @code {
     [Parameter]
     public CourseDetailsDto Course { get; set; } = new CourseDetailsDto();
-
-    // [Parameter]
-    // public EventCallback<Guid> OnShowParticipants { get; set; }
-
-    // [Parameter]
-    // public EventCallback<Guid> OnShowModules { get; set; }
 }

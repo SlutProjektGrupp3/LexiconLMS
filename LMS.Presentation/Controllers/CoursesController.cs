@@ -197,7 +197,7 @@ public class CoursesController : ControllerBase
     {
         var (items, total) = await _serviceManager.CourseService.GetCourseSummariesAsync(search, active, page, pageSize);
 
-        var dto = new LMS.Shared.DTOs.CourseDtos.CourseSummaryPagedDto
+        var dto = new CourseSummaryPagedDto
         {
             Items = items.ToList(),
             Total = total

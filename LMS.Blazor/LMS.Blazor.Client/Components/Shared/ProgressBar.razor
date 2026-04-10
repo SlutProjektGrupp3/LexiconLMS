@@ -1,5 +1,5 @@
 ﻿<div class="mb-4">
-    <div class="d-flex justify-content-between align-items-center mb-1">
+    <div class="d-flex justify-content-between align-items-center mb-1 small">
         <span>@Title</span>
         <span>@ProgressPercentage%</span>
     </div>
@@ -18,7 +18,7 @@
 @code {
     [Parameter] public DateTime StartDate { get; set; }
     [Parameter] public DateTime EndDate { get; set; }
-    [Parameter] public string Title { get; set; } = "Course progress";
+    [Parameter] public string Title { get; set; } = "Progress";
 
     private int ProgressPercentage
     {

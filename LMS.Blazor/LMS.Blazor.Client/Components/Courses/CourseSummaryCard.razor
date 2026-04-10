@@ -1,6 +1,7 @@
-@using LMS.Shared.DTOs.CourseDtos
+@using LMS.Shared.DTOs.Course
 @using LMS.Blazor.Client.Components.Icons
 @using LMS.Shared.DTOs.Module
+@using LMS.Blazor.Client.Components.Shared
 
 @inherits Microsoft.AspNetCore.Components.ComponentBase
 
@@ -31,7 +32,7 @@
 
         <hr class="text-secondary" />
 
-        <ProgressBar StartDate="@Course.StartDate" EndDate="@Course.EndDate" />
+        <ProgressBar Title="Course progress" StartDate="@Course.StartDate" EndDate="@Course.EndDate" />
 
         <div class="d-flex justify-content-between align-items-center mb-1">
             <button class="btn btn-primary btn-sm"

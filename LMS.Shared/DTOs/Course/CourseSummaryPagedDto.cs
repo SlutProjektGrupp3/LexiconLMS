@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace LMS.Shared.DTOs.CourseDtos
+namespace LMS.Shared.DTOs.Course
 {
     public class CourseSummaryPagedDto
     {

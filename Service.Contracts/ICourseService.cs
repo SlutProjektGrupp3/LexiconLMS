@@ -14,5 +14,5 @@ public interface ICourseService
     Task AddStudentToCourseAsync(Guid courseId, string studentId);
     Task<IEnumerable<AvailableStudentDto>> GetAvailableStudentsAsync();
     Task<IEnumerable<LMS.Shared.DTOs.Course.ParticipantDto>> GetParticipantsAsync(Guid courseId);
-    Task<(IEnumerable<LMS.Shared.DTOs.CourseDtos.CourseSummaryDto> Items, int TotalCount)> GetCourseSummariesAsync(string? search = null, bool? active = null, int page = 1, int pageSize = 12);
+    Task<(IEnumerable<CourseSummaryDto> Items, int TotalCount)> GetCourseSummariesAsync(string? search = null, bool? active = null, int page = 1, int pageSize = 12);
 }    

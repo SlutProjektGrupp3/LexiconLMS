@@ -37,11 +37,29 @@ public class UserService : IUserService
                 FirstName: user.FirstName,
                 LastName: user.LastName,
                 Email: user.Email,
+                CourseId: user.CourseId,
                 RoleName: role.FirstOrDefault()
             ));
         }
 
         return dtoList;
+    }
+
+    public async Task<UserDto?> GetUserByIdAsync(string id)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(id);
+        if (user == null)
+            return null;
+        var role = await _userManager.GetRolesAsync(user);
+        return new UserDto
+        (
+            Id: user.Id,
+            FirstName: user.FirstName,
+            LastName: user.LastName,
+            Email: user.Email!,
+            CourseId: user.CourseId,
+            RoleName: role.FirstOrDefault()
+        );
     }
 
     public async Task<CreateUserResultDto> CreateUserAsync(CreateUserDto userCreateDto)
@@ -93,6 +111,7 @@ public class UserService : IUserService
                 FirstName: user.FirstName,
                 LastName: user.LastName,
                 Email: user.Email!,
+                CourseId: null,
                 RoleName: userCreateDto.RoleName
             );
 

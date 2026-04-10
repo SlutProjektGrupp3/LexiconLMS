@@ -3,7 +3,7 @@ using LMS.Shared.DTOs.User;
 using System;
 using System.Collections.Generic;
 
-namespace LMS.Shared.DTOs.CourseDtos
+namespace LMS.Shared.DTOs.Course
 {
     public class CourseSummaryDto
     {

@@ -6,5 +6,6 @@ public record UserDto(
     string FirstName,
     string LastName,
     string Email,
-    string RoleName
+    string RoleName,
+    Guid? CourseId
 );

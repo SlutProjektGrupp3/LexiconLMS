@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Components;
 using System.Threading;
 using System.Linq;
 using LMS.Shared.DTOs.Course;
-using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.DTOs.Module;
 using LMS.Blazor.Client.Services;
 

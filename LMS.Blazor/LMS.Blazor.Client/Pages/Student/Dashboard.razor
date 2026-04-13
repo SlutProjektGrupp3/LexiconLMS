@@ -103,7 +103,11 @@ else
         {
             try
             {
-                Activities = await ApiService.GetAsync<List<ActivityDto>>($"api/activities/modules/{moduleId}");
+                var all = await ApiService.GetAsync<List<ActivityDto>>($"api/activities/modules/{moduleId}");
+                // Only keep activities with an end date in the future
+                Activities = all?.Where(a => a.EndDate > DateTime.Now)
+                               .OrderBy(a => a.EndDate)
+                               .ToList();
             }
             catch (Exception ex)
             {

@@ -12,7 +12,7 @@
        </div>
     </div>
 
-    @if (ActivityList == null)
+    @if (ActivityList == null || !ActivityList.Any())
     {
         <div class="card bg-body-tertiary mx-1 my-3  p-5">
             <span class="text-muted small"> There is no activities pending! Good job!</span>

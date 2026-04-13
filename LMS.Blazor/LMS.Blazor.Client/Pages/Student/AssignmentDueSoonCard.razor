@@ -11,6 +11,13 @@
 
     <span class="text-muted small fw-semibold pt-3">@NextDueActivity?.Name</span>
 
+    @if (NextDueActivity == null)
+    {
+        <div class="card bg-body-tertiary m-1  p-3">
+            <span class="text-muted small"> Lookks like you are all caught up! Good job!</span>
+        </div>
+    }
+
     <div class="d-flex justify-content-between align-items-center">
         <span class="text-muted small">@NextDueActivity?.EndDate.ToString("d MMM HH:mm")</span>
         <span class="text-warning small">@GetDaysLeft(NextDueActivity?.EndDate ?? DateTime.Now) days left</span>

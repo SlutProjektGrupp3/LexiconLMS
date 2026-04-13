@@ -111,7 +111,6 @@ public class ModulesController : ControllerBase
             };
         }
     }
-    }
 
     [HttpPut("{moduleId}")]
     [Authorize(Roles = "Teacher")]

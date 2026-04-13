@@ -69,7 +69,7 @@ h1:focus {
 .create-btn:hover {
     background-color: #3399ff;
 }
-}
+
 .courses-wrapper {
     display: flex;
     flex-direction: column;

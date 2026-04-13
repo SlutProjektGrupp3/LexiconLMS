@@ -1,0 +1,54 @@
+@using Microsoft.AspNetCore.Components
+
+<div class="mb-3 d-flex gap-2 align-items-center">
+    <input class="form-control me-2" placeholder="Search courses..." value="@SearchText" @oninput="HandleInput" />
+
+    <select class="form-select me-2" style="width: 160px;" value="@ActiveFilter" @onchange="HandleActiveChanged">
+        <option value="all">All</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+    </select>
+
+    <button class="btn btn-primary" @onclick="() => OnSearchClicked.InvokeAsync(null)">Search</button>
+</div>
+
+@code {
+    [Parameter]
+    public string? SearchText { get; set; }
+
+    [Parameter]
+    public EventCallback<string> SearchTextChanged { get; set; }
+
+    [Parameter]
+    public string ActiveFilter { get; set; } = "all";
+
+    [Parameter]
+    public EventCallback<string> ActiveFilterChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<ChangeEventArgs> OnSearchInput { get; set; }
+
+    [Parameter]
+    public EventCallback<ChangeEventArgs> OnActiveChanged { get; set; }
+
+    [Parameter]
+    public EventCallback OnSearchClicked { get; set; }
+
+    private async Task HandleInput(ChangeEventArgs e)
+    {
+        var val = e.Value?.ToString();
+        SearchText = val;
+        await SearchTextChanged.InvokeAsync(val);
+        if (OnSearchInput.HasDelegate)
+            await OnSearchInput.InvokeAsync(e);
+    }
+
+    private async Task HandleActiveChanged(ChangeEventArgs e)
+    {
+        var val = e.Value?.ToString() ?? "all";
+        ActiveFilter = val;
+        await ActiveFilterChanged.InvokeAsync(val);
+        if (OnActiveChanged.HasDelegate)
+            await OnActiveChanged.InvokeAsync(e);
+    }
+}

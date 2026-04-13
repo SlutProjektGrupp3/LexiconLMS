@@ -10,7 +10,7 @@
 @using LMS.Blazor.Data
 @using System.IdentityModel.Tokens.Jwt
 @using System.Security.Claims
-@using LMS.Blazor.Shared.Components.Icons
+@using LMS.Blazor.Client.Components.Icons
 
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
@@ -235,14 +235,14 @@
                     ExpiresUtc =  DateTimeOffset.UtcNow.AddDays(7) // jwt.ValidTo
                 });
 
-            Logger.LogInformation("Successfully signed in user with JWT claims: {UserId}", userId);
+            var claimDebug = string.Join(", ", principal.Claims.Select(c => $"{c.Type}={c.Value}"));
+            Logger.LogInformation("Successfully signed in user {UserId} with claims: {Claims}", userId, claimDebug);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error adding JWT claims to sign-in for user {UserId}", userId);
         }
     }
-
 
 
     private sealed class InputModel

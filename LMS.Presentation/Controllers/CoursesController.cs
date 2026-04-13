@@ -148,6 +148,23 @@ public class CoursesController : ControllerBase
         return Ok(students);
     }
 
+    // GET: api/courses/summary
+    [HttpGet("summary")]
+    [Authorize(Roles = "Teacher")]
+    public async Task<IActionResult> GetCourseSummaries([FromQuery] string? search, [FromQuery] bool? active, [FromQuery] int page = 1, [FromQuery] int pageSize = 12)
+    {
+        var (items, total) = await _serviceManager.CourseService.GetCourseSummariesAsync(search, active, page, pageSize);
+
+        // Return CourseDetailsDto items directly in the paged response
+        var dto = new
+        {
+            Items = items,
+            Total = total
+        };
+
+        return Ok(dto);
+    }
+
     // GET: api/courses/{courseId}/participants
     [HttpGet("{courseId}/participants")]
     public async Task<IActionResult> GetParticipants(Guid courseId)
@@ -157,6 +174,4 @@ public class CoursesController : ControllerBase
 
         return Ok(participants);
     }
-
-
 }

@@ -19,5 +19,7 @@ namespace LMS.Shared.DTOs.User
 
         [Required(ErrorMessage = "User must have a role.")]
         public string RoleName { get; set; } = "";
+
+        public Guid? CourseId { get; set; }
     }
 }

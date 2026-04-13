@@ -6,7 +6,7 @@ namespace Service.Contracts;
 
 public interface ICourseService
 {
-    Task<IEnumerable<CourseDto>> GetAllCoursesAsync(bool trackChanges = false);
+    Task<IEnumerable<CourseDetailsDto>> GetAllCoursesAsync();
     Task<ResultDto<CourseDto>> CreateCourseAsync(CreateCourseDto dto);
     Task<CourseDetailsDto?> GetCourseByIdAsync(Guid id);
     Task UpdateCourseAsync(Guid id, UpdateCourseDto updateCourseDto, bool trackChanges);

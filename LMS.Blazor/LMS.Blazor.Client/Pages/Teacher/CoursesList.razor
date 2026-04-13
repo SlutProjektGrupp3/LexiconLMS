@@ -1,4 +1,5 @@
 ﻿@using LMS.Shared.DTOs.Course
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
 
 @if (Courses is null || Courses.Count == 0)
 {
@@ -40,6 +41,8 @@ else
                                 <div class="meta">
                                     <span>📅 @course.StartDate.ToString("yyyy-MM-dd")</span>                                    
                                 </div>
+                                <span>@(course.ParticipantsCount ?? 0) participants</span>
+                                <span>@(course.ModulesCount ?? 0) modules</span>
                             </div>
 
                             <div class="course-actions">
@@ -70,16 +73,18 @@ else
 
 @code {
     [Parameter]
-    public List<CourseDto> Courses { get; set; } = new();
+    public List<CourseDetailsDto> Courses { get; set; } = new();
 
     [Parameter]
     public EventCallback<Guid> OnDeleteClicked { get; set; }
 
     private string searchTerm = "";
 
-    private IEnumerable<CourseDto> FilteredCourses =>
+    private IEnumerable<CourseDetailsDto> FilteredCourses =>
         string.IsNullOrWhiteSpace(searchTerm)
             ? Courses
             : Courses.Where(c =>
-                c.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+                c.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));   
+
+    
 }

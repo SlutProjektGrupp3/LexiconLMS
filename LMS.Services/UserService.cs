@@ -131,5 +131,17 @@ public class UserService : IUserService
     {
         return await _roleManager.Roles.Select(r => r.Name).ToListAsync();
     }
+    public async Task<int> GetUsersCountByRoleAsync(string roleName)
+    {
+        if (string.IsNullOrWhiteSpace(roleName))
+            return 0;
+
+        var role = await _roleManager.FindByNameAsync(roleName);
+        if (role == null)
+            return 0;
+
+        var usersInRole = await _userManager.GetUsersInRoleAsync(roleName);
+        return usersInRole?.Count ?? 0;
+    }
 }
 

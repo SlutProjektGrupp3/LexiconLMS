@@ -27,10 +27,17 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateUser([FromBody] CreateUserDto userCreateDto)
+    public async Task<IActionResult> CreateUser([FromBody] CreateUserDto createUserDto)
     {
-        var result = await _serviceManager.UserService.CreateUserAsync(userCreateDto);
-        return result.Succeeded ? CreatedAtAction(nameof(GetAllUsers), new { id = result.CreatedUser!.Id }, result) : BadRequest(result.Errors);
+        var result = await _serviceManager.UserService.CreateUserAsync(createUserDto);
+        return result.Succeeded ? CreatedAtAction(nameof(GetAllUsers), new { id = result.Data!.Id }, result) : BadRequest(result.Errors);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserDto updateUserDto)
+    {
+        var result = await _serviceManager.UserService.UpdateUserAsync(id, updateUserDto);
+        return result.Succeeded ? Ok(result) : BadRequest(result.Errors);
     }
 
     [HttpDelete("{id}")]

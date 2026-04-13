@@ -5,7 +5,7 @@ public record CourseDto
 (
     Guid Id,
     string Name,
-    string Description,
+    string? Description,
     DateTime StartDate,
     DateTime EndDate
 );

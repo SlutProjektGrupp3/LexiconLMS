@@ -1,4 +1,6 @@
 ﻿
+using LMS.Shared.DTOs.Course;
+
 namespace LMS.Shared.DTOs.User;
 
 public record UserDto(
@@ -6,5 +8,6 @@ public record UserDto(
     string FirstName,
     string LastName,
     string Email,
-    string RoleName
+    string RoleName,
+    CourseDto? Course = null
 );

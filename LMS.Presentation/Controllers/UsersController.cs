@@ -8,7 +8,7 @@ namespace LMS.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize(Roles = "Teacher")]
+
 public class UsersController : ControllerBase
 {
     private readonly IServiceManager _serviceManager;
@@ -18,6 +18,7 @@ public class UsersController : ControllerBase
         _serviceManager = serviceManager;
     }
 
+    [Authorize(Roles = "Teacher")]
     [HttpGet]
     public async Task<IActionResult> GetAllUsers()
     {
@@ -26,6 +27,7 @@ public class UsersController : ControllerBase
         return Ok(users ?? new List<UserDto>());
     }
 
+    [Authorize(Roles = "Teacher")]
     [HttpPost]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserDto userCreateDto)
     {
@@ -33,6 +35,7 @@ public class UsersController : ControllerBase
         return result.Succeeded ? CreatedAtAction(nameof(GetAllUsers), new { id = result.CreatedUser!.Id }, result) : BadRequest(result.Errors);
     }
 
+    [Authorize(Roles = "Teacher")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUser(string id)
     {
@@ -71,6 +74,7 @@ public class UsersController : ControllerBase
     }
     
     [HttpGet("teachers")]
+    [Authorize(Roles = "Teacher,Student")]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetTeachers()
     {
         var teachers = await _serviceManager.UserService.GetTeachersAsync();

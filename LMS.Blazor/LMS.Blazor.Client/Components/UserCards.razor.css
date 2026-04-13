@@ -33,10 +33,10 @@
     justify-content: center;
 }
 
-    .edit-btn:hover {
-        color: var(--bs-info-text-emphasis);
-        background-color: rgba(var(--bs-info-rgb), 0.05);
-    }
+.edit-btn:hover {
+    color: var(--bs-link-color);
+    background-color: rgba(var(--bs-info-rgb), 0.05);
+}
 
 .delete-btn:hover {
     color: var(--bs-danger);

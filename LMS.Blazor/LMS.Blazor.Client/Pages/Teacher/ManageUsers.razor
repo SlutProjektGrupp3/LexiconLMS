@@ -47,13 +47,17 @@ else
                         All Users
                     </button>
 
-                    <button class="btn rounded px-3 @(selectedRole == "Teacher" ? "btn-primary" : "btn-light")"
+                    <button class="btn rounded px-3 d-inline-flex align-items-center gap-2
+                            @(selectedRole == "Teacher" ? "btn-primary" : "btn-light")"
                             @onclick="@(() => selectedRole = "Teacher")">
+                        <BriefcaseIcon Size="16"></BriefcaseIcon>
                         Teachers
                     </button>
 
-                    <button class="btn rounded px-3 @(selectedRole == "Student" ? "btn-success" : "btn-light")"
+                    <button class="btn rounded px-3 d-inline-flex align-items-center gap-2
+                            @(selectedRole == "Student" ? "btn-success" : "btn-light")"
                             @onclick="@(() => selectedRole = "Student")">
+                        <GraduationCapIcon Size="16"></GraduationCapIcon>
                         Students
                     </button>
 

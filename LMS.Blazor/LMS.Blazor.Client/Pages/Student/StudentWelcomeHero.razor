@@ -1,0 +1,13 @@
+﻿@using LMS.Shared.DTOs.Course
+
+
+<div class="card d-flex flex-column align-items-start flex-wrap m-3 p-5 lh-5 text-light hero-card">
+    <h2 class="fw-bold mb-0">Welcome back, @StudentName!</h2>
+    <span class="text-info small mb-0">You are studying @CourseName. You have cleared @ClearedModules modules.</span>
+</div>
+
+@code {
+    [Parameter] public string CourseName { get; set; } = "No Course Name";
+    [Parameter] public string StudentName { get; set; } = "No Student name";
+    [Parameter] public int ClearedModules { get; set; } = 0;
+}

@@ -1,5 +1,6 @@
 ﻿using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
+using Domain.Models.Exceptions;
 using LMS.Shared.DTOs;
 using LMS.Shared.DTOs.Course;
 using LMS.Shared.DTOs.User;
@@ -8,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Service.Contracts;
 using System.Data;
+using System.Reflection;
 
 namespace LMS.Services;
 
@@ -51,6 +53,24 @@ public class UserService : IUserService
         return dtoList;
     }
 
+    public async Task<UserDto?> GetUserByIdAsync(string id)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(id);
+        if (user == null)
+            return null;
+        var role = await _userManager.GetRolesAsync(user);
+        return new UserDto
+        (
+            Id: user.Id,
+            FirstName: user.FirstName,
+            LastName: user.LastName,
+            Email: user.Email!,
+            CourseId: user.CourseId,
+            RoleName: role.FirstOrDefault()
+        );
+    }
+
+    public async Task<CreateUserResultDto> CreateUserAsync(CreateUserDto userCreateDto)
     public async Task<ResultDto<UserDto>> CreateUserAsync(CreateUserDto userCreateDto)
     {
         var user = new ApplicationUser
@@ -202,7 +222,7 @@ public class UserService : IUserService
         var user = await _userManager.FindByIdAsync(id);
 
         if (user == null)
-            throw new KeyNotFoundException("User not found.");
+            throw new NotFoundException($"User with id {id} was not found.");
 
         var result = await _userManager.DeleteAsync(user);
 
@@ -215,5 +235,79 @@ public class UserService : IUserService
     {
         return await _roleManager.Roles.Select(r => r.Name).ToListAsync();
     }
+    public async Task<UserDto> UpdateUserAsync(string id, UpdateUserDto dto)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
+        {
+            throw new NotFoundException($"User with ID {id} not found.", "User Not Found");
+        }
+
+        user.FirstName = dto.FirstName;
+        user.LastName = dto.LastName;
+        user.Email = dto.Email;
+        user.UserName = dto.Email; 
+        user.CourseId = dto.CourseId;
+
+        var updateResult = await _userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            var errorMsg = string.Join(", ", updateResult.Errors.Select(e => e.Description));
+            throw new BadRequestException(errorMsg, "Update failed");
+        }
+
+        var currentRoles = await _userManager.GetRolesAsync(user);
+        var currentRole = currentRoles.FirstOrDefault();
+
+        if (currentRole != dto.RoleName)
+        {
+            if (currentRole != null)
+            {
+                await _userManager.RemoveFromRoleAsync(user, currentRole);
+            }
+
+            var roleResult = await _userManager.AddToRoleAsync(user, dto.RoleName);
+            if (!roleResult.Succeeded)
+            {
+                var errorMsg = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+                throw new BadRequestException(errorMsg, "Role Update Failed");
+            }
+        }
+
+        return new UserDto(
+            user.Id,
+            user.FirstName,
+            user.LastName,
+            user.Email,
+            dto.RoleName,
+            user.CourseId
+        );
+    }
+    public async Task<int> GetUsersCountByRoleAsync(string roleName)
+    {
+        if (string.IsNullOrWhiteSpace(roleName))
+            return 0;
+
+        var role = await _roleManager.FindByNameAsync(roleName);
+        if (role == null)
+            return 0;
+
+        var usersInRole = await _userManager.GetUsersInRoleAsync(roleName);
+        return usersInRole?.Count ?? 0;
+    }
+    
+    public async Task<IEnumerable<UserDto>> GetTeachersAsync()
+{
+    var teachers = await _userManager.GetUsersInRoleAsync("Teacher");
+
+    return teachers.Select(t => new UserDto(
+        t.Id,
+        t.FirstName,
+        t.LastName,
+        t.Email ?? string.Empty,
+        "Teacher",
+        t.CourseId
+    ));
+}
 }
 

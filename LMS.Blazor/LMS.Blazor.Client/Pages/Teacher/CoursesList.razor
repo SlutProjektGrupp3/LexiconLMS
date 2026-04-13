@@ -1,4 +1,6 @@
-﻿@using LMS.Shared.DTOs.Course
+﻿@using LMS.Blazor.Client.Components.Icons
+@using LMS.Shared.DTOs.Course
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
 
 @if (Courses is null || Courses.Count == 0)
 {
@@ -6,42 +8,83 @@
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>StartDate</th>
-                <th>EndDate</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var course in Courses)
+    <div class="manage-courses">
+        <div class="header">
+            <div>
+                <p class="text-muted">Overview of all your courses</p>
+            </div>            
+        </div>
+        <div class="toolbar mb-4">
+            <input class="form-control" placeholder="Search courses..." @bind="searchTerm" />
+        </div>
+        <div class="courses-container">
+            @if (!FilteredCourses.Any())
             {
-                <tr>
-                    <td><a href="@($"/courses/{course.Id}")">@course.Name</a></td>
-                    <td>@course.Description</td>
-                    <td>@course.StartDate.ToShortDateString()</td>
-                    <td>@course.EndDate.ToShortDateString()</td>
-                    <NavLink class="btn btn-sm btn-outline-primary"
-                             href="@($"/teacher/courses/edit/{course.Id}")">
-                        Edit
-                    </NavLink>
-                    <button class="btn btn-sm btn-outline-danger"
-                            @onclick="() => OnDeleteClicked.InvokeAsync(course.Id)">
-                        Delete
-                    </button>
-                </tr>
+                <div class="empty-state">
+                    <i class="bi bi-journal-x"></i>
+                    <p>No courses found</p>
+                </div>
             }
-        </tbody>
-    </table>
+            else
+            {
+                <div class="course-grid">
+                    @foreach (var course in FilteredCourses)
+                    {
+                        <div class="course-row">
+
+                            <div class="course-icon">
+                                <i class="bi bi-book"></i>
+                            </div>
+
+                            <div class="course-info">
+                                <h5><a href="@($"/courses/{course.Id}")">@course.Name</a></h5>
+
+                                <div class="meta">
+                                    <span><CalendarIcon/> @course.StartDate.ToString("yyyy-MM-dd")</span>
+                                    <span>• @(course.ModulesCount ?? 0) modules</span>
+                                    <span>• @(course.ParticipantsCount ?? 0) participants</span>
+                                </div>                                                           
+                            </div>
+                            <div class="course-actions">
+
+                                <NavLink class="btn btn-sm btn-outline-primary" 
+                                         href="@($"/teacher/managecourses/edit/{course.Id}")">
+                                    <i class="bi bi-pencil"></i>
+                                </NavLink>
+
+                                <button class="btn btn-sm btn-outline-danger ms-2" 
+                                        @onclick="() => OnDeleteClicked.InvokeAsync(course.Id)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+
+                                <NavLink href="@($"/courses/{course.Id}")">
+                                    <i class="bi bi-chevron-right"></i>
+                                </NavLink>
+
+                            </div>
+                        </div>
+                    }
+
+                </div>
+            }
+        </div>
+    </div>   
 }
 
 @code {
     [Parameter]
-    public List<CourseDto> Courses { get; set; } = new();
+    public List<CourseDetailsDto> Courses { get; set; } = new();
 
     [Parameter]
     public EventCallback<Guid> OnDeleteClicked { get; set; }
+
+    private string searchTerm = "";
+
+    private IEnumerable<CourseDetailsDto> FilteredCourses =>
+        string.IsNullOrWhiteSpace(searchTerm)
+            ? Courses
+            : Courses.Where(c =>
+                c.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));   
+
+    
 }

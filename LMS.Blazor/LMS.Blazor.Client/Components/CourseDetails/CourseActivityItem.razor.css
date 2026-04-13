@@ -1,0 +1,38 @@
+﻿/*----------ACTIVITY----------*/
+.activity-card {
+    background-color: #fff;
+}
+
+.activity-number-circle {
+    width: 2.5rem;
+    height: 2.5rem;
+    min-width: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.activity-title {
+    line-height: 1.15;
+}
+
+.activity-description {
+    line-height: 1.2;
+    margin-top: 0.15rem;
+}
+
+.activity-date {
+    line-height: 1.2;
+    margin-top: 0.1rem;
+}
+
+.text-xs {
+    font-size: 0.75rem;
+}
+
+.text-xs {
+    font-size: 0.75rem;
+}

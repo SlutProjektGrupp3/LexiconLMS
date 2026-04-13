@@ -1,5 +1,6 @@
 ﻿
 using System.ComponentModel.DataAnnotations;
+using System.Text;
 
 namespace LMS.Shared.DTOs.User;
 

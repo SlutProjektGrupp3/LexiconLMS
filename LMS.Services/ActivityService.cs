@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
+using Domain.Models.Exceptions;
 using LMS.Shared.DTOs;
 using LMS.Shared.DTOs.Activity;
 using Service.Contracts;
@@ -77,23 +78,34 @@ public class ActivityService : IActivityService
         _repository.Delete(activity);
         await _unitOfWork.CompleteAsync();
 
-        return ResultDto<bool>.Success(true);
-    }
-    public async Task<ResultDto<ActivityDto>> UpdateActivityAsync(Guid activityId, UpdateActivityDto dto)
-    {
+            return ResultDto<bool>.Success(true);
+        }
+        public async Task<ResultDto<ActivityDto>> UpdateActivityAsync(Guid activityId, UpdateActivityDto dto)
+        {
+        if (dto.EndDate < dto.StartDate)
+        {
+            throw new BadRequestException("End date must be after start date.", "Invalid Dates");
+        }
         var activity = await _repository.GetActivityByIdAsync(activityId, trackChanges: true);
         if (activity == null)
-            return ResultDto<ActivityDto>.Failed(new ErrorDto
-            {
-                Code = "ActivityNotFound",
-                Description = $"Activity with id {activityId} was not found."
-            });
+        {
+            throw new NotFoundException($"Activity with id {activityId} was not found.", "Activity Not Found");
+        }
 
         _mapper.Map(dto, activity);
 
         await _unitOfWork.CompleteAsync();
 
-        var dtoResult = _mapper.Map<ActivityDto>(activity);
+        var dtoResult = new ActivityDto(
+                activity.Id,
+                activity.Name,
+                activity.Type?.Name ?? "Unknown",
+                activity.Description,
+                activity.StartDate,
+                activity.EndDate,
+                activity.TypeId,
+                activity.ModuleId
+            );
 
         return ResultDto<ActivityDto>.Success(dtoResult);
     }

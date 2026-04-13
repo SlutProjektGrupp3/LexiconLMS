@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
 using Domain.Contracts.Repositories;
-using LMS.Shared.DTOs.Module;
 using Domain.Models.Entities;
+using Domain.Models.Exceptions;
+using LMS.Shared.DTOs.Module;
 using Service.Contracts;
 using Microsoft.EntityFrameworkCore;
 
@@ -111,7 +112,7 @@ public class ModulesService : IModuleService
             trackChanges: true);
 
         if (module is null)
-            throw new KeyNotFoundException("Module not found.");
+            throw new NotFoundException($"Module with id {moduleId} was not found.");
 
         _mapper.Map(dto, module);
 

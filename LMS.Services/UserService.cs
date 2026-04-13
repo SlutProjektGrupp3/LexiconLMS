@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Service.Contracts;
 using System.Data;
+using System.Reflection;
 
 namespace LMS.Services;
 
@@ -138,7 +139,7 @@ public class UserService : IUserService
         var user = await _userManager.FindByIdAsync(id);
 
         if (user == null)
-            throw new KeyNotFoundException("User not found.");
+            throw new NotFoundException($"User with id {id} was not found.");
 
         var result = await _userManager.DeleteAsync(user);
 
@@ -211,5 +212,18 @@ public class UserService : IUserService
         var usersInRole = await _userManager.GetUsersInRoleAsync(roleName);
         return usersInRole?.Count ?? 0;
     }
+    
+    public async Task<IEnumerable<UserDto>> GetTeachersAsync()
+{
+    var teachers = await _userManager.GetUsersInRoleAsync("Teacher");
+
+    return teachers.Select(t => new UserDto(
+        t.Id,
+        t.FirstName,
+        t.LastName,
+        t.Email ?? string.Empty,
+        "Teacher"
+    ));
+}
 }
 

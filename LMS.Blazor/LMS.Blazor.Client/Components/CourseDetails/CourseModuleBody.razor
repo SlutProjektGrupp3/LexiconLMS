@@ -1,0 +1,143 @@
+﻿@using LMS.Shared.DTOs.Activity
+@using LMS.Shared.DTOs.Module
+@using LMS.Blazor.Client.Components
+@using LMS.Blazor.Client.Components.Icons
+@using LMS.Shared.DTOs.Modules
+
+
+<div class="accordion-body">
+
+    <div class="d-flex justify-content-end gap-2 mb-3">
+        <AuthorizeView Roles="Teacher">
+            <Authorized>
+                <ShowFormButton ShowForm="ShowCreateForm.GetValueOrDefault(Module.Id)"
+                                OnClickWithId="OnToggleCreateForm"
+                                Id="@Module.Id"
+                                HiddenText="New Activity" />
+            </Authorized>
+        </AuthorizeView>
+    </div>
+
+    @if (ShowEditModuleForm.GetValueOrDefault(Module.Id))
+    {
+        <div class="mb-3">
+            <EditModuleForm Model="ModulesToEdit[Module.Id]"
+                            OnSubmit="OnUpdateModule"
+                            OnCancel="OnCancelEditModule"
+                            IsSubmitting="IsUpdatingModule" />
+        </div>
+    }
+
+    @if (LoadingModules.Contains(Module.Id))
+    {
+        <div class="text-muted small">Loading activities...</div>
+    }
+    else if (ModuleActivities.TryGetValue(Module.Id, out var activities))
+    {
+        @if (ShowCreateForm.GetValueOrDefault(Module.Id))
+        {
+            <div class="mb-3">
+                <AddActivityForm ModuleId="@Module.Id"
+                                 Model="NewActivities[Module.Id]"
+                                 OnSubmit="OnCreateActivity" />
+            </div>
+        }
+
+        <div class="mb-3">
+            <div class="text-secondary fw-semibold small">
+                Activities
+            </div>
+        </div>
+
+        <div class="ps-2">
+            @if (activities.Any())
+            {
+                <div class="d-flex flex-column gap-2">
+                    @foreach (var activityItem in activities
+                                            .OrderBy(a => a.StartDate)
+                                            .Select((a, i) => new { Activity = a, Index = i + 1 }))
+                    {
+                        var activity = activityItem.Activity;
+                        var activityIndex = activityItem.Index;
+
+                        <CourseActivityItem Activity="activity"
+                                            Index="activityIndex"
+                                            IsEditing="@(EditingActivityId == activity.Id && ActivityToUpdate != null)"
+                                            ActivityToUpdate="ActivityToUpdate"
+                                            Color="@GetActivityColor(activity)"
+                                            OnEdit="() => OnPrepareToUpdate.InvokeAsync((Module.Id, activity))"
+                                            OnDelete="() => OnPrepareToDelete.InvokeAsync((Module.Id, activity.Id))"
+                                            OnUpdate="() => OnUpdateActivity.InvokeAsync((Module.Id, activity.Id))"
+                                            OnCancelUpdate="OnCancelUpdate" />
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-muted small">
+                    This module has no activities.
+                </div>
+            }
+        </div>
+    }
+
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public ModuleDto Module { get; set; } = default!;
+
+    [Parameter]
+    public bool IsUpdatingModule { get; set; }
+
+    [Parameter]
+    public Guid? EditingActivityId { get; set; }
+
+    [Parameter]
+    public UpdateActivityDto? ActivityToUpdate { get; set; }
+
+    [Parameter]
+    public HashSet<Guid> LoadingModules { get; set; } = new();
+
+    [Parameter]
+    public Dictionary<Guid, List<ActivityDto>> ModuleActivities { get; set; } = new();
+
+    [Parameter]
+    public Dictionary<Guid, bool> ShowCreateForm { get; set; } = new();
+
+    [Parameter]
+    public Dictionary<Guid, CreateActivityDto> NewActivities { get; set; } = new();
+
+    [Parameter]
+    public Dictionary<Guid, bool> ShowEditModuleForm { get; set; } = new();
+
+    [Parameter]
+    public Dictionary<Guid, UpdateModuleDto> ModulesToEdit { get; set; } = new();
+
+    [Parameter]
+    public Func<ActivityDto, (string BgClass, string TextClass)> GetActivityColor { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback<Guid> OnToggleCreateForm { get; set; }
+
+    [Parameter]
+    public EventCallback OnCreateActivity { get; set; }
+
+    [Parameter]
+    public EventCallback OnUpdateModule { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancelEditModule { get; set; }
+
+    [Parameter]
+    public EventCallback<(Guid ModuleId, ActivityDto Activity)> OnPrepareToUpdate { get; set; }
+
+    [Parameter]
+    public EventCallback<(Guid ModuleId, Guid ActivityId)> OnPrepareToDelete { get; set; }
+
+    [Parameter]
+    public EventCallback<(Guid ModuleId, Guid ActivityId)> OnUpdateActivity { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancelUpdate { get; set; }
+}

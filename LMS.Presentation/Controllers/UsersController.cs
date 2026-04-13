@@ -69,4 +69,11 @@ public class UsersController : ControllerBase
         var count = await _serviceManager.UserService.GetUsersCountByRoleAsync(roleName);
         return Ok(count);
     }
+    
+    [HttpGet("teachers")]
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetTeachers()
+    {
+        var teachers = await _serviceManager.UserService.GetTeachersAsync();
+        return Ok(teachers);
+    }
 }

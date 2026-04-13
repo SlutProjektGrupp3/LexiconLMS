@@ -191,5 +191,18 @@ public class UserService : IUserService
         var usersInRole = await _userManager.GetUsersInRoleAsync(roleName);
         return usersInRole?.Count ?? 0;
     }
+    
+    public async Task<IEnumerable<UserDto>> GetTeachersAsync()
+{
+    var teachers = await _userManager.GetUsersInRoleAsync("Teacher");
+
+    return teachers.Select(t => new UserDto(
+        t.Id,
+        t.FirstName,
+        t.LastName,
+        t.Email ?? string.Empty,
+        "Teacher"
+    ));
+}
 }
 

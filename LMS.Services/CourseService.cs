@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using Domain.Models.Exceptions;
@@ -6,6 +7,7 @@ using LMS.Shared.DTOs;
 using LMS.Shared.DTOs.Course;
 using LMS.Shared.DTOs.User;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Service.Contracts;
 
 namespace LMS.Services;
@@ -21,6 +23,37 @@ public class CourseService : ICourseService
         _uow = uow;
         _mapper = mapper;
         _userManager = userManager;
+    }
+
+    public async Task<(IEnumerable<CourseDetailsDto> Items, int TotalCount)> GetCourseSummariesAsync(string? search = null, bool? active = null, int page = 1, int pageSize = 12)
+    {
+        var total = 0;
+        var list = await _uow.CourseRepository.GetCourseSummariesAsync();
+        var query = list.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var lower = search.Trim().ToLower();
+            query = query?.Where(c => c.Name.ToLower().Contains(lower) || (c.Description != null && c.Description.ToLower().Contains(lower)));
+        }
+
+        if (active.HasValue)
+        {
+            if (active.Value)
+                query = query?.Where(c => c.EndDate > DateTime.Now);
+            else
+                query = query?.Where(c => c.EndDate <= DateTime.Now);
+        }
+
+        var items = query
+            .OrderBy(c => c.StartDate)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        total += items.Count;
+
+        return (items, total);
     }
 
     public async Task<IEnumerable<CourseDto>> GetAllCoursesAsync(bool trackChanges = false)
@@ -73,15 +106,17 @@ public class CourseService : ICourseService
         await _uow.CompleteAsync();
     }
 
-    public async Task<IEnumerable<ParticipantDto>> GetParticipantsAsync(Guid courseId)
+    public async Task<IEnumerable<UserDto>> GetParticipantsAsync(Guid courseId)
     {
         var course = await _uow.CourseRepository
             .GetCourseWithStudentsAsync(courseId, trackChanges: false);
 
         if (course is null)
-            return Enumerable.Empty<ParticipantDto>();
+            return Enumerable.Empty<UserDto>();
 
-        return _mapper.Map<IEnumerable<ParticipantDto>>(course.Students);
+        var students = course.Students; 
+
+        return _mapper.Map<IEnumerable<UserDto>>(students);
     }
 
     public async Task AddStudentToCourseAsync(Guid courseId, string studentId)
@@ -123,6 +158,8 @@ public class CourseService : ICourseService
             .Select(u => _mapper.Map<AvailableStudentDto>(u))
             .ToList();
     }
-
-
+    public async Task<IEnumerable<CourseDetailsDto>> GetAllCoursesAsync()
+    {
+        return await _uow.CourseRepository.GetCourseSummariesAsync();
+    }
 }

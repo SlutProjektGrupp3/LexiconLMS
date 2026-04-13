@@ -6,10 +6,11 @@
 @using LMS.Shared.DTOs.User
 @using LMS.Blazor.Client.Components
 @using LMS.Blazor.Client.Components.Icons
+@using LMS.Blazor.Client.Components.Courses
+@using LMS.Blazor.Client.Components.CourseDetails
 
 
 <PageTitle>Course Details</PageTitle>
-
 
 @if (isLoading)
 {
@@ -25,298 +26,182 @@ else if (error != null)
         <strong>Error:</strong> @error
     </div>
 }
+
+
 else if (_course != null)
 {
-    <div class="card shadow-sm">
-        <div class="card-body">
+   <div class="course-details-page">
+    <div class="container px-4">
 
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 class="mb-0">@_course.Name</h4>
-                    <small class="text-muted">@_course.Description</small>
-                </div>
+        <!-- Hero / Course header -->
+            <CourseDetailsHero Course="_course"
+                               ParticipantCount="ParticipantCount"
+                               CourseProgressPercentage="CourseProgressPercentage"
+                               ShowCreateModuleForm="_showCreateModuleForm"
+                               OnToggleCreateModuleForm="ToggleCreateModuleForm" />
 
-                <AuthorizeView Roles="Teacher">
-                    <Authorized>
-                        <ShowFormButton ShowForm="_showCreateModuleForm"
-                                        OnClick="ToggleCreateModuleForm"
-                                        HiddenText="New Module" />
-                    </Authorized>
-                </AuthorizeView>
+        @if (!string.IsNullOrWhiteSpace(successMessage))
+        {
+            <div class="alert alert-success py-2 px-3 mb-3 fs-6" role="alert">
+                @successMessage
             </div>
+        }
 
-            @if (_showCreateModuleForm)
+        <!-- Tabs -->
+        <ul class="nav course-tabs mb-4">
+    <li class="nav-item">
+        <button type="button"
+                class="nav-link course-tab @(activeTab == "modules" ? "active" : "")"
+                @onclick='() => activeTab = "modules"'>
+            <span class="course-tab-icon">
+                <CalendarIcon Size="18" />
+            </span>
+                    <span class="tab-title">Modules</span>
+        </button>
+    </li>
+
+    <li class="nav-item">
+        <button type="button"
+                class="nav-link course-tab @(activeTab == "participants" ? "active" : "")"
+                @onclick="OpenParticipantsTab">
+            <span class="course-tab-icon">
+                <UsersIcon Size="18" />
+            </span>
+                    <span class="tab-title">Participants</span>
+        </button>
+    </li>
+
+    <li class="nav-item">
+        <button type="button"
+                class="nav-link course-tab @(activeTab == "documents" ? "active" : "")"
+                @onclick='() => activeTab = "documents"'>
+            <span class="course-tab-icon">
+                <DocumentIcon Size="18" />
+            </span>
+                    <span class="tab-title">Documents</span>
+        </button>
+    </li>
+</ul>
+
+        <!-- Tab content -->
+            @if (activeTab == "modules")
             {
-                <AuthorizeView Roles="Teacher">
-                    <Authorized>
-                        <CreateModuleForm Model="_moduleToCreate" OnSubmit="HandleCreateModule" />
-                    </Authorized>
-                </AuthorizeView>
-            }
-            @if (!string.IsNullOrWhiteSpace(successMessage))
-            {
-                <div class="alert alert-success py-2 px-3 mb-3 fs-6" role="alert">
-                    @successMessage
-                </div>
-            }
-
-            <button class="btn btn-primary" @onclick="ToggleAddStudent">
-     Add student
- </button>
-
-
-
- @if (showAddStudent)
- {
-     <div class="mt-3">
-
-         <input class="form-control mb-2"
-                placeholder="Search student..."
-                value="@searchTerm"
-                @oninput="OnSearchInput" />
-
-         @if (selectedStudent != null)
-         {
-             <div class="alert alert-light border py-2 px-3 mb-2">
-                 Selected student:
-                 <strong>@selectedStudent.FirstName @selectedStudent.LastName</strong>
-                 <span class="text-muted">(@selectedStudent.Email)</span>
-             </div>
-         }
-
-         <div class="border rounded p-2 bg-white" style="min-height: 60px;">
-             @if (filteredStudents.Any())
-             {
-                 <div class="list-group">
-                     @foreach (var student in filteredStudents)
-                     {
-                         <button type="button"
-                                 class="list-group-item list-group-item-action"
-                                 @onclick="() => SelectStudent(student)">
-                             @student.FirstName @student.LastName
-                             <span class="text-muted small">(@student.Email)</span>
-                         </button>
-                     }
-                 </div>
-             }
-             else if (!string.IsNullOrWhiteSpace(searchTerm))
-             {
-                 <div class="text-muted small">
-                     No students match the search.
-                 </div>
-             }
-             else
-             {
-                 <div class="text-muted small">
-                     Start typing to search for a student.
-                 </div>
-             }
-         </div>
-
-         <button class="btn btn-success mt-2"
-                 @onclick="AddStudent"
-                 disabled="@(selectedStudent is null)">
-             Add to course
-         </button>
-
-     </div>
- }
-
-            
-            @if (_course.Modules == null || !_course.Modules.Any())
-            {
-                <p class="text-muted">This course has no modules.</p>
-            }
-            else
-            {
-                <div class="accordion" id="modulesAccordion">
-                    @foreach (var module in _course.Modules)
-                    {
-                        var collapseId = $"collapse-{module.Id}";
-                        var headingId = $"heading-{module.Id}";
-                        var accordionIsOpen = _openModules.Contains(module.Id);
-
-                        <div class="accordion-item">
-
-                            <!-- Header -->
-                            <h2 id="@headingId" class="accordion-header d-flex align-items-center">
-                                <button class="accordion-button @(accordionIsOpen ? "" : "collapsed")"
-                                        type="button"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target="#@collapseId"
-                                        aria-expanded="@accordionIsOpen"
-                                        aria-controls="@collapseId"
-                                        @onclick="() => ToggleModuleAsync(module.Id)">
-                                    <div class="d-flex flex-column text-start">
-                                        <span class="fw-semibold">@module.Name</span>
-                                        <small class="text-muted">@module.Description</small>
-
-                                      
-                                    </div>
-
-                                    <div class="d-flex w-100 align-items-center">
-
-                                        <AuthorizeView Roles="Teacher">
-                                            <Authorized>
-                                                <button class="btn btn-sm btn-outline-danger ms-auto me-3"
-                                                      @onclick="() => PrepareToDelete(module.Id, Guid.Empty)"
-                                                      data-bs-toggle="modal"
-                                                      data-bs-target="#deleteModuleModal">
-                                                    Delete
-                                                </button>
-                                            </Authorized>
-                                        </AuthorizeView>
-                                    </div>
-                                </button>
-                            </h2>
-
-
-                            <!-- Body -->
-                            <div id="@collapseId"
-                                 class="accordion-collapse collapse @(accordionIsOpen ? "show" : "")"
-                                 data-bs-parent="#modulesAccordion">
-
-                                <div class="accordion-body">
-                                    <div class="d-flex justify-content-end gap-2 mb-3">
-                                      
-                                
-                                    <ShowFormButton ShowForm="_showEditModuleForm.GetValueOrDefault(module.Id)"
-                                                    OnClickWithId="ToggleEditModuleForm"
-                                                    Id="@module.Id"
-                                                    HiddenText="Edit Module"
-                                                    ShowCancel="false">
-
-                                        <Icon>
-                                            <EditIcon Size="18" />
-                                        </Icon>
-                                    </ShowFormButton>
-                                    </div>
-
-                                        <!-- FORM -->
-                                        @if (_showEditModuleForm.GetValueOrDefault(module.Id))
-                                        {
-                                            <div class="mb-3">
-                                                <EditModuleForm Model="_modulesToEdit[module.Id]"
-                                                                OnSubmit="() => HandleUpdateModule(module.Id)"
-                                                                OnCancel="() => CancelEditModule(module.Id)"
-                                                                IsSubmitting="_isUpdatingModule" />
-                                            </div>
-                                        }
-                                      
-                                
-                                    @if (_loadingModules.Contains(module.Id))
-                                    {
-                                        <div class="text-muted small">Loading activities...</div>
-                                    }
-                                    else if (_moduleActivities.TryGetValue(module.Id, out var activities))
-                                    {
-                                        <AuthorizeView Roles="Teacher">
-                                            <Authorized>
-                                                <ShowFormButton ShowForm="_showCreateForm.GetValueOrDefault(module.Id)"
-                                                                OnClickWithId="ToggleCreateForm"
-                                                                Id="module.Id"
-                                                                HiddenText="New Activity" />
-
-                                                @if (_showCreateForm.GetValueOrDefault(module.Id))
-                                                {
-                                                    <AddActivityForm ModuleId="module.Id"
-                                                                     Model="_newActivities[module.Id]"
-                                                                     OnSubmit="HandleCreateActivity" />
-                                                }
-                                            </Authorized>
-                                        </AuthorizeView>
-
-                                        @if (activities.Any())
-                                        {
-                                            <div class="list-group list-group-flush">
-                                                @foreach (var activity in activities)
-                                                {
-                                                    @if (_editingActivityId == activity.Id && _activityToUpdate != null)
-                                                    {
-                                                        <UpdateActivityForm ActivityId="activity.Id"
-                                                                            Model="_activityToUpdate"
-                                                                            OnSubmit="() => HandleUpdateActivity(module.Id, activity.Id)"
-                                                                            OnCancel="CancelUpdate" />
-                                                    }
-                                                    else
-                                                    {
-                                                        <div class="list-group-item px-0">
-    
-                                                            <div class="d-flex justify-content-between align-items-start">
-                                                                <div class="fw-semibold">
-                                                                    @activity.Name
-                                                                    <span class="text-muted fw-normal small">
-                                                                        (@activity.TypeName)
-                                                                    </span>
-                                                                </div>
-
-                                                            <AuthorizeView Roles="Teacher">
-                                                                <Authorized>
-                                                                    <button class="btn btn-sm btn-outline-warning me-2"
-        @onclick="() => PrepareToUpdate(module.Id, activity)">
-    Edit
-</button>
-                                                                    <button class="btn btn-sm btn-outline-danger"
-                                                                            data-bs-toggle="modal"
-                                                                            data-bs-target="#deleteActivityModal"
-                                                                            @onclick="() => PrepareToDelete(module.Id, activity.Id)">
-                                                                        Delete
-                                                                    </button>
-                                                                </Authorized>
-                                                            </AuthorizeView>
-                                                        </div>
-
-                                                            <div class="text-muted small">
-                                                                @activity.Description
-                                                            </div>
-
-                                                            <div class="text-muted small">
-                                                                @activity.StartDate.ToShortDateString()
-                                                                -
-                                                                @activity.EndDate.ToShortDateString()
-                                                            </div>
-
-                                                        </div>
-                                                    }
-                                                }
-                                            </div>
-
-                                            
-                                            <AuthorizeView Roles="Teacher">
-                                                <Authorized>
-                                                    <ConfirmModal ModalId="deleteActivityModal"
-                                                                  Title="Confirm Deletion"
-                                                                  Message="Are you sure you want to delete this activity?"
-                                                                  OnConfirm="() => HandleDeleteActivity(_moduleIdToRemember, _activityIdToRemember)" />
-                                                </Authorized>
-                                            </AuthorizeView>
-                                        }
-                                        else
-                                        {
-                                            <div class="text-muted small">
-                                                This module has no activities.
-                                            </div>
-                                        }
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    }
-         
-                    
+                @if (_showCreateModuleForm)
+                {
                     <AuthorizeView Roles="Teacher">
                         <Authorized>
-                            <ConfirmModal ModalId="deleteModuleModal"
-                                          Title="Confirm Deletion"
-                                          Message="Are you sure you want to delete this module? All activities will also be deleted!"
-                                          OnConfirm="() => HandleDeleteModule(_moduleIdToRemember)" />
+                            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                                <div class="card-body">
+                                    <CreateModuleForm Model="_moduleToCreate" OnSubmit="HandleCreateModule" />
+                                </div>
+                            </div>
                         </Authorized>
                     </AuthorizeView>
+                }
+
+                @if (_course.Modules == null || !_course.Modules.Any())
+                {
+                    <div class="card shadow-sm border-0 rounded-4">
+                        <div class="card-body">
+                            <p class="text-muted mb-0">This course has no modules.</p>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="accordion" id="modulesAccordion">
+
+                        @foreach (var module in SortedModules
+                                        .Select((m, i) => new { Module = m, Index = i + 1 }))
+                        {
+                            var moduleItem = module.Module;
+                            var index = module.Index;
+
+                            var collapseId = $"collapse-{moduleItem.Id}";
+                            var headingId = $"heading-{moduleItem.Id}";
+                            var accordionIsOpen = _openModules.Contains(moduleItem.Id);
+
+                            <div class="accordion-item module-accordion-item mb-3 rounded-4 overflow-hidden shadow-sm @(accordionIsOpen ? "module-active" : "")">
+
+                                <!-- HEADER -->
+                                <CourseModuleHeader Module="moduleItem"
+                                                    Index="index"
+                                                    IsOpen="accordionIsOpen"
+                                                    BadgeClass="@GetModuleStatusBadgeClass(moduleItem)"
+                                                    Status="@GetModuleStatus(moduleItem)"
+                                                    CircleStyle="@GetModuleCircleStyle(moduleItem)"
+                                                    OnToggle="() => ToggleModuleAsync(moduleItem.Id)"
+                                                    OnEdit="() => OpenEditModuleForm(moduleItem.Id)"
+                                                    OnDelete="() => PrepareToDelete(moduleItem.Id, Guid.Empty)" />
+
+                                <!-- BODY -->
+                                <div id="@collapseId"
+                                     class="accordion-collapse collapse @(accordionIsOpen ? "show" : "")"
+                                     data-bs-parent="#modulesAccordion">
+
+                                    <CourseModuleBody Module="moduleItem"
+                                                      IsUpdatingModule="_isUpdatingModule"
+                                                      EditingActivityId="_editingActivityId"
+                                                      ActivityToUpdate="_activityToUpdate"
+                                                      LoadingModules="_loadingModules"
+                                                      ModuleActivities="_moduleActivities"
+                                                      ShowCreateForm="_showCreateForm"
+                                                      NewActivities="_newActivities"
+                                                      ShowEditModuleForm="_showEditModuleForm"
+                                                      ModulesToEdit="_modulesToEdit"
+                                                      GetActivityColor="GetActivityColorClass"
+                                                      OnToggleCreateForm="ToggleCreateForm"
+                                                      OnCreateActivity="() => HandleCreateActivity(moduleItem.Id)"
+                                                      OnUpdateModule="() => HandleUpdateModule(moduleItem.Id)"
+                                                      OnCancelEditModule="() => CancelEditModule(moduleItem.Id)"
+                                                      OnPrepareToUpdate="args => PrepareToUpdate(args.ModuleId, args.Activity)"
+                                                      OnPrepareToDelete="args => PrepareToDelete(args.ModuleId, args.ActivityId)"
+                                                      OnUpdateActivity="args => HandleUpdateActivity(args.ModuleId, args.ActivityId)"
+                                                      OnCancelUpdate="CancelUpdate" />
+                                </div>
+                            </div>
+                        }
+
+                        <AuthorizeView Roles="Teacher">
+                            <Authorized>
+                                <ConfirmModal ModalId="deleteActivityModal"
+                                              Title="Confirm Deletion"
+                                              Message="Are you sure you want to delete this activity?"
+                                              OnConfirm="() => HandleDeleteActivity(_moduleIdToRemember, _activityIdToRemember)" />
+                            </Authorized>
+                        </AuthorizeView>
+
+                        <AuthorizeView Roles="Teacher">
+                            <Authorized>
+                                <ConfirmModal ModalId="deleteModuleModal"
+                                              Title="Confirm Deletion"
+                                              Message="Are you sure you want to delete this module? All activities will also be deleted!"
+                                              OnConfirm="() => HandleDeleteModule(_moduleIdToRemember)" />
+                            </Authorized>
+                        </AuthorizeView>
+
+                    </div>
+                }
+            }
+            else if (activeTab == "participants")
+            {
+                <CourseParticipantsTab IsLoading="isLoadingParticipants"
+                                       Teachers="teachers"
+                                       Participants="participants" />
+            }
+            else if (activeTab == "documents")
+            {
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body">
+                        <h5 class="mb-3">Document</h5>
+                        <p class="text-muted mb-0">The documents tab</p>
+                    </div>
                 </div>
             }
+
         </div>
     </div>
+      
 }
 
 @code {
@@ -342,28 +227,36 @@ else if (_course != null)
     private Guid _moduleIdToRemember;
     private Guid _activityIdToRemember;
 
-    private bool showAddStudent = false;
-    // All students that are available to be added to the course
-    private List<AvailableStudentDto> availableStudents = new();
-    private string selectedStudentId = string.Empty;
-    // Current value in the search input
-    private string searchTerm = string.Empty;
-    // Filtered list shown as search results
-    private List<AvailableStudentDto> filteredStudents = new();
-    // The full selected student object (used for display in UI)
-    private AvailableStudentDto? selectedStudent;
-
-   
-
+    private string activeTab = "modules";
+    private List<UserDto> participants = new();
+    private List<UserDto> teachers = new();
+    private bool isLoadingParticipants = false;
+    private bool participantsLoaded = false;
+    private int ParticipantCount => participants?.Count ?? 0;
+    private Dictionary<string, (string BgClass, string TextClass)> _activityTypeColorMap
+    = new(StringComparer.OrdinalIgnoreCase);
 
     private Dictionary<Guid, bool> _showEditModuleForm = new();
     private Dictionary<Guid, UpdateModuleDto> _modulesToEdit = new();
+
+    private IEnumerable<ModuleDto> SortedModules =>
+    _course?.Modules?
+        .OrderBy(m => GetModuleSortOrder(m))
+        .ThenBy(m =>
+            GetModuleSortOrder(m) == 0 ? m.EndDate :     // Ongoing: soonest ending first
+            GetModuleSortOrder(m) == 1 ? m.StartDate :   // Upcoming: soonest starting first
+            DateTime.MaxValue)
+        .ThenByDescending(m =>
+            GetModuleSortOrder(m) == 2 ? m.EndDate :     // Completed: most recently completed first
+            DateTime.MinValue)
+    ?? Enumerable.Empty<ModuleDto>();
 
     protected override async Task OnInitializedAsync()
     {
 
         //This method run in prerender
         await CallApi();
+        await LoadParticipantsTab();
         
     }
 
@@ -386,6 +279,75 @@ else if (_course != null)
         }
     }
 
+    // Success Message
+    private async Task ShowSuccessMessage(string message)
+    {
+        successMessage = message;
+        StateHasChanged();
+
+        await Task.Delay(3000); // Show message for 3 seconds before clearing
+
+        successMessage = null;
+        StateHasChanged();
+    }
+
+    //Progressbar
+    private int CourseProgressPercentage
+    {
+        get
+        {
+            if (_course?.Modules == null || !_course.Modules.Any())
+                return 0;
+
+            var completedModules = _course.Modules.Count(m => m.EndDate.Date < DateTime.Today);
+            var totalModules = _course.Modules.Count;
+
+            return (int)Math.Round((double)completedModules / totalModules * 100);
+        }
+    }
+
+
+    //Participants
+    private async Task OpenParticipantsTab()
+    {
+        activeTab = "participants";
+        await LoadParticipantsTab();
+    }
+
+    private async Task LoadParticipantsTab()
+    {
+        if (participantsLoaded)
+            return;
+
+        isLoadingParticipants = true;
+        error = null;
+
+        try
+        {
+            participants = await ApiService.GetAsync<List<UserDto>>(
+                $"api/courses/{Id}/participants") ?? new();
+
+            teachers = await ApiService.GetAsync<List<UserDto>>(
+                "api/users/teachers") ?? new();
+
+            participantsLoaded = true;
+        }
+        catch (Exception ex)
+        {
+            error = "Failed to load participants: " + ex.Message;
+        }
+        finally
+        {
+            isLoadingParticipants = false;
+        }
+    }   
+    private string GetInitials(string firstName, string lastName)
+    {
+        return $"{firstName.FirstOrDefault()}{lastName.FirstOrDefault()}".ToUpper();
+    }
+
+
+    //Modules
     private async Task ToggleModuleAsync(Guid moduleId)
     {
         if (_openModules.Contains(moduleId))
@@ -405,16 +367,28 @@ else if (_course != null)
             {
                 var activities = await ApiService.GetAsync<List<ActivityDto>>($"api/activities/modules/{moduleId}");
                 _moduleActivities[moduleId] = activities ?? new List<ActivityDto>();
+                BuildActivityTypeColorMap();
             }
             catch
             {
                 _moduleActivities[moduleId] = new List<ActivityDto>();
+                BuildActivityTypeColorMap();
             }
             finally
             {
                 _loadingModules.Remove(moduleId);
             }
         }
+    }
+
+    private async Task OpenEditModuleForm(Guid moduleId)
+    {
+        if (!_openModules.Contains(moduleId))
+        {
+            await ToggleModuleAsync(moduleId);
+        }
+
+        ToggleEditModuleForm(moduleId);
     }
 
     private void ToggleCreateForm(Guid moduleId)
@@ -546,17 +520,86 @@ else if (_course != null)
         {
             _isUpdatingModule = false;
         }
-    }
-    private async Task ShowSuccessMessage(string message)
+    }  
+    
+
+    // Modules - badges
+
+    private int GetModuleSortOrder(ModuleDto module)
     {
-        successMessage = message;
-        StateHasChanged();
+        var today = DateTime.Today;
 
-        await Task.Delay(3000); // Show message for 3 seconds before clearing
+        if (module.StartDate.Date <= today && module.EndDate.Date >= today)
+            return 0; // Ongoing
 
-        successMessage = null;
-        StateHasChanged();
+        if (module.StartDate.Date > today)
+            return 1; // Upcoming
+
+        return 2; // Completed
     }
+
+    private string GetModuleStatus(ModuleDto module)
+    {
+        var today = DateTime.Today;
+
+        if (module.EndDate.Date < today)
+            return "Completed";
+
+        if (module.StartDate.Date > today)
+            return "Upcoming";
+
+        return "Ongoing";
+    }
+
+    private string GetModuleStatusBadgeClass(ModuleDto module)
+    {
+        var today = DateTime.Today;
+
+        if (module.EndDate.Date < today)
+            return "bg-success-subtle text-success";
+
+        if (module.StartDate.Date > today)
+            return "bg-secondary-subtle text-secondary";
+
+        return "bg-primary-subtle text-primary";
+    }
+
+    private string GetModuleCircleStyle(ModuleDto module)
+    {
+        var today = DateTime.Today;
+
+        if (module.EndDate.Date < today)
+            return "background-color:#d1e7dd; color:#0f5132;";
+
+        if (module.StartDate.Date > today)
+            return "background-color:#e2e3e5; color:#41464b;";
+
+        return "background-color:#cfe2ff; color:#084298;";
+    }
+
+    private async Task HandleDeleteModule(Guid moduleId)
+    {
+        try
+        {
+            await ApiService.DeleteAsync($"api/modules/{moduleId}");
+
+            _openModules.Remove(moduleId);
+            _moduleActivities.Remove(moduleId);
+            
+            var moduleDto = _course!.Modules.Find(m => m.Id == moduleId);
+            if (moduleDto != null)
+            {
+                _course.Modules.Remove(moduleDto);
+            }
+        }
+        catch (Exception ex)
+        {
+            error = "Failed to delete activity: " + ex.Message;
+        }
+    }
+
+
+    // Activities
 
     private async Task HandleCreateActivity(Guid moduleId)
     {
@@ -569,7 +612,8 @@ else if (_course != null)
             {
                 if (_moduleActivities.ContainsKey(moduleId))
                 {
-                    _moduleActivities[moduleId].Add(createdActivity);
+                   _moduleActivities[moduleId].Add(createdActivity);
+                    BuildActivityTypeColorMap();
                 }
 
                 _showCreateForm[moduleId] = false;
@@ -594,6 +638,7 @@ else if (_course != null)
                 if (activityToRemove != null)
                 {
                     _moduleActivities[moduleId].Remove(activityToRemove);
+                    BuildActivityTypeColorMap();
                 }
             }
         }
@@ -608,98 +653,6 @@ else if (_course != null)
         _moduleIdToRemember = moduleId;
         _activityIdToRemember = activityId;
 
-    }
-
-    private async Task ToggleAddStudent()
-    {
-        showAddStudent = !showAddStudent;
-
-        if (showAddStudent)
-        {
-            // Reset UI state
-            selectedStudent = null;
-            selectedStudentId = string.Empty;
-            searchTerm = string.Empty;
-
-            // fetch fresh data from API when component open
-            availableStudents = await ApiService.GetAsync<List<AvailableStudentDto>>(
-                $"api/courses/{Id}/available-students"
-            ) ?? new();
-
-            // Do not show results until user starts typing
-            filteredStudents = new List<AvailableStudentDto>();
-        }
-    }
-
-
-    private async Task AddStudent()
-    {
-        if (string.IsNullOrWhiteSpace(selectedStudentId))
-        {
-            error = "Välj en elev först.";
-            return;
-        }
-
-        try
-        {
-            await ApiService.PostAsync<object>($"api/courses/{Id}/students/{selectedStudentId}", new { });
-
-            showAddStudent = false;
-            selectedStudentId = string.Empty;
-            selectedStudent = null;
-            searchTerm = string.Empty;
-            error = null;
-
-            // Refresh available students so the added one disappears from the list
-            availableStudents = await ApiService.GetAsync<List<AvailableStudentDto>>(
-                $"api/courses/{Id}/available-students"
-            ) ?? new();
-
-            filteredStudents = availableStudents;
-            await CallApi();
-        }
-        catch (Exception ex)
-        {
-            error = "Failed to add student: " + ex.Message;
-        }
-    }
-
-    private void FilterStudents()
-    {
-        // If search is empty, do not show any results
-        if (string.IsNullOrWhiteSpace(searchTerm))
-        {
-            filteredStudents = new List<AvailableStudentDto>();
-            return;
-        }
-
-        var term = searchTerm.Trim();
-
-        
-        // Filter by first name, last name, full name, or email
-        filteredStudents = availableStudents
-            .Where(s =>
-                s.FirstName.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                s.LastName.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                $"{s.FirstName} {s.LastName}".Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                s.Email.Contains(term, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-    }
-
-    private void SelectStudent(AvailableStudentDto student)
-    {
-        selectedStudent = student;
-        selectedStudentId = student.Id;
-        filteredStudents = new List<AvailableStudentDto>();
-    }
-
-    private void OnSearchInput(ChangeEventArgs e)
-    {
-        // Update search term from input field
-        searchTerm = e.Value?.ToString() ?? string.Empty;
-
-        // Trigger filtering as user types
-        FilterStudents();
     }
 
     private void PrepareToUpdate(Guid moduleId, ActivityDto activity)
@@ -734,6 +687,7 @@ else if (_course != null)
 
             var activities = await ApiService.GetAsync<List<ActivityDto>>($"api/activities/modules/{moduleId}");
             _moduleActivities[moduleId] = activities ?? new List<ActivityDto>();
+            BuildActivityTypeColorMap();
 
             _editingActivityId = null;
             _activityToUpdate = null;
@@ -744,24 +698,44 @@ else if (_course != null)
         }
     }
 
-    private async Task HandleDeleteModule(Guid moduleId)
-    {
-        try
-        {
-            await ApiService.DeleteAsync($"api/modules/{moduleId}");
+    //Aktivity badges
 
-            _openModules.Remove(moduleId);
-            _moduleActivities.Remove(moduleId);
-            
-            var moduleDto = _course!.Modules.Find(m => m.Id == moduleId);
-            if (moduleDto != null)
-            {
-                _course.Modules.Remove(moduleDto);
-            }
-        }
-        catch (Exception ex)
+    private readonly (string BgClass, string TextClass)[] activityColorVariants =
+[
+    ("bg-primary-subtle", "text-primary"),
+    ("bg-success-subtle", "text-success"),
+    ("bg-warning-subtle", "text-warning"),
+    ("bg-info-subtle", "text-info"),
+    ("bg-danger-subtle", "text-danger"),
+    ("bg-secondary-subtle", "text-secondary")
+];
+
+    private void BuildActivityTypeColorMap()
+    {
+        var allTypes = _moduleActivities.Values
+            .SelectMany(activities => activities)
+            .Select(a => a.TypeName?.Trim())
+            .Where(type => !string.IsNullOrWhiteSpace(type))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(type => type)
+            .ToList();
+
+        _activityTypeColorMap = new Dictionary<string, (string BgClass, string TextClass)>(StringComparer.OrdinalIgnoreCase);
+
+        for (int i = 0; i < allTypes.Count; i++)
         {
-            error = "Failed to delete activity: " + ex.Message;
+            _activityTypeColorMap[allTypes[i]!] = activityColorVariants[i % activityColorVariants.Length];
         }
+    }
+
+    private (string BgClass, string TextClass) GetActivityColorClass(ActivityDto activity)
+    {
+        if (!string.IsNullOrWhiteSpace(activity.TypeName) &&
+            _activityTypeColorMap.TryGetValue(activity.TypeName, out var color))
+        {
+            return color;
+        }
+
+        return ("bg-secondary-subtle", "text-secondary");
     }
 }

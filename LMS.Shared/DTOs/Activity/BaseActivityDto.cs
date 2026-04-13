@@ -5,7 +5,7 @@ using System.Text;
 
 namespace LMS.Shared.DTOs.Activity
 {
-    public abstract class BaseActivityDto
+    public abstract class BaseActivityDto : IValidatableObject
     {
         [Required(ErrorMessage = "Name is required")]
         public string Name { get; set; } = string.Empty;

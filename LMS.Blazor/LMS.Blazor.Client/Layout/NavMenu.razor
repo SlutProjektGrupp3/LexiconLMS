@@ -13,70 +13,46 @@
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
-<nav class="nav flex-column">
-    <AuthorizeView Roles="Teacher">
-        <Authorized>
-            <div class="d-flex flex-column justify-content-between h-100">
-                <div>
-                    <div class="nav-item">
-                        <NavLink class="nav-link" href="teacher/dashboard">
-                            <DashboardIcon CssClass="mx-3" /> Dashboard
-                        </NavLink>
-                    </div>
-
-                    <div class="nav-item">
-                        <NavLink class="nav-link" href="teacher/managecourses">
-                            <BookOpenIcon CssClass="mx-3" /> Manage Courses
-                        </NavLink>
-                    </div>
-
-                    <div class="nav-item">
-                        <NavLink class="nav-link" href="manageusers">
-                            <ParticipantsIcon CssClass="mx-3" /> Manage Users
-                        </NavLink>
-                    </div>
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="nav flex-column">
+        <AuthorizeView Roles="Teacher">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="teacher/dashboard">
+                        <span class="bi bi-speedometer2"></span> Dashboard
+                    </NavLink>
                 </div>
 
-                <form action="Account/Logout" method="post" >
-                    <AntiforgeryToken />
-                    <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                    <button type="submit" class="nav-link">
-                        <LogOutIcon CssClass="text-danger mx-3" /> 
-                        <span class="text-light">Logout</span>
-                    </button>
-                </form>
-            </div>
-        </Authorized>
-    </AuthorizeView>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="teacher/managecourses">
+                        <span class="bi bi-book"></span> Manage Courses
+                    </NavLink>
+                </div>
 
-    <AuthorizeView Roles="Student">
-        <Authorized>
-            <div class="d-flex flex-column justify-content-between h-100">
-               <div>
-                    <div class="nav-item">
-                        <NavLink class="nav-link" href="student/dashboard">
-                            <DashboardIcon CssClass="mx-3" /> Dashboard
-                        </NavLink>
-                    </div>
-                    <div class="nav-item">
-                        <NavLink class="nav-link" href="student/mycourse">
-                            <BookOpenIcon CssClass="mx-3" /> My Course
-                        </NavLink>
-                    </div>
-               </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="manageusers">
+                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Manage Users
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
 
-                <form action="Account/Logout" method="post" class="p-4">
-                    <AntiforgeryToken />
-                    <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                    <button type="submit" class="nav-link">
-                        <LogOutIcon CssClass="text-danger mx-3" />
-                        <span class="text-light">Logout</span>
-                    </button>
-                </form>
-            </div>
-        </Authorized>
-    </AuthorizeView>
-</nav>
+        <AuthorizeView Roles="Student">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="student/dashboard">
+                        <span class="bi bi-speedometer2"></span> Dashboard
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="student/mycourse">
+                        <span class="bi bi-book"></span> My Course
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+    </nav>
+</div>
 
 @code {
     private string? currentUrl;

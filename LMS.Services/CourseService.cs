@@ -27,32 +27,31 @@ public class CourseService : ICourseService
 
     public async Task<(IEnumerable<CourseDetailsDto> Items, int TotalCount)> GetCourseSummariesAsync(string? search = null, bool? active = null, int page = 1, int pageSize = 12)
     {
-        // Build base query
-        var repoQuery = (_uow.CourseRepository as Domain.Contracts.Repositories.ICourseRepository)!.GetCourseQuery(false);
-        var query = repoQuery;
+        var total = 0;
+        var list = await _uow.CourseRepository.GetCourseSummariesAsync();
+        var query = list.AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search))
         {
             var lower = search.Trim().ToLower();
-            query = query.Where(c => c.Name.ToLower().Contains(lower) || (c.Description != null && c.Description.ToLower().Contains(lower)));
+            query = query?.Where(c => c.Name.ToLower().Contains(lower) || (c.Description != null && c.Description.ToLower().Contains(lower)));
         }
 
         if (active.HasValue)
         {
             if (active.Value)
-                query = query.Where(c => c.EndDate > DateTime.Now);
+                query = query?.Where(c => c.EndDate > DateTime.Now);
             else
-                query = query.Where(c => c.EndDate <= DateTime.Now);
+                query = query?.Where(c => c.EndDate <= DateTime.Now);
         }
 
-        var total = await query.CountAsync(CancellationToken.None);
-
-        var items = await query
+        var items = query
             .OrderBy(c => c.StartDate)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .ProjectTo<CourseDetailsDto>(_mapper.ConfigurationProvider)
-            .ToListAsync(CancellationToken.None);
+            .ToList();
+
+        total += items.Count;
 
         return (items, total);
     }
@@ -68,6 +67,8 @@ public class CourseService : ICourseService
         var course = await _uow.CourseRepository.GetCourseByIdAsync(id, includeModules: true);
         if (course == null)
             return null;
+        return _mapper.Map<CourseDetailsDto>(course);
+    }
 
     public async Task<ResultDto<CourseDto>> CreateCourseAsync(CreateCourseDto dto)
     {
@@ -177,10 +178,4 @@ public class CourseService : ICourseService
     {
         return await _uow.CourseRepository.GetCourseSummariesAsync();
     }
-
-    public async Task<CourseDetailsDto?> GetCourseByIdAsync(Guid id)
-    {
-        return await _uow.CourseRepository.GetCourseDetailsAsync(id);
-    }
-
 }

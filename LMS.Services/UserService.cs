@@ -163,6 +163,7 @@ public class UserService : IUserService
         user.LastName = dto.LastName;
         user.Email = dto.Email;
         user.UserName = dto.Email; 
+        user.CourseId = dto.CourseId;
 
         var updateResult = await _userManager.UpdateAsync(user);
         if (!updateResult.Succeeded)
@@ -194,7 +195,8 @@ public class UserService : IUserService
             user.FirstName,
             user.LastName,
             user.Email,
-            dto.RoleName
+            dto.RoleName,
+            user.CourseId
         );
     }
     public async Task<int> GetUsersCountByRoleAsync(string roleName)

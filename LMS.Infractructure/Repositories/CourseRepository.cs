@@ -50,14 +50,6 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
             .FirstOrDefaultAsync();
     }    
 
-    public IQueryable<Course> GetCourseQuery(bool trackChanges = false)
-    {
-        return FindAll(trackChanges);
-    }
-    public IQueryable<Course> GetCoursesQuery(bool trackChanges = false)
-    {
-        return FindAll(trackChanges);
-    }
     public async Task<List<CourseDetailsDto>> GetCourseSummariesAsync()
     {
         return await FindAll(false)
@@ -66,12 +58,13 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
                 Id = c.Id,
                 Name = c.Name,
                 StartDate = c.StartDate,
-
+                EndDate = c.EndDate,
                 ParticipantsCount = c.Students.Count(),
-                ModulesCount = c.Modules.Count()                
+                ModulesCount = c.Modules.Count()
             })
             .ToListAsync();
     }
+
     public async Task<CourseDetailsDto?> GetCourseDetailsAsync(Guid courseId)
     {
         return await FindByCondition(c => c.Id == courseId, false)
@@ -101,7 +94,8 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
                     u.FirstName,
                     u.LastName,
                     u.Email,
-                    "Student"
+                    "Student",
+                     u.CourseId
                     )
                 ).ToList(),
 

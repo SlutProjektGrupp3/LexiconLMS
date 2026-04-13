@@ -1,0 +1,60 @@
+﻿@using LMS.Shared.DTOs.User
+
+<div class="card mt-3 p-3 bg-light mb-3">
+    <h5>Edit User</h5>
+    <EditForm Model="Model" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+
+        <div class="mb-2">
+            <label class="form-label">First Name</label>
+            <InputText class="form-control" @bind-Value="Model.FirstName" />
+            <ValidationMessage For="@(() => Model.FirstName)" />
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label">Last Name</label>
+            <InputText class="form-control" @bind-Value="Model.LastName" />
+            <ValidationMessage For="@(() => Model.LastName)" />
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label">Email</label>
+            <InputText class="form-control" @bind-Value="Model.Email" />
+            <ValidationMessage For="@(() => Model.Email)" />
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label">Role</label>
+            <InputSelect class="form-select" @bind-Value="Model.RoleName">
+                @foreach (var role in Roles)
+                {
+                    <option value="@role">@role</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => Model.RoleName)" />
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-2">Update User</button>
+        <button type="button" class="btn btn-secondary mt-2 ms-2" @onclick="HandleCancel">Cancel</button>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter] 
+    public UpdateUserDto Model { get; set; } = default!;
+    [Parameter] 
+    public List<string> Roles { get; set; } = new();
+    [Parameter] 
+    public EventCallback OnSubmit { get; set; }
+    [Parameter] 
+    public EventCallback OnCancel { get; set; }
+
+    private async Task HandleSubmit()
+    {
+        await OnSubmit.InvokeAsync();
+    }
+    private async Task HandleCancel()
+    {
+        if (OnCancel.HasDelegate) await OnCancel.InvokeAsync();
+    }
+}

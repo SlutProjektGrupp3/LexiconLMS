@@ -13,8 +13,8 @@
     </div>
  </div>
 <div class="d-flex justify-content-end mt-4 mb-3">
-    <button class="create-btn" @onclick="GoToCreateCourse">
-        ➕ Create Course
+    <button class="btn btn-primary" @onclick="GoToCreateCourse">
+        <i class="bi bi-plus"></i> Create Course
     </button>
 </div>
 
@@ -104,6 +104,6 @@
 
     void GoToCreateCourse()
     {
-        Navigation.NavigateTo("/teacher/courses");
+        Navigation.NavigateTo("/teacher/managecourses");
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Domain.Models.Entities;
 using LMS.Shared.DTOs.Course;
+using LMS.Shared.DTOs.User;
 using LMS.Shared.Request;
 using System;
 using System.Collections.Generic;

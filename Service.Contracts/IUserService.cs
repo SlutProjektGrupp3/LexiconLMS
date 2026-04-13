@@ -13,4 +13,5 @@ public interface IUserService
 
     Task<UserDto> UpdateUserAsync(string id, UpdateUserDto dto);
     Task<int> GetUsersCountByRoleAsync(string roleName);
+    Task<UserDto?> GetUserByIdAsync(string id);
 }

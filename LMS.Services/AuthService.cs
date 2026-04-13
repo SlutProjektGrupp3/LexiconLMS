@@ -85,9 +85,9 @@ public class AuthService : IAuthService
             
             //Add more claims here if needed
             //These claims disappear after first content paint?
-            //new Claim("FirstName", user.FirstName),
-            //new Claim("LastName", user.LastName)
-            //new Claim("FavoriteColor", "Blue") 
+            new Claim(ClaimTypes.GivenName, _user.FirstName),
+            new Claim(ClaimTypes.Surname, _user.LastName),
+            
         };
 
         var roles = await _userManager.GetRolesAsync(_user);

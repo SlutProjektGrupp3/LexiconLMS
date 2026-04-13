@@ -1,0 +1,99 @@
+﻿@using LMS.Shared.DTOs.Activity
+@using LMS.Blazor.Client.Components.Icons
+
+@if (IsEditing && ActivityToUpdate is not null)
+{
+    <UpdateActivityForm ActivityId="Activity.Id"
+                        Model="ActivityToUpdate"
+                        OnSubmit="OnUpdate"
+                        OnCancel="OnCancelUpdate" />
+}
+else
+{
+    <div class="border rounded-4 px-3 py-2 shadow-sm activity-card">
+        <div class="d-flex justify-content-between gap-2">
+
+            <div class="d-flex align-items-center gap-3 flex-grow-1">
+                <div class="activity-number-circle @Color.BgClass @Color.TextClass">
+                    @Index
+                </div>
+
+                <div class="flex-grow-1" style="min-width: 0;">
+                    <div class="mb-1">
+                        <span class="badge rounded-pill px-2 py-1 small @Color.BgClass @Color.TextClass">
+                            @Activity.TypeName
+                        </span>
+                    </div>
+
+                    <div class="fw-semibold mb-1 activity-title">
+                        @Activity.Name
+                    </div>
+
+                    <div class="text-muted small mb-1 activity-description">
+                        @Activity.Description
+                    </div>
+
+                    <div class="text-secondary text-xs activity-date">
+                        @Activity.StartDate.ToShortDateString()
+                        -
+                        @Activity.EndDate.ToShortDateString()
+                    </div>
+                </div>
+            </div>
+
+            <AuthorizeView Roles="Teacher">
+                <Authorized>
+                    <div class="d-flex align-items-center gap-3 flex-shrink-0 align-self-center me-3">
+                        <span class="module-action-icon text-muted"
+                              title="Edit activity"
+                              role="button"
+                              tabindex="0"
+                              @onclick="OnEdit">
+                            <EditIcon Size="16" />
+                        </span>
+
+                        <span class="module-action-icon text-muted"
+                              title="Delete activity"
+                              role="button"
+                              tabindex="0"
+                              @onclick="OnDelete"
+                              data-bs-toggle="modal"
+                              data-bs-target="#deleteActivityModal">
+                            <TrashIcon Size="16" />
+                        </span>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public ActivityDto Activity { get; set; } = default!;
+
+    [Parameter]
+    public int Index { get; set; }
+
+    [Parameter]
+    public bool IsEditing { get; set; }
+
+    [Parameter]
+    public UpdateActivityDto? ActivityToUpdate { get; set; }
+
+    [Parameter]
+    public (string BgClass, string TextClass) Color { get; set; }
+
+    [Parameter]
+    public EventCallback OnEdit { get; set; }
+
+    [Parameter]
+    public EventCallback OnDelete { get; set; }
+
+    [Parameter]
+    public EventCallback OnUpdate { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancelUpdate { get; set; }
+}

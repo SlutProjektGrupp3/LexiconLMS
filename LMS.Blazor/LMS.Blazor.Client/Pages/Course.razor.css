@@ -19,152 +19,34 @@
 .text-xxs {
     font-size: 0.65rem; 
 }
+/*-----------MODULES-------------*/
 
-
-/*------------COURSE HERO----------*/
-.course-hero-description {
-    font-size: 1rem;
-    line-height: 1.5;
-    color: #4b5563;
+.module-accordion-item {
+    background-color: #ffffff;
+    border: 1px solid #edf1f5;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
-.course-meta {
-    font-size: 0.80rem;
-    color: #6b7280;
-}
-
-
-
-/*------------MODULES------------*/
-
-.module-title {
-    font-size: 1.1rem;
-    font-weight: 950;
-    color: #0f172a;
-  
-    letter-spacing: -0.02em;
-}
-
-    .module-accordion-item {
-        background-color: #ffffff;
-        border: 1px solid #edf1f5;
-        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-        transition: transform 0.18s ease, box-shadow 0.18s ease;
+    .module-accordion-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .08) !important;
     }
 
-        .module-accordion-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .08) !important;
-        }
-
-    .module-accordion-button {
-        background-color: #fff;
-        transition: background-color 0.18s ease;
-    }
-
-        .module-accordion-button:hover {
-            background-color: #f8f9fa;
-        }
-
-        .module-accordion-button:not(.collapsed) {
-            background-color: #fff;
-            box-shadow: none;
-        }
-
-        .module-accordion-button:focus {
-            box-shadow: none;
-            border-color: transparent;
-        }
-
-        .module-accordion-button::after {
-            margin-left: 1rem;
-        }
-
-    .module-header-divider {
-        width: 1px;
-        height: 20px;
-        background-color: #dee2e6;
-    }
-
-    .module-chevron {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 22px;
-        color: #6c757d;
-        line-height: 1;
-    }
-
-    .module-subtext {
-        font-size: 0.95rem;
-        color: #6b7280;
-        line-height: 1.4;
-    }
-
-    .module-date {
-        font-size: 0.95rem;
-        color: #94a3b8;
-    }
-
-    .module-active {
-        border: 2px solid #0ea5e9;
-        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.08);
-    }
-
-    .module-action-icon svg {
-        transition: transform 0.15s ease;
-    }
-
-    .module-action-icon:hover svg {
-        transform: scale(1.1);
-    }
-
-.module-accordion-button::after {
-    display: none;
-}
-
-.accordion-body {
-    background-color: #f8fafc;
-}
-/*----------ACTIVITY----------*/
-.activity-card {
+.module-accordion-button {
     background-color: #fff;
 }
 
-.activity-number-circle {
-    width: 2.5rem;
-    height: 2.5rem;
-    min-width: 2.5rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    line-height: 1;
+    .module-accordion-button:hover {
+        background-color: #f8f9fa;
+    }
+
+.module-active {
+    border: 2px solid #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.08);
 }
 
-.activity-title {
-    line-height: 1.15;
-}
-
-.activity-description {
-    line-height: 1.2;
-    margin-top: 0.15rem;
-}
-
-.activity-date {
-    line-height: 1.2;
-    margin-top: 0.1rem;
-}
-
-.text-xs {
-    font-size: 0.75rem;
-}
-
-.text-xs {
-    font-size: 0.75rem;
-}
-    /* TABS*/
+    /*------TABS-------------*/
 
     .tab-title {
         font-size: 0.80rem;

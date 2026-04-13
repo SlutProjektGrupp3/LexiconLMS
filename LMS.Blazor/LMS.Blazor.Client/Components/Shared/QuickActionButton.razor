@@ -27,6 +27,7 @@
 
     [Parameter]
     public EventCallback OnClick { get; set; }
+    [Parameter] public string CssClass { get; set; } = "";
 
     private async Task HandleClick()
     {

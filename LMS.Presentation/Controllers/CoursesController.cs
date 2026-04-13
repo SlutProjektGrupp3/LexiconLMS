@@ -1,11 +1,10 @@
-﻿using LMS.Shared.DTOs;
-using LMS.Shared.DTOs.CourseDtos;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
+using LMS.Shared.DTOs.Course;
 
 namespace LMS.Presentation.Controllers;
 
@@ -14,15 +13,12 @@ namespace LMS.Presentation.Controllers;
 
 public class CoursesController : ControllerBase
 {
-    private readonly ICourseService _courseService;
-    private readonly IServiceManager serviceManager;
+    private readonly IServiceManager _serviceManager;
 
-
-    public CoursesController(IServiceManager serviceManager, ICourseService courseService)
+    public CoursesController(IServiceManager serviceManager)
  
     {
-        _courseService = courseService;
-        this.serviceManager = serviceManager;
+        _serviceManager = serviceManager;
     }
 
     // GET: api/courses
@@ -30,7 +26,7 @@ public class CoursesController : ControllerBase
     [Authorize(Roles = "Teacher")]    
     public async Task<IActionResult> GetCourses()
     {
-        var courses = await serviceManager.CourseService.GetAllCoursesAsync();
+        var courses = await _serviceManager.CourseService.GetAllCoursesAsync();
         return Ok(courses);
     }
 
@@ -39,7 +35,7 @@ public class CoursesController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetCourseById(Guid id)
     {
-        var courseDetails = await serviceManager.CourseService.GetCourseByIdAsync(id);
+        var courseDetails = await _serviceManager.CourseService.GetCourseByIdAsync(id);
         if (courseDetails is null)
         {
                 return NotFound(new ProblemDetails
@@ -58,7 +54,7 @@ public class CoursesController : ControllerBase
     [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> CreateCourse([FromBody] CreateCourseDto dto)
     {
-        var createdCourse = await _courseService.CreateCourseAsync(dto);
+        var createdCourse = await _serviceManager.CourseService.CreateCourseAsync(dto);
         
         if (createdCourse.Succeeded)
             return CreatedAtAction(nameof(GetCourseById),new { id = createdCourse.Data!.Id },createdCourse);
@@ -99,7 +95,7 @@ public class CoursesController : ControllerBase
 
         try
         {
-            await serviceManager.CourseService.UpdateCourseAsync(id, updateCourseDto, trackChanges: true);
+            await _serviceManager.CourseService.UpdateCourseAsync(id, updateCourseDto, trackChanges: true);
             return NoContent();
         }
         catch (KeyNotFoundException)
@@ -120,7 +116,7 @@ public class CoursesController : ControllerBase
     {
         try
         {
-            var result = await serviceManager.CourseService.DeleteCourseAsync(id, trackChanges: true);
+            var result = await _serviceManager.CourseService.DeleteCourseAsync(id, trackChanges: true);
             
             if (!result.Succeeded)
             {
@@ -164,7 +160,7 @@ public class CoursesController : ControllerBase
     [HttpPost("{courseId}/students/{studentId}")]
     public async Task<IActionResult> AddStudentToCourse(Guid courseId, string studentId)
     {
-        await _courseService.AddStudentToCourseAsync(courseId, studentId);
+        await _serviceManager.CourseService.AddStudentToCourseAsync(courseId, studentId);
         return NoContent();
     }
 
@@ -172,7 +168,7 @@ public class CoursesController : ControllerBase
     [HttpGet("{courseId}/available-students")]
     public async Task<IActionResult> GetAvailableStudents()
     {
-        var students = await _courseService.GetAvailableStudentsAsync();
+        var students = await _serviceManager.CourseService.GetAvailableStudentsAsync();
         return Ok(students);
     }
 
@@ -180,7 +176,7 @@ public class CoursesController : ControllerBase
     [HttpGet("{courseId}/participants")]
     public async Task<IActionResult> GetParticipants(Guid courseId)
     {
-        var participants = await serviceManager.CourseService
+        var participants = await _serviceManager.CourseService
             .GetParticipantsAsync(courseId);
 
         return Ok(participants);

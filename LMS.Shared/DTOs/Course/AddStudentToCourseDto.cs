@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace LMS.Shared.DTOs.Courses
+namespace LMS.Shared.DTOs.Course
 {
     public class AddStudentToCourseDto
     {

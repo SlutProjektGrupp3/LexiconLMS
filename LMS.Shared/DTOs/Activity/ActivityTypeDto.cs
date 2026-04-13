@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿
+namespace LMS.Shared.DTOs.Activity;
 
-namespace LMS.Shared.DTOs.Activity
+public class ActivityTypeDto
 {
-    public class ActivityTypeDto
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-    }
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
 }

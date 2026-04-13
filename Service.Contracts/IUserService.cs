@@ -10,4 +10,5 @@ public interface IUserService
     Task DeleteUserAsync(string id);
     Task<List<string?>> GetAllRolesAsync();
     Task<UserDto> UpdateUserAsync(string id, UpdateUserDto dto);
+    Task<int> GetUsersCountByRoleAsync(string roleName);
 }

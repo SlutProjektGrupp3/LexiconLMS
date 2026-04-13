@@ -149,24 +149,9 @@ namespace LMS.Blazor.Client.Pages.Teacher
             catch (TaskCanceledException) { }
         }
 
-        protected Task ToggleCreateForm()
+        protected void NavigateToCourses()
         {
-            successMessage = null;
-            _showCreateForm = !_showCreateForm;
-            return Task.CompletedTask;
-        }
-
-        protected Task HandleCourseCreated()
-        {
-            _showCreateForm = false;
-            successMessage = "Course added.";
-            return Task.CompletedTask;
-        }
-
-        protected Task HandleCancelCreate()
-        {
-            _showCreateForm = false;
-            return Task.CompletedTask;
+            Navigation.NavigateTo($"/teacher/courses");
         }
 
         protected int GetActiveCoursesNumber(IEnumerable<CourseDetailsDto>? courses = null)

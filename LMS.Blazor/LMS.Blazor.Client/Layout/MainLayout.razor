@@ -20,14 +20,6 @@
                             <small class="text-muted" style="font-size: 0.75rem;">@GetUserRole(auth.User)</small>
                         </div>
                     </NavLink>
-                    <form action="Account/Logout" method="post" class="p-4">
-                        <AntiforgeryToken />
-                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                        <button type="submit" class="nav-link">
-                            <LogOutIcon Size="28" CssClass="text-danger" />
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
-                        </button>
-                    </form>
                 </div>
             </Authorized>
         </AuthorizeView>

@@ -69,7 +69,6 @@ public static class ServiceExtensions
             opt.Filters.Add(new ProducesAttribute("application/json"));
 
         })
-                .AddNewtonsoftJson()
                 .AddApplicationPart(typeof(AssemblyReference).Assembly);
     }
 

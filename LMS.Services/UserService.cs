@@ -65,12 +65,11 @@ public class UserService : IUserService
             FirstName: user.FirstName,
             LastName: user.LastName,
             Email: user.Email!,
-            CourseId: user.CourseId,
-            RoleName: role.FirstOrDefault()
+            RoleName: role.FirstOrDefault(),
+            Course: user.Course == null ? null : new CourseDto(user.Course.Id, user.Course.Name, user.Course.Description, user.Course.StartDate, user.Course.EndDate)
         );
     }
 
-    public async Task<CreateUserResultDto> CreateUserAsync(CreateUserDto userCreateDto)
     public async Task<ResultDto<UserDto>> CreateUserAsync(CreateUserDto userCreateDto)
     {
         var user = new ApplicationUser
@@ -235,54 +234,6 @@ public class UserService : IUserService
     {
         return await _roleManager.Roles.Select(r => r.Name).ToListAsync();
     }
-    public async Task<UserDto> UpdateUserAsync(string id, UpdateUserDto dto)
-    {
-        var user = await _userManager.FindByIdAsync(id);
-        if (user == null)
-        {
-            throw new NotFoundException($"User with ID {id} not found.", "User Not Found");
-        }
-
-        user.FirstName = dto.FirstName;
-        user.LastName = dto.LastName;
-        user.Email = dto.Email;
-        user.UserName = dto.Email; 
-        user.CourseId = dto.CourseId;
-
-        var updateResult = await _userManager.UpdateAsync(user);
-        if (!updateResult.Succeeded)
-        {
-            var errorMsg = string.Join(", ", updateResult.Errors.Select(e => e.Description));
-            throw new BadRequestException(errorMsg, "Update failed");
-        }
-
-        var currentRoles = await _userManager.GetRolesAsync(user);
-        var currentRole = currentRoles.FirstOrDefault();
-
-        if (currentRole != dto.RoleName)
-        {
-            if (currentRole != null)
-            {
-                await _userManager.RemoveFromRoleAsync(user, currentRole);
-            }
-
-            var roleResult = await _userManager.AddToRoleAsync(user, dto.RoleName);
-            if (!roleResult.Succeeded)
-            {
-                var errorMsg = string.Join(", ", roleResult.Errors.Select(e => e.Description));
-                throw new BadRequestException(errorMsg, "Role Update Failed");
-            }
-        }
-
-        return new UserDto(
-            user.Id,
-            user.FirstName,
-            user.LastName,
-            user.Email,
-            dto.RoleName,
-            user.CourseId
-        );
-    }
     public async Task<int> GetUsersCountByRoleAsync(string roleName)
     {
         if (string.IsNullOrWhiteSpace(roleName))
@@ -297,17 +248,17 @@ public class UserService : IUserService
     }
     
     public async Task<IEnumerable<UserDto>> GetTeachersAsync()
-{
-    var teachers = await _userManager.GetUsersInRoleAsync("Teacher");
+    {
+        var teachers = await _userManager.GetUsersInRoleAsync("Teacher");
 
-    return teachers.Select(t => new UserDto(
-        t.Id,
-        t.FirstName,
-        t.LastName,
-        t.Email ?? string.Empty,
-        "Teacher",
-        t.CourseId
-    ));
-}
+        return teachers.Select(t => new UserDto(
+            t.Id,
+            t.FirstName,
+            t.LastName,
+            t.Email ?? string.Empty,
+            "Teacher",
+            null
+        ));
+    }
 }
 

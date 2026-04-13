@@ -22,7 +22,7 @@
 }
 else
 {
-    if (User != null && User.CourseId.HasValue) 
+    if (User != null && User.Course?.Id != null)
     {
         <StudentWelcomeHero StudentName="@User?.FirstName" CourseName="@Course?.Name" ClearedModules="@GetClearedModules()" />
 
@@ -75,9 +75,9 @@ else
         {
             User = await ApiService.GetAsync<UserDto>("api/users/me");
 
-            if (User != null && User.CourseId.HasValue)
+            if (User != null && User.Course?.Id != null)
             {
-                Course = await ApiService.GetAsync<CourseDetailsDto>($"api/courses/{User.CourseId}");
+                Course = await ApiService.GetAsync<CourseDetailsDto>($"api/courses/{User.Course.Id}");
                 CurrentModule = Course?.Modules?.FirstOrDefault(m => m.StartDate <= DateTime.Now && m.EndDate >= DateTime.Now);
 
                 if (CurrentModule != null)

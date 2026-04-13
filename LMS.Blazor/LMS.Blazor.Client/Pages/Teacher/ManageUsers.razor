@@ -1,5 +1,6 @@
 ﻿@page "/teacher/manageusers"
 @inject IApiService ApiService
+@using LMS.Blazor.Client.Components.Icons
 @using LMS.Shared.DTOs
 @using LMS.Shared.DTOs.Course
 @using LMS.Shared.DTOs.User
@@ -31,7 +32,7 @@ else
             </div>
 
             <button class="btn btn-primary rounded px-4" @onclick="OpenCreateModal">
-                <span class="me-2">+</span> Add User
+                <CirclePlusIcon Size="16" CssClass="me-1" /> Add User
             </button>
         </div>
 

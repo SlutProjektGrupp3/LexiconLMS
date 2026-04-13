@@ -1,7 +1,6 @@
 ﻿using LMS.Shared.DTOs.User;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 
@@ -57,7 +56,6 @@ public class UsersController : ControllerBase
 
     [HttpPost]
     [Authorize(Roles = "Teacher")]
-    public async Task<IActionResult> CreateUser([FromBody] CreateUserDto userCreateDto)
     public async Task<IActionResult> CreateUser([FromBody] CreateUserDto createUserDto)
     {
         var result = await _serviceManager.UserService.CreateUserAsync(createUserDto);
@@ -90,12 +88,6 @@ public class UsersController : ControllerBase
             return NotFound("No roles found.");
         }
         return Ok(roles);
-    }
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserDto dto)
-    {
-        var updatedUser = await _serviceManager.UserService.UpdateUserAsync(id, dto);
-        return Ok(updatedUser);
     }
 
     [HttpGet]

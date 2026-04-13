@@ -1,0 +1,110 @@
+﻿@using LMS.Shared.DTOs.User
+@using LMS.Shared.DTOs.CourseDtos
+@using LMS.Shared.DTOs.Course
+
+@if (IsLoading)
+{
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body">
+            <p class="mb-0"><em>Loading participants...</em></p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="participants-tab">
+
+        <div class="participants-section mb-5">
+            <h6 class="participants-section-title">Teachers</h6>
+
+            <div class="row g-3">
+                @foreach (var teacher in Teachers)
+                {
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="participant-card">
+                            <div class="participant-card-body">
+                                <div class="participant-avatar @GetAvatarBootstrapClass(teacher.FirstName, teacher.LastName)">
+                                    @GetInitials(teacher.FirstName, teacher.LastName)
+                                </div>
+
+                                <div class="participant-info">
+                                    <div class="participant-name">
+                                        @teacher.FirstName @teacher.LastName
+                                    </div>
+                                    <div class="participant-email">
+                                        @teacher.Email
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="participants-section">
+            <h6 class="participants-section-title">
+                Participants (@Participants.Count)
+            </h6>
+
+            <div class="row g-3">
+                @foreach (var student in Participants)
+                {
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="participant-card">
+                            <div class="participant-card-body">
+                                <div class="participant-avatar @GetAvatarBootstrapClass(student.FirstName, student.LastName)">
+                                    @GetInitials(student.FirstName, student.LastName)
+                                </div>
+
+                                <div class="participant-info">
+                                    <div class="participant-name">
+                                        @student.FirstName @student.LastName
+                                    </div>
+                                    <div class="participant-email">
+                                        @student.Email
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool IsLoading { get; set; }
+
+    [Parameter]
+    public List<UserDto> Teachers { get; set; } = new();
+
+    [Parameter]
+    public List<ParticipantDto> Participants { get; set; } = new();
+
+    private string GetInitials(string firstName, string lastName)
+    {
+        return $"{firstName.FirstOrDefault()}{lastName.FirstOrDefault()}".ToUpper();
+    }
+
+    private readonly string[] avatarBootstrapClasses =
+    [
+        "bg-primary text-white",
+        "bg-info text-white",
+        "bg-success text-white",
+        "bg-danger text-white",
+        "bg-warning text-dark",
+        "bg-secondary text-white",
+        "bg-dark text-white"
+    ];
+
+    private string GetAvatarBootstrapClass(string firstName, string lastName)
+    {
+        var fullName = $"{firstName}{lastName}";
+        var index = Math.Abs(fullName.GetHashCode()) % avatarBootstrapClasses.Length;
+        return avatarBootstrapClasses[index];
+    }
+}

@@ -36,20 +36,8 @@ public class UsersController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUser(string id)
     {
-        try
-        {
-            await _serviceManager.UserService.DeleteUserAsync(id);
-            return NoContent();
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound();
-        }
-        catch (Exception ex) 
-        {
-            return BadRequest(ex.Message);
-        }
-
+        await _serviceManager.UserService.DeleteUserAsync(id);
+        return NoContent();
     }
 
     [HttpGet]
@@ -80,5 +68,12 @@ public class UsersController : ControllerBase
 
         var count = await _serviceManager.UserService.GetUsersCountByRoleAsync(roleName);
         return Ok(count);
+    }
+    
+    [HttpGet("teachers")]
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetTeachers()
+    {
+        var teachers = await _serviceManager.UserService.GetTeachersAsync();
+        return Ok(teachers);
     }
 }

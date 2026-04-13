@@ -63,6 +63,12 @@ public class UsersController : ControllerBase
         }
         return Ok(roles);
     }
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserDto dto)
+    {
+        var updatedUser = await _serviceManager.UserService.UpdateUserAsync(id, dto);
+        return Ok(updatedUser);
+    }
 
     [HttpGet]
     [Route("count-by-role/{roleName}")]

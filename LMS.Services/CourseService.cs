@@ -69,9 +69,6 @@ public class CourseService : ICourseService
         if (course == null)
             return null;
 
-        return _mapper.Map<CourseDetailsDto>(course);
-    }
-
     public async Task<ResultDto<CourseDto>> CreateCourseAsync(CreateCourseDto dto)
     {
         var errors = new List<ErrorDto>();
@@ -176,4 +173,14 @@ public class CourseService : ICourseService
             .Select(u => _mapper.Map<AvailableStudentDto>(u))
             .ToList();
     }
+    public async Task<IEnumerable<CourseDetailsDto>> GetAllCoursesAsync()
+    {
+        return await _uow.CourseRepository.GetCourseSummariesAsync();
+    }
+
+    public async Task<CourseDetailsDto?> GetCourseByIdAsync(Guid id)
+    {
+        return await _uow.CourseRepository.GetCourseDetailsAsync(id);
+    }
+
 }

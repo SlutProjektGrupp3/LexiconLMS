@@ -29,6 +29,12 @@ public class MapperProfile : Profile
             .ForMember(dest => dest.Active, opt => opt.MapFrom(src => src.EndDate > DateTime.UtcNow))
             .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description ?? string.Empty));
         CreateMap<UpdateCourseDto, Course>();
+        CreateMap<Course, CourseDetailsDto>()
+            .ForMember(dest => dest.ModulesCount,
+            opt => opt.MapFrom(src => src.Modules.Count()))
+            
+            .ForMember(dest => dest.ParticipantsCount,
+            opt => opt.MapFrom(src => src.Students.Count()));
 
         //Module mappings
         CreateMap<Module, ModuleDto>();

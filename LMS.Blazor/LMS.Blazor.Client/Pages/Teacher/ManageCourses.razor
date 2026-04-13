@@ -1,4 +1,4 @@
-﻿@page "/teacher/courses"
+﻿@page "/teacher/managecourses"
 @using LMS.Shared.DTOs.Course
 @using LMS.Blazor.Client.Components.Shared
 @using LMS.Blazor.Client.Components.Courses
@@ -67,7 +67,7 @@ else
 }
 
 @code {
-    private List<CourseDto> _courses = new();
+    private List<CourseDetailsDto> _courses = new();
     private bool isLoading = true;
     private string? errorMessage;
     private bool showSuccessMessage;
@@ -85,11 +85,11 @@ else
         return Task.CompletedTask;
     }
 
-    private Task HandleCourseCreated()
+    private async Task HandleCourseCreated()
     {
         showCreateForm = false;
         successMessage = "Course added.";
-        return Task.CompletedTask;
+        await LoadCourses();
     }
 
     private Task HandleCancelCreate()
@@ -133,8 +133,8 @@ else
         errorMessage = null;
         try
         {
-            var result = await ApiService.GetAsync<List<CourseDto>>("api/courses");
-            _courses = result ?? new List<CourseDto>();
+            var result = await ApiService.GetAsync<List<CourseDetailsDto>>("api/courses");
+            _courses = result ?? new List<CourseDetailsDto>();
         }
         catch (Exception ex)
         {
@@ -163,7 +163,7 @@ else
         try
         {
             await ApiService.DeleteAsync($"api/courses/{selectedCourseId}");
-            Navigation.NavigateTo("/teacher/courses?deleted=true", forceLoad: true);
+            Navigation.NavigateTo("/teacher/managecourses?deleted=true", forceLoad: true);
         }
         catch (Exception ex)
         {

@@ -39,12 +39,11 @@ else
                                 <h5><a href="@($"/courses/{course.Id}")">@course.Name</a></h5>
 
                                 <div class="meta">
-                                    <span>📅 @course.StartDate.ToString("yyyy-MM-dd")</span>                                    
-                                </div>
-                                <span>@(course.ParticipantsCount ?? 0) participants</span>
-                                <span>@(course.ModulesCount ?? 0) modules</span>
+                                    <span>📅 @course.StartDate.ToString("yyyy-MM-dd")</span>
+                                    <span>• @(course.ModulesCount ?? 0) modules</span>
+                                    <span>• @(course.ParticipantsCount ?? 0) participants</span>
+                                </div>                                                           
                             </div>
-
                             <div class="course-actions">
 
                                 <NavLink class="btn btn-sm btn-outline-primary" 

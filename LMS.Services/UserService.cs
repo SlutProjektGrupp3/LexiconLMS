@@ -222,7 +222,8 @@ public class UserService : IUserService
         t.FirstName,
         t.LastName,
         t.Email ?? string.Empty,
-        "Teacher"
+        "Teacher",
+        t.CourseId
     ));
 }
 }

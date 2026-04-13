@@ -9,6 +9,7 @@ public interface ICourseService
     Task<IEnumerable<CourseDetailsDto>> GetAllCoursesAsync();
     Task<ResultDto<CourseDto>> CreateCourseAsync(CreateCourseDto dto);
     Task<CourseDetailsDto?> GetCourseByIdAsync(Guid id);
+    Task<IEnumerable<UserDto>> GetParticipantsAsync(Guid courseId);
     Task UpdateCourseAsync(Guid id, UpdateCourseDto updateCourseDto, bool trackChanges);
     Task<ResultDto> DeleteCourseAsync(Guid id, bool trackChanges);
     Task AddStudentToCourseAsync(Guid courseId, string studentId);

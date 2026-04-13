@@ -165,5 +165,13 @@ public class CoursesController : ControllerBase
         return Ok(dto);
     }
 
+    // GET: api/courses/{courseId}/participants
+    [HttpGet("{courseId}/participants")]
+    public async Task<IActionResult> GetParticipants(Guid courseId)
+    {
+        var participants = await _serviceManager.CourseService
+            .GetParticipantsAsync(courseId);
 
+        return Ok(participants);
+    }
 }

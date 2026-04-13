@@ -135,6 +135,19 @@ public class CourseService : ICourseService
         return ResultDto.Success;
     }
 
+    public async Task<IEnumerable<UserDto>> GetParticipantsAsync(Guid courseId)
+    {
+        var course = await _uow.CourseRepository
+            .GetCourseWithStudentsAsync(courseId, trackChanges: false);
+
+        if (course is null)
+            return Enumerable.Empty<UserDto>();
+
+        var students = course.Students; 
+
+        return _mapper.Map<IEnumerable<UserDto>>(students);
+    }
+
     public async Task AddStudentToCourseAsync(Guid courseId, string studentId)
     {
         var course = await _uow.CourseRepository

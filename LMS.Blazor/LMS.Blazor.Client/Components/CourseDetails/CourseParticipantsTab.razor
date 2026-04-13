@@ -1,5 +1,4 @@
 ﻿@using LMS.Shared.DTOs.User
-@using LMS.Shared.DTOs.CourseDtos
 @using LMS.Shared.DTOs.Course
 
 @if (IsLoading)
@@ -83,7 +82,7 @@ else
     public List<UserDto> Teachers { get; set; } = new();
 
     [Parameter]
-    public List<ParticipantDto> Participants { get; set; } = new();
+    public List<UserDto> Participants { get; set; } = new();
 
     private string GetInitials(string firstName, string lastName)
     {

@@ -1,10 +1,12 @@
 ﻿using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
+using Domain.Models.Exceptions;
 using LMS.Shared.DTOs.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Service.Contracts;
 using System.Data;
+using System.Reflection;
 
 namespace LMS.Services;
 
@@ -118,7 +120,7 @@ public class UserService : IUserService
         var user = await _userManager.FindByIdAsync(id);
 
         if (user == null)
-            throw new KeyNotFoundException("User not found.");
+            throw new NotFoundException($"User with id {id} was not found.");
 
         var result = await _userManager.DeleteAsync(user);
 

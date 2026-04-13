@@ -4,6 +4,7 @@ html, body {
 body {
     font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
+    background-color: #f9fafb;
 }
 
 a, .btn-link {

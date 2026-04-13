@@ -56,10 +56,10 @@ public class CourseService : ICourseService
         return (items, total);
     }
 
-    public async Task<IEnumerable<CourseDto>> GetAllCoursesAsync(bool trackChanges = false)
+    public async Task<IEnumerable<CourseDetailsDto>> GetAllCoursesAsync(bool trackChanges = false)
     {
         var courses = await _uow.CourseRepository.GetAllCoursesAsync(trackChanges);
-        return _mapper.Map<IEnumerable<CourseDto>>(courses);
+        return _mapper.Map<IEnumerable<CourseDetailsDto>>(courses);
     }
 
     public async Task<CourseDetailsDto> GetCourseByIdAsync(Guid id)
@@ -162,4 +162,5 @@ public class CourseService : ICourseService
     {
         return await _uow.CourseRepository.GetCourseSummariesAsync();
     }
+    
 }

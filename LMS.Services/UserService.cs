@@ -133,5 +133,63 @@ public class UserService : IUserService
     {
         return await _roleManager.Roles.Select(r => r.Name).ToListAsync();
     }
+    public async Task<UserDto> UpdateUserAsync(string id, UpdateUserDto dto)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
+        {
+            throw new NotFoundException($"User with ID {id} not found.", "User Not Found");
+        }
+
+        user.FirstName = dto.FirstName;
+        user.LastName = dto.LastName;
+        user.Email = dto.Email;
+        user.UserName = dto.Email; 
+
+        var updateResult = await _userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            var errorMsg = string.Join(", ", updateResult.Errors.Select(e => e.Description));
+            throw new BadRequestException(errorMsg, "Update failed");
+        }
+
+        var currentRoles = await _userManager.GetRolesAsync(user);
+        var currentRole = currentRoles.FirstOrDefault();
+
+        if (currentRole != dto.RoleName)
+        {
+            if (currentRole != null)
+            {
+                await _userManager.RemoveFromRoleAsync(user, currentRole);
+            }
+
+            var roleResult = await _userManager.AddToRoleAsync(user, dto.RoleName);
+            if (!roleResult.Succeeded)
+            {
+                var errorMsg = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+                throw new BadRequestException(errorMsg, "Role Update Failed");
+            }
+        }
+
+        return new UserDto(
+            user.Id,
+            user.FirstName,
+            user.LastName,
+            user.Email,
+            dto.RoleName
+        );
+    }
+    public async Task<int> GetUsersCountByRoleAsync(string roleName)
+    {
+        if (string.IsNullOrWhiteSpace(roleName))
+            return 0;
+
+        var role = await _roleManager.FindByNameAsync(roleName);
+        if (role == null)
+            return 0;
+
+        var usersInRole = await _userManager.GetUsersInRoleAsync(roleName);
+        return usersInRole?.Count ?? 0;
+    }
 }
 

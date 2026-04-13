@@ -51,5 +51,22 @@ public class UsersController : ControllerBase
         }
         return Ok(roles);
     }
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserDto dto)
+    {
+        var updatedUser = await _serviceManager.UserService.UpdateUserAsync(id, dto);
+        return Ok(updatedUser);
+    }
 
+    [HttpGet]
+    [Route("count-by-role/{roleName}")]
+    [Authorize(Roles = "Teacher")]
+    public async Task<IActionResult> GetUsersCountByRole(string roleName)
+    {
+        if (string.IsNullOrWhiteSpace(roleName))
+            return BadRequest("Role name is required.");
+
+        var count = await _serviceManager.UserService.GetUsersCountByRoleAsync(roleName);
+        return Ok(count);
+    }
 }

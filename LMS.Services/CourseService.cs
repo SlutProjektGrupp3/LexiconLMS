@@ -23,20 +23,7 @@ public class CourseService : ICourseService
         _userManager = userManager;
     }
 
-    public async Task<IEnumerable<CourseDto>> GetAllCoursesAsync(bool trackChanges = false)
-    {
-        var courses = await _uow.CourseRepository.GetAllCoursesAsync(trackChanges);
-        return _mapper.Map<IEnumerable<CourseDto>>(courses);
-    }
-
-    public async Task<CourseDetailsDto?> GetCourseByIdAsync(Guid id)
-    {
-        var course = await _uow.CourseRepository.GetCourseByIdAsync(id, includeModules: true);
-        if (course == null)
-            return null;
-
-        return _mapper.Map<CourseDetailsDto>(course);
-    }
+      
 
     public async Task<ResultDto<CourseDto>> CreateCourseAsync(CreateCourseDto dto)
     {
@@ -153,6 +140,14 @@ public class CourseService : ICourseService
             .Select(u => _mapper.Map<AvailableStudentDto>(u))
             .ToList();
     }
+    public async Task<IEnumerable<CourseDetailsDto>> GetAllCoursesAsync()
+    {
+        return await _uow.CourseRepository.GetCourseSummariesAsync();
+    }
 
+    public async Task<CourseDetailsDto?> GetCourseByIdAsync(Guid id)
+    {
+        return await _uow.CourseRepository.GetCourseDetailsAsync(id);
+    }
 
 }

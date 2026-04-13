@@ -121,4 +121,13 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
         return await FindByCondition(c => c.Students.Any(s => s.Id == userId), trackChanges)
             .FirstOrDefaultAsync();
     }
+
+    public async Task<IEnumerable<Course?>> GetActiveCoursesAsync(bool trackChanges = false)
+    {
+        //return active and upcoming courses
+        return await FindAll(trackChanges)
+            .Where(c => c.EndDate >= DateTime.UtcNow)
+            .AsNoTracking()
+            .ToListAsync();
+    }
 }

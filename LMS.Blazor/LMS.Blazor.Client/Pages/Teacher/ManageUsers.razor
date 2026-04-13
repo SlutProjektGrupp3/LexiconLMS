@@ -85,7 +85,7 @@ else
 
         <UserModalForm Model="currentUser"
                        Roles="_roles"
-                       Courses="_courses"
+                       Courses="_activeCourses"
                        IsOpen="showUserModal"
                        IsEdit="isEditMode"
                        OnSubmit="HandleSaveUser"
@@ -103,7 +103,7 @@ else
 @code {
     private List<UserDto> _users = new();
     private List<string> _roles = new();
-    private List<CourseDto> _courses = new();
+    private List<CourseDto> _activeCourses = new();
 
     private string? error;
     private string? successMessage;
@@ -138,7 +138,7 @@ else
         {
             _users = await ApiService.GetAsync<List<UserDto>>($"api/users") ?? new List<UserDto>();
             _roles = await ApiService.GetAsync<List<string>>($"api/users/roles") ?? new List<string>();
-            _courses = await ApiService.GetAsync<List<CourseDto>>($"api/courses") ?? new List<CourseDto>();
+            _activeCourses = await ApiService.GetAsync<List<CourseDto>>($"api/courses/active") ?? new List<CourseDto>();
         }
         catch (Exception ex)
         {

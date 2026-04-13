@@ -17,7 +17,6 @@ public class MapperProfile : Profile
         CreateMap<UserRegistrationDto, ApplicationUser>();
         CreateMap<ApplicationUser, UserDto>();
         CreateMap<ApplicationUser, AvailableStudentDto>();
-        //CreateMap<ICollection<ApplicationUser>, IEnumerable<UserDto>>();
 
         //Course mappings
         CreateMap<Course, CourseDto>();

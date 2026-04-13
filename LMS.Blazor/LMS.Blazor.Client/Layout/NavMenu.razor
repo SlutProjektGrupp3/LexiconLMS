@@ -19,21 +19,29 @@
             <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="teacher/dashboard">
-                        <span class="bi bi-speedometer2"></span> Dashboard
+                        <DashboardIcon /> Dashboard
                     </NavLink>
                 </div>
 
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="teacher/managecourses">
-                        <span class="bi bi-book"></span> Manage Courses
+                        <BookOpenIcon CssClass="px-2" /> Manage Courses
                     </NavLink>
                 </div>
 
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="manageusers">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Manage Users
+                        <ParticipantsIcon CssClass="px-2" /> Manage Users
                     </NavLink>
                 </div>
+
+                <form action="Account/Logout" method="post" class="p-4">
+                    <AntiforgeryToken />
+                    <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                    <button type="submit" class="nav-link">
+                        <LogOutIcon CssClass="text-danger px-2" /> Logout
+                    </button>
+                </form>
             </Authorized>
         </AuthorizeView>
 
@@ -41,14 +49,22 @@
             <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="student/dashboard">
-                        <span class="bi bi-speedometer2"></span> Dashboard
+                        <DashboardIcon /> Dashboard
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="student/mycourse">
-                        <span class="bi bi-book"></span> My Course
+                        <BookOpenIcon /> My Course
                     </NavLink>
                 </div>
+
+                <form action="Account/Logout" method="post" class="p-4">
+                    <AntiforgeryToken />
+                    <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                    <button type="submit" class="nav-link">
+                        <LogOutIcon Size="28" CssClass="text-danger" /> Logout
+                    </button>
+                </form>
             </Authorized>
         </AuthorizeView>
     </nav>

@@ -17,5 +17,7 @@ namespace Domain.Contracts.Repositories
         Task<Course?> GetCourseWithStudentsAsync(Guid courseId, bool trackChanges);
         Task<List<CourseDetailsDto>> GetCourseSummariesAsync();
         Task<CourseDetailsDto?> GetCourseDetailsAsync(Guid courseId);
+        IQueryable<CourseDetailsDto> GetCourseSummariesQuery();
+
     }
 }

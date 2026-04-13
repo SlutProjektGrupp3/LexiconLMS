@@ -56,83 +56,54 @@ public class CourseService : ICourseService
         return (items, total);
     }
 
-    public async Task<IEnumerable<CourseDto>> GetAllCoursesAsync(bool trackChanges = false)
+    public async Task<IEnumerable<CourseDetailsDto>> GetAllCoursesAsync(bool trackChanges = false)
     {
         var courses = await _uow.CourseRepository.GetAllCoursesAsync(trackChanges);
-        return _mapper.Map<IEnumerable<CourseDto>>(courses);
+        return _mapper.Map<IEnumerable<CourseDetailsDto>>(courses);
     }
 
-    public async Task<CourseDetailsDto?> GetCourseByIdAsync(Guid id)
+    public async Task<CourseDetailsDto> GetCourseByIdAsync(Guid id)
     {
         var course = await _uow.CourseRepository.GetCourseByIdAsync(id, includeModules: true);
         if (course == null)
-            return null;
+            throw new NotFoundException($"Course with id {id} was not found.");
+
         return _mapper.Map<CourseDetailsDto>(course);
     }
 
-    public async Task<ResultDto<CourseDto>> CreateCourseAsync(CreateCourseDto dto)
+    public async Task<CourseDto> CreateCourseAsync(CreateCourseDto dto)
     {
-        var errors = new List<ErrorDto>();
-
-        if (string.IsNullOrWhiteSpace(dto.Name))
-            errors.Add(new ErrorDto { Code = "InvalidName", Description = "Name is required." });
-
-        if (dto.StartDate == default)
-            errors.Add(new ErrorDto { Code = "InvalidStartDate", Description = "Start date is required." });
-
-        if (dto.EndDate == default)
-            errors.Add(new ErrorDto { Code = "InvalidEndDate", Description = "End date is required." });
-
-        if (dto.EndDate <= dto.StartDate)
-            errors.Add(new ErrorDto { Code = "InvalidDates", Description = "End date must be after start date." });
-
-        if (dto.StartDate < DateTime.Today)
-            errors.Add(new ErrorDto { Code = "InvalidStartDate", Description = "Start date cannot be in the past." });
-
-        if (errors.Any())
-            return ResultDto<CourseDto>.Failed(errors);
-
         var course = _mapper.Map<Course>(dto);
 
         _uow.CourseRepository.CreateCourse(course);
 
         await _uow.CompleteAsync();
 
-        var courseDto = _mapper.Map<CourseDto>(course);
-
-        return ResultDto<CourseDto>.Success(courseDto);
+        return _mapper.Map<CourseDto>(course);
     }
 
     public async Task UpdateCourseAsync(Guid id, UpdateCourseDto updateCourseDto, bool trackChanges)
     {
-        var courseEntity = await _uow.CourseRepository.GetCourseByIdAsync(id, trackChanges, includeModules: false);
+        var courseEntity = await _uow.CourseRepository
+            .GetCourseByIdAsync(id, trackChanges, includeModules: false);
 
         if (courseEntity is null)
-            throw new KeyNotFoundException($"Course with id {id} was not found.");
-
-        if (updateCourseDto.EndDate < updateCourseDto.StartDate)
-            throw new Exception("End date must be after start date.");
+            throw new NotFoundException($"Course with id {id} was not found.");       
 
         _mapper.Map(updateCourseDto, courseEntity);
 
         await _uow.CompleteAsync();
     }
-    public async Task<ResultDto> DeleteCourseAsync(Guid id, bool trackChanges)
+    public async Task DeleteCourseAsync(Guid id, bool trackChanges)
     {
         var courseEntity = await _uow.CourseRepository.GetCourseByIdAsync(id, trackChanges);
 
         if (courseEntity is null)
         {
-            return ResultDto.Failed(new ErrorDto
-            {
-                Code = "CourseNotFound",
-                Description = $"Course with id {id} was not found."
-            });
+            throw new NotFoundException($"Course with id {id} was not found.");
         }
         _uow.CourseRepository.Delete(courseEntity);
         await _uow.CompleteAsync();
-
-        return ResultDto.Success;
     }
 
     public async Task<IEnumerable<UserDto>> GetParticipantsAsync(Guid courseId)
@@ -191,4 +162,5 @@ public class CourseService : ICourseService
     {
         return await _uow.CourseRepository.GetCourseSummariesAsync();
     }
+    
 }

@@ -2,19 +2,8 @@
 
 namespace LMS.Shared.DTOs.Activity;
 
-public class UpdateActivityDto
+public class UpdateActivityDto : BaseActivityDto
 {
-    [Required]
-    public string Name { get; set; } = string.Empty;
-
-    public string Description { get; set; } = string.Empty;
-
-    [Required]
-    public DateTime StartDate { get; set; }
-
-    [Required]
-    public DateTime EndDate { get; set; }
-
     [Required(ErrorMessage = "Select an activity type.")]
     public Guid TypeId { get; set; }
 }

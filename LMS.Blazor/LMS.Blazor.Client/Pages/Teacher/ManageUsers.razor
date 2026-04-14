@@ -178,21 +178,27 @@ else
                 CourseId = currentUser.CourseId
             };
 
-            var result = await ApiService.PutAsync<UpdateUserDto, ResultDto<UserDto>>($"api/users/{currentUser.Id}", updateUserDto);
+            var updatedUser = await ApiService.PutAsync<UpdateUserDto, UserDto>(
+            $"api/users/{currentUser.Id}", updateUserDto);
 
-            if (result is { Succeeded: true, Data: { } updatedUser })
+            var index = _users.FindIndex(u => u.Id == updatedUser.Id);
+
+            if (index != -1)
             {
-                var index = _users.FindIndex(u => u.Id == updatedUser.Id);
-
                 _users[index] = updatedUser;
-
-                successMessage = "User updated successfully.";
-                CloseFormModal();
             }
+            else
+            {
+                _users.Add(updatedUser);
+            }
+
+            successMessage = "User updated successfully.";
+            CloseFormModal();
+            
         }
         catch(Exception ex)
         {
-            error = "Failed to update user: " + ex.Message;
+            error = ex.Message;
         }
     }
 
@@ -207,20 +213,18 @@ else
                 Email = currentUser.Email,
                 RoleName = currentUser.RoleName,
                 CourseId = currentUser.CourseId
-            };
+            };                        
 
-            var result = await ApiService.PostAsync<CreateUserDto, ResultDto<UserDto>>("api/users", createUserDto);
+            var createdUser = await ApiService.PostAsync<CreateUserDto, UserDto>("api/users", createUserDto);
 
-            if (result is { Succeeded: true, Data: { } createdUser })
-            {
-                _users.Add(createdUser);
-                successMessage = "User created successfully.";
-                CloseFormModal();
-            }
+            _users.Add(createdUser);
+
+            successMessage = "User created successfully.";
+            CloseFormModal();
         }
         catch (Exception ex)
         {
-            error = "Failed to create user: " + ex.Message;
+            error = ex.Message;
         }
     }
 

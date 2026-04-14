@@ -98,13 +98,14 @@ public class CoursesController : ControllerBase
     [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> GetCourseSummaries([FromQuery] string? search, [FromQuery] bool? active, [FromQuery] int page = 1, [FromQuery] int pageSize = 12)
     {
-        var (items, total) = await _serviceManager.CourseService.GetCourseSummariesAsync(search, active, page, pageSize);
+        var (items, total, totalActiveCourses) = await _serviceManager.CourseService.GetCourseSummariesAsync(search, active, page, pageSize);
 
         // Return CourseDetailsDto items directly in the paged response
         var dto = new
         {
             Items = items,
-            Total = total
+            Total = total,
+            TotalActiveCourses = totalActiveCourses
         };
 
         return Ok(dto);

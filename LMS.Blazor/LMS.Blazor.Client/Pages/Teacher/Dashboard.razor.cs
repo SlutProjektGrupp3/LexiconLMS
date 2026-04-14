@@ -23,7 +23,6 @@ namespace LMS.Blazor.Client.Pages.Teacher
         protected int TotalActiveCourses { get; set; }
 
         protected List<CourseDetailsDto> Courses { get; set; } = new();
-        protected List<CourseDetailsDto> UnfilteredCourses { get; set; } = new();
         protected List<ModuleDto> modulesList { get; set; } = new();
 
         protected int currentPage = 1;
@@ -106,9 +105,6 @@ namespace LMS.Blazor.Client.Pages.Teacher
                     Navigation.NavigateTo(navUri, forceLoad: false);
                 }
 
-                var UnfilteredDto = await ApiService.GetAsync<CourseSummaryPagedDto>("api/courses/summary");
-                UnfilteredCourses = UnfilteredDto?.Items;
-
                 var dto = await ApiService.GetAsync<CourseSummaryPagedDto>(url);
                 // Map returned CourseSummaryDto items (from controller) to CourseDetailsDto used in UI
                 Courses = dto?.Items.Select(i => new CourseDetailsDto
@@ -122,7 +118,7 @@ namespace LMS.Blazor.Client.Pages.Teacher
                     ModulesCount = i.ModulesCount,
                     Active = i.Active
                 }).ToList() ?? new();
-                totalCount = dto?.Total ?? 0;
+                totalCount = dto?.TotalActiveCourses ?? 0;
             }
             catch (Exception ex)
             {
@@ -158,12 +154,6 @@ namespace LMS.Blazor.Client.Pages.Teacher
         protected void NavigateToCourses()
         {
             Navigation.NavigateTo($"/teacher/managecourses");
-        }
-
-        protected int GetActiveCoursesNumber()
-        {
-            var list = UnfilteredCourses;
-            return list?.Count(c => c.Active ?? false) ?? 0;
         }
     }
 }

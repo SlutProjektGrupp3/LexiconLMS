@@ -25,9 +25,10 @@ public class CourseService : ICourseService
         _userManager = userManager;
     }
 
-    public async Task<(IEnumerable<CourseDetailsDto> Items, int TotalCount)> GetCourseSummariesAsync(string? search = null, bool? active = null, int page = 1, int pageSize = 12)
+    public async Task<(IEnumerable<CourseDetailsDto> Items, int TotalCount, int TotalActiveCourses)> GetCourseSummariesAsync(string? search = null, bool? active = null, int page = 1, int pageSize = 12)
     {
         var query = _uow.CourseRepository.GetCourseSummariesQuery();
+        var totalActiveCourses = await query.CountAsync(c => c.Active == true);
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -49,7 +50,7 @@ public class CourseService : ICourseService
             .Take(pageSize)
             .ToListAsync();
         
-        return (items, totalCount);
+        return (items, totalCount, totalActiveCourses);
     }
 
     public async Task<IEnumerable<CourseDetailsDto>> GetAllCoursesAsync(bool trackChanges = false)

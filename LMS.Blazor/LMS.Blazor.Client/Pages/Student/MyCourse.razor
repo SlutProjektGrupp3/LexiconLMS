@@ -163,7 +163,7 @@ else if (_course != null)
     private Dictionary<string, (string BgClass, string TextClass)> _activityTypeColorMap
     = new(StringComparer.OrdinalIgnoreCase);
  
-    private List<ParticipantDto> participants = new();
+    private List<UserDto> participants = new();
     private bool isLoadingParticipants = false;
     private bool participantsLoaded = false;
     private List<UserDto> teachers = new();
@@ -200,7 +200,7 @@ else if (_course != null)
 
             if (_course != null)
             {
-                participants = await ApiService.GetAsync<List<ParticipantDto>>(
+                participants = await ApiService.GetAsync<List<UserDto>>(
                     $"api/courses/{_course.Id}/participants") ?? new();
             }
         }
@@ -249,7 +249,7 @@ else if (_course != null)
 
         try
         {
-            participants = await ApiService.GetAsync<List<ParticipantDto>>(
+            participants = await ApiService.GetAsync<List<UserDto>>(
                 $"api/courses/{_course.Id}/participants") ?? new();
 
             teachers = await ApiService.GetAsync<List<UserDto>>(

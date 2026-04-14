@@ -1,0 +1,53 @@
+﻿.user-card {
+    transition: all 0.2s ease;
+}
+
+.user-card:hover {
+    border-color: var(--bs-info-bg-subtle) !important;
+}
+
+.avatar-circle {
+    width: 50px;
+    height: 50px;
+    font-size: 0.85rem;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Icon buttons */
+.edit-btn, .delete-btn {
+    width: 30px;
+    height: 30px;
+    color: var(--bs-secondary);
+    border: none;
+    background: transparent;
+    transition: all 0.2s ease;
+    display:inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.edit-btn:hover {
+    color: var(--bs-link-color);
+    background-color: rgba(var(--bs-info-rgb), 0.05);
+}
+
+.delete-btn:hover {
+    color: var(--bs-danger);
+    background-color: rgba(var(--bs-danger-rgb), 0.05);
+}
+
+.hover-link {
+    color: var(--bs-secondary);
+    transition: color 0.15s ease;
+}
+
+.hover-link:hover {
+    color: var(--bs-link-color) !important;
+}

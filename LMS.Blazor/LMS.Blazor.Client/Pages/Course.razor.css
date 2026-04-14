@@ -4,7 +4,6 @@
 
 
 .course-details-page {
-    background-color: #f6f7f9;
     min-height: 100vh;
     margin-left: -1.5rem;
     margin-right: -1.5rem;
@@ -70,7 +69,6 @@
         border: 0;
         border-radius: 0;
         background: transparent;
-        font-weight: 500;
         text-decoration: none;
         box-shadow: none !important;
         color: grey;
@@ -99,12 +97,7 @@
         justify-content: center;
         line-height: 1;
     }
-    /* 🔥 ACTIVE STATE */
 
-    .module-active {
-        border: 2px solid #0d6efd;
-        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
-    }
 
 
 

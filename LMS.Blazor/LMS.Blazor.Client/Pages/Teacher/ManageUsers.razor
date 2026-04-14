@@ -1,0 +1,283 @@
+﻿@page "/teacher/manageusers"
+@inject IApiService ApiService
+@using LMS.Blazor.Client.Components.Icons
+@using LMS.Shared.DTOs
+@using LMS.Shared.DTOs.Course
+@using LMS.Shared.DTOs.User
+@using LMS.Blazor.Client.Components
+
+@if (successMessage != null)
+{
+    <div class="alert alert-success mb-3">@successMessage</div>
+}
+
+@if (error != null)
+{
+    <div class="alert alert-danger mb-3">@error</div>
+}
+
+@if (isLoading)
+{
+    <p><em>Loading users...</em></p>
+}
+else
+{
+    <div class="container-fluid py-4">
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1">User Management</h2>
+                <p class="text-muted mb-0">Manage all registered users</p>
+            </div>
+
+            <button class="btn btn-primary rounded px-4" @onclick="OpenCreateModal">
+                <CirclePlusIcon Size="16" CssClass="me-1" /> Add User
+            </button>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
+            <div class="d-flex flex-column flex-md-row gap-3 justify-content-between align-items-center">
+
+                <!-- Filter buttons -->
+                <div class="btn-group p-1 gap-2">
+
+                    <button class="btn rounded px-3 @(selectedRole == "all" ? "btn-dark" : "btn-light")"
+                            @onclick="@(() => selectedRole = "all")">
+                        All Users
+                    </button>
+
+                    <button class="btn rounded px-3 d-inline-flex align-items-center gap-2
+                            @(selectedRole == "Teacher" ? "btn-primary" : "btn-light")"
+                            @onclick="@(() => selectedRole = "Teacher")">
+                        <BriefcaseIcon Size="16"></BriefcaseIcon>
+                        Teachers
+                    </button>
+
+                    <button class="btn rounded px-3 d-inline-flex align-items-center gap-2
+                            @(selectedRole == "Student" ? "btn-success" : "btn-light")"
+                            @onclick="@(() => selectedRole = "Student")">
+                        <GraduationCapIcon Size="16"></GraduationCapIcon>
+                        Students
+                    </button>
+
+                </div>
+
+                <!-- Search -->
+                <input class="form-control w-auto"
+                       style="min-width: 250px;"
+                       placeholder="Search name or email..."
+                       @bind="searchTerm" />
+
+            </div>
+        </div>
+
+
+        <!-- User Cards -->
+        <UserCards Users ="FilteredUsers" OnEdit="OpenEditModal" OnDelete="ConfirmDelete" />
+
+        @if (!FilteredUsers.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                No users found.
+            </div>
+        }
+
+        <UserModalForm Model="currentUser"
+                       Roles="_roles"
+                       Courses="_activeCourses"
+                       IsOpen="showUserModal"
+                       IsEdit="isEditMode"
+                       OnSubmit="HandleSaveUser"
+                       OnCancel="CloseFormModal" />
+
+
+
+        <ConfirmModal ModalId="deleteUserModal"
+                      Title="Confirm Deletion"
+                      Message="Are you sure you want to delete this user?"
+                      OnConfirm="DeleteUser" />
+    </div>
+}
+
+@code {
+    private List<UserDto> _users = new();
+    private List<string> _roles = new();
+    private List<CourseDto> _activeCourses = new();
+
+    private string? error;
+    private string? successMessage;
+    private bool isLoading = true;
+    private bool showUserModal;
+    private bool isEditMode;
+    private string? userIdToDelete;
+
+    private string searchTerm = "";
+    private string selectedRole = "all";
+
+    private UserFormDto currentUser = new();
+
+    private IEnumerable<UserDto> FilteredUsers =>
+        _users.Where(u =>
+            (string.IsNullOrWhiteSpace(searchTerm) ||
+             u.FirstName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+             u.LastName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+             u.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+            &&
+            (selectedRole == "all" || u.RoleName == selectedRole));
+
+    protected override async Task OnInitializedAsync()
+    {
+        //This method run in prerender
+        await CallApi();
+    }
+
+    private async Task CallApi()
+    {
+        try
+        {
+            _users = await ApiService.GetAsync<List<UserDto>>($"api/users") ?? new List<UserDto>();
+            _roles = await ApiService.GetAsync<List<string>>($"api/users/roles") ?? new List<string>();
+            _activeCourses = await ApiService.GetAsync<List<CourseDto>>($"api/courses/active") ?? new List<CourseDto>();
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task HandleSaveUser()
+    {
+        error = null;
+
+        if(isEditMode)
+        {
+            await UpdateUser();
+        }
+        else
+        {
+            await CreateUser();
+        }
+    }
+
+    private async Task UpdateUser()
+    {
+        try
+        {
+            var updateUserDto = new UpdateUserDto
+            {
+                Id = currentUser.Id!,
+                FirstName = currentUser.FirstName,
+                LastName = currentUser.LastName,
+                Email = currentUser.Email,
+                RoleName = currentUser.RoleName,
+                CourseId = currentUser.CourseId
+            };
+
+            var result = await ApiService.PutAsync<UpdateUserDto, ResultDto<UserDto>>($"api/users/{currentUser.Id}", updateUserDto);
+
+            if (result is { Succeeded: true, Data: { } updatedUser })
+            {
+                var index = _users.FindIndex(u => u.Id == updatedUser.Id);
+
+                _users[index] = updatedUser;
+
+                successMessage = "User updated successfully.";
+                CloseFormModal();
+            }
+        }
+        catch(Exception ex)
+        {
+            error = "Failed to update user: " + ex.Message;
+        }
+    }
+
+    private async Task CreateUser()
+    {
+        try
+        {
+            var createUserDto = new CreateUserDto
+            {
+                FirstName = currentUser.FirstName,
+                LastName = currentUser.LastName,
+                Email = currentUser.Email,
+                RoleName = currentUser.RoleName,
+                CourseId = currentUser.CourseId
+            };
+
+            var result = await ApiService.PostAsync<CreateUserDto, ResultDto<UserDto>>("api/users", createUserDto);
+
+            if (result is { Succeeded: true, Data: { } createdUser })
+            {
+                _users.Add(createdUser);
+                successMessage = "User created successfully.";
+                CloseFormModal();
+            }
+        }
+        catch (Exception ex)
+        {
+            error = "Failed to create user: " + ex.Message;
+        }
+    }
+
+    private void OpenCreateModal()
+    {
+        isEditMode = false;
+        currentUser = new UserFormDto();
+
+        successMessage = null;
+        showUserModal = true;
+    }
+
+    private void OpenEditModal(string id)
+    {
+        var user = _users.FirstOrDefault(u => u.Id == id);
+
+        if (user == null)
+            return;
+
+        isEditMode = true;
+
+        currentUser = new UserFormDto
+        {
+            Id = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            RoleName = user.RoleName,
+            CourseId = user.Course?.Id
+        };
+
+        successMessage = null;
+        showUserModal = true;
+    }
+
+    private void CloseFormModal()
+    {
+        showUserModal = false;
+    }
+
+
+    private void ConfirmDelete(string id)
+    {
+        successMessage = null;
+        userIdToDelete = id;
+    }
+
+    private async Task DeleteUser()
+    {
+        if (userIdToDelete == null)
+            return;
+
+        await ApiService.DeleteAsync($"api/users/{userIdToDelete}");
+
+        _users = _users.Where(u => u.Id != userIdToDelete).ToList();
+
+        successMessage = "User deleted successfully.";
+        userIdToDelete = null;
+    }
+}

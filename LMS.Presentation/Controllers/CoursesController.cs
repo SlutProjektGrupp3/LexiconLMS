@@ -29,6 +29,13 @@ public class CoursesController : ControllerBase
         var courses = await _serviceManager.CourseService.GetAllCoursesAsync();
         return Ok(courses);
     }
+    [HttpGet("active")]
+    [Authorize(Roles = "Teacher")]
+    public async Task<IActionResult> GetActiveCourses()
+    {
+        var courses = await _serviceManager.CourseService.GetActiveCoursesAsync();
+        return Ok(courses);
+    }
 
     // GET: api/courses/{id}
     [HttpGet("{id:guid}")]

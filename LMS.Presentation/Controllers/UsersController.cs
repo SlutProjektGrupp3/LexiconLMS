@@ -1,7 +1,6 @@
 ﻿using LMS.Shared.DTOs.User;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 
@@ -57,12 +56,20 @@ public class UsersController : ControllerBase
 
     [HttpPost]
     [Authorize(Roles = "Teacher")]
-    public async Task<IActionResult> CreateUser([FromBody] CreateUserDto userCreateDto)
+    public async Task<IActionResult> CreateUser([FromBody] CreateUserDto createUserDto)
     {
-        var result = await _serviceManager.UserService.CreateUserAsync(userCreateDto);
-        return result.Succeeded ? CreatedAtAction(nameof(GetAllUsers), new { id = result.CreatedUser!.Id }, result) : BadRequest(result.Errors);
+        var result = await _serviceManager.UserService.CreateUserAsync(createUserDto);
+        return result.Succeeded ? CreatedAtAction(nameof(GetAllUsers), new { id = result.Data!.Id }, result) : BadRequest(result.Errors);
     }
 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserDto updateUserDto)
+    {
+        var result = await _serviceManager.UserService.UpdateUserAsync(id, updateUserDto);
+        return result.Succeeded ? Ok(result) : BadRequest(result.Errors);
+    }
+
+    [Authorize(Roles = "Teacher")]
     [HttpDelete("{id}")]
     [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> DeleteUser(string id)
@@ -83,12 +90,6 @@ public class UsersController : ControllerBase
         }
         return Ok(roles);
     }
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserDto dto)
-    {
-        var updatedUser = await _serviceManager.UserService.UpdateUserAsync(id, dto);
-        return Ok(updatedUser);
-    }
 
     [HttpGet]
     [Route("count-by-role/{roleName}")]
@@ -103,6 +104,7 @@ public class UsersController : ControllerBase
     }
     
     [HttpGet("teachers")]
+    [Authorize(Roles = "Teacher,Student")]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetTeachers()
     {
         var teachers = await _serviceManager.UserService.GetTeachersAsync();

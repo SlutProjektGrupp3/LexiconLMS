@@ -1,0 +1,136 @@
+﻿@using LMS.Shared.DTOs.Course
+@using LMS.Shared.DTOs.User
+
+@if (IsOpen)
+{
+    <div class="modal fade show d-block" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow rounded-4">
+
+                <!-- Header -->
+                <div class="modal-header border-0 py-4 px-6 border-bottom">
+                    <h5 class="modal-title fw-semibold">
+                        @(IsEdit ? "Edit User" : "Create User")
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close p-2"
+                            @onclick="OnCancelClicked">
+                    </button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body p-6">
+
+                    <EditForm Model="Model" OnValidSubmit="HandleSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="mb-3">
+                            <label class="form-label required">First Name</label>
+                            <InputText class="form-control" placeholder="First Name" @bind-Value="Model.FirstName" />
+                            <ValidationMessage For="@(() => Model.FirstName)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label required">Last Name</label>
+                            <InputText class="form-control" placeholder="Last Name" @bind-Value="Model.LastName" />
+                            <ValidationMessage For="@(() => Model.LastName)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label required">Email</label>
+                            <InputText class="form-control" placeholder="name@lexicon.se" @bind-Value="Model.Email" />
+                            <ValidationMessage For="@(() => Model.Email)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label required">Role</label>
+                            <InputSelect class="form-select"
+                                         @bind-Value="Model.RoleName"
+                                         @bind-Value:after="HandleRoleChanged">
+                                <option value="" selected disabled>Select Role</option>
+                                @foreach (var role in Roles)
+                                {
+                                    <option value="@role">@role</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => Model.RoleName)" />
+                        </div>
+
+                        @if (Model.RoleName == "Student")
+                        {
+                            <div class="mb-3">
+                                <label class="form-label required">Course</label>
+                                <InputSelect class="form-select" @bind-Value="Model.CourseId">
+                                    <option value="" selected disabled>Select Course</option>
+                                    @foreach (var course in Courses)
+                                    {
+                                        if(IsEdit && Model.CourseId == course.Id)
+                                        {
+                                            <option value="@course.Id" selected>@course.Name</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@course.Id">@course.Name</option>
+                                        }
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="@(() => Model.CourseId)" />
+                            </div>
+
+                        }
+
+                        <!-- Footer -->
+                        <div class="d-flex justify-content-end gap-2 pt-4 border-top">
+                            <button type="button"
+                                    class="btn btn-light rounded border border-2"
+                                    @onclick="OnCancelClicked">
+                                Cancel
+                            </button>
+
+                            <button type="submit"
+                                    class="btn btn-primary rounded px-4">
+                                @(IsEdit ? "Save Changes" : "Create User")
+                            </button>
+                        </div>
+                    </EditForm>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    [Parameter] public UserFormDto Model { get; set; } = new();
+    [Parameter] public List<string> Roles { get; set; } = new();
+    [Parameter] public List<CourseDto> Courses { get; set; } = new();
+
+    [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public bool IsOpen { get; set; }
+
+    [Parameter] public EventCallback OnSubmit { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private async Task HandleSubmit()
+    {
+        await OnSubmit.InvokeAsync();
+    }
+
+    private async Task OnCancelClicked()
+    {
+        await OnCancel.InvokeAsync();
+    }
+
+
+    private void HandleRoleChanged()
+    {
+        if (Model.RoleName == "Teacher")
+        {
+            Model.CourseId = null;
+        }
+    }
+
+}

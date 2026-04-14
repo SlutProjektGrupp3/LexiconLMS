@@ -1,9 +1,12 @@
 ﻿using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using Domain.Models.Exceptions;
+using LMS.Shared.DTOs;
+using LMS.Shared.DTOs.Course;
 using LMS.Shared.DTOs.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Service.Contracts;
 using System.Data;
 using System.Reflection;
@@ -15,12 +18,14 @@ public class UserService : IUserService
     private readonly IUnitOfWork _unitOfWork;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly IConfiguration _configuration;
 
-    public UserService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+    public UserService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _userManager = userManager;
         _roleManager = roleManager;
+        _configuration = configuration;
     }
 
     public async Task<List<UserDto>> GetAllUsersAsync()
@@ -32,6 +37,7 @@ public class UserService : IUserService
         foreach (var user in users)
         {
             var role = await _userManager.GetRolesAsync(user);
+            var course = await _unitOfWork.CourseRepository.GetCourseByUserIdAsync(user.Id);
 
             dtoList.Add(new UserDto
             (
@@ -39,8 +45,8 @@ public class UserService : IUserService
                 FirstName: user.FirstName,
                 LastName: user.LastName,
                 Email: user.Email,
-                CourseId: user.CourseId,
-                RoleName: role.FirstOrDefault()
+                RoleName: role.FirstOrDefault(),
+                Course: course != null ? new CourseDto(course.Id, course.Name, course.Description, course.StartDate, course.EndDate) : null
             ));
         }
 
@@ -49,46 +55,51 @@ public class UserService : IUserService
 
     public async Task<UserDto?> GetUserByIdAsync(string id)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(id);
+        var user = await _userManager.FindByIdAsync(id);
+
         if (user == null)
             return null;
         var role = await _userManager.GetRolesAsync(user);
+        var course = await _unitOfWork.CourseRepository.GetCourseByUserIdAsync(user.Id);
+
         return new UserDto
         (
             Id: user.Id,
             FirstName: user.FirstName,
             LastName: user.LastName,
             Email: user.Email!,
-            CourseId: user.CourseId,
-            RoleName: role.FirstOrDefault()
+            RoleName: role.FirstOrDefault(),
+            Course: course != null ? new CourseDto(course.Id, course.Name, course.Description, course.StartDate, course.EndDate) : null
         );
+
     }
 
-    public async Task<CreateUserResultDto> CreateUserAsync(CreateUserDto userCreateDto)
+    public async Task<ResultDto<UserDto>> CreateUserAsync(CreateUserDto userCreateDto)
     {
         var user = new ApplicationUser
         {
             FirstName = userCreateDto.FirstName,
             LastName = userCreateDto.LastName,
             Email = userCreateDto.Email,
-            UserName = userCreateDto.Email
+            UserName = userCreateDto.Email,
+            CourseId = userCreateDto.CourseId
         };
 
         try
         {
-            var createResult = await _userManager.CreateAsync(user, userCreateDto.Password);
+            var createResult = await _userManager.CreateAsync(user, _configuration["password"]);
 
             if (!createResult.Succeeded)
             {
                 var errors = createResult.Errors
-                    .Select(e => new UserError
+                    .Select(e => new ErrorDto
                     {
                         Code = e.Code,
                         Description = e.Description
                     })
                     .ToList();
 
-                return CreateUserResultDto.Failed(errors);
+                return ResultDto<UserDto>.Failed(errors);
             }
 
             var roleResult = await _userManager.AddToRoleAsync(user, userCreateDto.RoleName);
@@ -98,40 +109,115 @@ public class UserService : IUserService
                 await _userManager.DeleteAsync(user);
 
                 var errors = roleResult.Errors
-                    .Select(e => new UserError
+                    .Select(e => new ErrorDto
                     {
                         Code = e.Code,
                         Description = e.Description
                     })
                     .ToList();
 
-                return CreateUserResultDto.Failed(errors);
+                return ResultDto<UserDto>.Failed(errors);
             }
 
-            var createdUser = new UserDto(
-                Id: user.Id,
-                FirstName: user.FirstName,
-                LastName: user.LastName,
-                Email: user.Email!,
-                CourseId: null,
-                RoleName: userCreateDto.RoleName
-            );
+            var createdUser = await _userManager.Users
+                .Where(u => u.Id == user.Id)
+                .Select(u => new UserDto
+                (
+                    Id: u.Id,
+                    FirstName: u.FirstName,
+                    LastName: u.LastName,
+                    Email: u.Email!,
+                    RoleName: userCreateDto.RoleName,
+                    Course: u.Course == null ? null : new CourseDto(u.Course.Id, u.Course.Name, u.Course.Description, u.Course.StartDate, u.Course.EndDate)
+                )).FirstOrDefaultAsync();
 
-            return CreateUserResultDto.SuccessWith(createdUser);
+            return ResultDto<UserDto>.Success(createdUser);
         }
         catch
         {
-            var errors = new List<UserError>
+            var errors = new List<ErrorDto>
         {
-            new UserError
+            new ErrorDto
             {
                 Code = "USER_ERROR:DB",
                 Description = "An error occurred while saving the user to the database."
             }
         };
 
-            return CreateUserResultDto.Failed(errors);
+            return ResultDto<UserDto>.Failed(errors);
         }
+    }
+
+    public async Task<ResultDto<UserDto>> UpdateUserAsync(string id, UpdateUserDto userUpdateDto)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
+            return ResultDto<UserDto>.Failed(new List<ErrorDto> { new ErrorDto { Code = "USER_NOT_FOUND", Description = "User not found." } });
+
+        user.FirstName = userUpdateDto.FirstName;
+        user.LastName = userUpdateDto.LastName;
+        user.Email = userUpdateDto.Email;
+        user.UserName = userUpdateDto.Email;
+        user.CourseId = userUpdateDto.CourseId;
+
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            var errors = result.Errors
+                .Select(e => new ErrorDto
+                {
+                    Code = e.Code,
+                    Description = e.Description
+                })
+                .ToList();
+
+            return ResultDto<UserDto>.Failed(errors);
+        }
+
+        var currentRoles = await _userManager.GetRolesAsync(user);
+        var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+        if (!removeResult.Succeeded)
+        {
+            var errors = removeResult.Errors
+                .Select(e => new ErrorDto
+                {
+                    Code = e.Code,
+                    Description = e.Description
+                })
+                .ToList();
+
+            return ResultDto<UserDto>.Failed(errors);
+        }
+
+        var addRoleResult = await _userManager.AddToRoleAsync(user, userUpdateDto.RoleName);
+        if (!addRoleResult.Succeeded)
+        {
+            var errors = addRoleResult.Errors
+                .Select(e => new ErrorDto
+                {
+                    Code = e.Code,
+                    Description = e.Description
+                })
+                .ToList();
+
+            return ResultDto<UserDto>.Failed(errors);
+        }
+
+        await _unitOfWork.CompleteAsync();
+
+        var updatedUser = await _userManager.Users
+            .Where(u => u.Id == user.Id)
+            .Select(u => new UserDto
+            (
+                Id: u.Id,
+                FirstName: u.FirstName,
+                LastName: u.LastName,
+                Email: u.Email!,
+                RoleName: userUpdateDto.RoleName,
+                Course: u.Course == null ? null : new CourseDto(u.Course.Id, u.Course.Name, u.Course.Description, u.Course.StartDate, u.Course.EndDate)
+            )).FirstOrDefaultAsync();
+
+        return ResultDto<UserDto>.Success(updatedUser);
     }
 
     public async Task DeleteUserAsync(string id)
@@ -152,54 +238,6 @@ public class UserService : IUserService
     {
         return await _roleManager.Roles.Select(r => r.Name).ToListAsync();
     }
-    public async Task<UserDto> UpdateUserAsync(string id, UpdateUserDto dto)
-    {
-        var user = await _userManager.FindByIdAsync(id);
-        if (user == null)
-        {
-            throw new NotFoundException($"User with ID {id} not found.", "User Not Found");
-        }
-
-        user.FirstName = dto.FirstName;
-        user.LastName = dto.LastName;
-        user.Email = dto.Email;
-        user.UserName = dto.Email; 
-        user.CourseId = dto.CourseId;
-
-        var updateResult = await _userManager.UpdateAsync(user);
-        if (!updateResult.Succeeded)
-        {
-            var errorMsg = string.Join(", ", updateResult.Errors.Select(e => e.Description));
-            throw new BadRequestException(errorMsg, "Update failed");
-        }
-
-        var currentRoles = await _userManager.GetRolesAsync(user);
-        var currentRole = currentRoles.FirstOrDefault();
-
-        if (currentRole != dto.RoleName)
-        {
-            if (currentRole != null)
-            {
-                await _userManager.RemoveFromRoleAsync(user, currentRole);
-            }
-
-            var roleResult = await _userManager.AddToRoleAsync(user, dto.RoleName);
-            if (!roleResult.Succeeded)
-            {
-                var errorMsg = string.Join(", ", roleResult.Errors.Select(e => e.Description));
-                throw new BadRequestException(errorMsg, "Role Update Failed");
-            }
-        }
-
-        return new UserDto(
-            user.Id,
-            user.FirstName,
-            user.LastName,
-            user.Email,
-            dto.RoleName,
-            user.CourseId
-        );
-    }
     public async Task<int> GetUsersCountByRoleAsync(string roleName)
     {
         if (string.IsNullOrWhiteSpace(roleName))
@@ -214,17 +252,17 @@ public class UserService : IUserService
     }
     
     public async Task<IEnumerable<UserDto>> GetTeachersAsync()
-{
-    var teachers = await _userManager.GetUsersInRoleAsync("Teacher");
+    {
+        var teachers = await _userManager.GetUsersInRoleAsync("Teacher");
 
-    return teachers.Select(t => new UserDto(
-        t.Id,
-        t.FirstName,
-        t.LastName,
-        t.Email ?? string.Empty,
-        "Teacher",
-        t.CourseId
-    ));
-}
+        return teachers.Select(t => new UserDto(
+            t.Id,
+            t.FirstName,
+            t.LastName,
+            t.Email ?? string.Empty,
+            "Teacher",
+            null
+        ));
+    }
 }
 

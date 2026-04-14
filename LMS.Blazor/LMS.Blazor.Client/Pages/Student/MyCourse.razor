@@ -1,6 +1,14 @@
 ﻿@page "/student/mycourse"
 @using LMS.Shared.DTOs.Course
 @using Microsoft.AspNetCore.Authorization
+@using LMS.Shared.DTOs.Activity
+@using LMS.Shared.DTOs.Module
+@using LMS.Shared.DTOs.User
+@using LMS.Blazor.Client.Components
+@using LMS.Blazor.Client.Components.Icons
+@using LMS.Blazor.Client.Components.Courses
+@using LMS.Blazor.Client.Components.CourseDetails
+@using LMS.Blazor.Client.Shared.Presentation
 @attribute [Authorize(Roles = "Student")]
 @inject IApiService ApiService
 
@@ -14,65 +22,187 @@ else if (!string.IsNullOrWhiteSpace(errorMessage))
 {
     <div class="alert alert-danger">@errorMessage</div>
 }
-else if (course is not null)
+else if (_course != null)
 {
-    <div class="card mb-4">
-        <div class="card-body">
-            <h4>@course.Name</h4>
-            <p>@course.Description</p>
-            <p>
-                <strong>Start:</strong> @course.StartDate.ToShortDateString()
-                <br />
-                <strong>End:</strong> @course.EndDate.ToShortDateString()
-            </p>
+   <div class="course-details-page">
+    <div class="container px-4">
+
+        <!-- Hero / Course header -->
+            <CourseDetailsHero Course="_course"
+                               ParticipantCount="ParticipantCount"
+                               CourseProgressPercentage="CourseProgressPercentage"
+                               />
+
+        
+
+        <!-- Tabs -->
+        <ul class="nav course-tabs mb-4">
+    <li class="nav-item">
+        <button type="button"
+                class="nav-link course-tab @(activeTab == "modules" ? "active" : "")"
+                @onclick='() => activeTab = "modules"'>
+            <span class="course-tab-icon">
+                <CalendarIcon Size="18" />
+            </span>
+                    <span class="tab-title">Modules</span>
+        </button>
+    </li>
+
+    <li class="nav-item">
+                    <button type="button"
+                            class="nav-link course-tab @(activeTab == "participants" ? "active" : "")"
+                            @onclick="OpenParticipantsTab">
+                        <span class="course-tab-icon">
+                            <UsersIcon Size="18" />
+                        </span>
+                        <span class="tab-title">Participants</span>
+                    </button>
+    </li>
+
+    <li class="nav-item">
+        <button type="button"
+                class="nav-link course-tab @(activeTab == "documents" ? "active" : "")"
+                @onclick='() => activeTab = "documents"'>
+            <span class="course-tab-icon">
+                <DocumentIcon Size="18" />
+            </span>
+                    <span class="tab-title">Documents</span>
+        </button>
+    </li>
+</ul>
+
+        <!-- Tab content -->
+            @if (activeTab == "modules")
+            {
+               
+
+                @if (_course.Modules == null || !_course.Modules.Any())
+                {
+                    <div class="card shadow-sm border-0 rounded-4">
+                        <div class="card-body">
+                            <p class="text-muted mb-0">This course has no modules.</p>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="accordion" id="modulesAccordion">
+
+                        @foreach (var module in SortedModules
+                                        .Select((m, i) => new { Module = m, Index = i + 1 }))
+                        {
+                            var moduleItem = module.Module;
+                            var index = module.Index;
+
+                            var collapseId = $"collapse-{moduleItem.Id}";
+                            var headingId = $"heading-{moduleItem.Id}";
+                            var accordionIsOpen = _openModules.Contains(moduleItem.Id);
+
+                            <div class="accordion-item module-accordion-item mb-3 rounded-4 overflow-hidden shadow-sm @(accordionIsOpen ? "module-active" : "")">
+
+                                <!-- HEADER -->
+                                <CourseModuleHeader Module="moduleItem"
+                                                    Index="index"
+                                                    IsOpen="accordionIsOpen"
+                                                    BadgeClass="@GetModuleStatusBadgeClass(moduleItem)"
+                                                    Status="@GetModuleStatus(moduleItem)"
+                                                    CircleStyle="@GetModuleCircleStyle(moduleItem)"
+                                                    OnToggle="() => ToggleModuleAsync(moduleItem.Id)"
+                                                  />
+
+                                <!-- BODY -->
+                                <div id="@collapseId"
+                                     class="accordion-collapse collapse @(accordionIsOpen ? "show" : "")"
+                                     data-bs-parent="#modulesAccordion">
+
+                                    <CourseModuleBody Module="moduleItem"
+                                                                                                          
+                                                      LoadingModules="_loadingModules"
+                                                      ModuleActivities="_moduleActivities"
+                                                      GetActivityColor="GetActivityColorClass"
+                                                      />
+                                </div>
+                            </div>
+                        }
+
+
+                    </div>
+                }
+            }
+            else if (activeTab == "participants")
+            {
+                <CourseParticipantsTab IsLoading="isLoadingParticipants"
+                                       Teachers="@teachers"
+                                       Participants="@participants" />
+            }
+            else if (activeTab == "documents")
+            {
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body">
+                        <h5 class="mb-3">Document</h5>
+                        <p class="text-muted mb-0">The documents tab</p>
+                    </div>
+                </div>
+            }
+
         </div>
     </div>
-
-    <h5>Modules</h5>
-
-    @if (course.Modules.Count == 0)
-    {
-        <p>No modules found.</p>
-    }
-    else
-    {
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Start</th>
-                    <th>End</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var module in course.Modules)
-                {
-                    <tr>
-                        <td>@module.Name</td>
-                        <td>@module.Description</td>
-                        <td>@module.StartDate.ToShortDateString()</td>
-                        <td>@module.EndDate.ToShortDateString()</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
+      
 }
 
+
 @code {
-    private CourseDetailsDto? course;
     private bool isLoading = true;
     private string? errorMessage;
+    private CourseDetailsDto? _course;
+    private Dictionary<Guid, List<ActivityDto>> _moduleActivities = new();
+    private HashSet<Guid> _loadingModules = new();
+    private HashSet<Guid> _openModules = new();
+    private string activeTab = "modules";
+    private int ParticipantCount => participants?.Count ?? 0;
+    private Dictionary<string, (string BgClass, string TextClass)> _activityTypeColorMap
+    = new(StringComparer.OrdinalIgnoreCase);
+ 
+    private List<UserDto> participants = new();
+    private bool isLoadingParticipants = false;
+    private bool participantsLoaded = false;
+    private List<UserDto> teachers = new();
+
+    private IEnumerable<ModuleDto> SortedModules =>
+    _course?.Modules?
+        .OrderBy(m => GetModuleSortOrder(m))
+        .ThenBy(m =>
+            GetModuleSortOrder(m) == 0 ? m.EndDate :     // Ongoing: soonest ending first
+            GetModuleSortOrder(m) == 1 ? m.StartDate :   // Upcoming: soonest starting first
+            DateTime.MaxValue)
+        .ThenByDescending(m =>
+            GetModuleSortOrder(m) == 2 ? m.EndDate :     // Completed: most recently completed first
+            DateTime.MinValue)
+    ?? Enumerable.Empty<ModuleDto>();
 
     protected override async Task OnInitializedAsync()
     {
+
+        //This method run in prerender
+        await CallApi();
+
+    }
+
+    private async Task CallApi()
+    {
+        isLoading = true;
+        errorMessage = null;
+        _course = null;
+
         try
         {
-            course = await ApiService.GetAsync<CourseDetailsDto>("api/student/my-course");
+            _course = await ApiService.GetAsync<CourseDetailsDto>("api/student/my-course");
 
-            if (course is null)
-                errorMessage = "You are not enrolled in any course.";
+            if (_course != null)
+            {
+                participants = await ApiService.GetAsync<List<UserDto>>(
+                    $"api/courses/{_course.Id}/participants") ?? new();
+            }
         }
         catch (Exception ex)
         {
@@ -82,5 +212,151 @@ else if (course is not null)
         {
             isLoading = false;
         }
+    }
+
+
+    //Progressbar
+    private int CourseProgressPercentage
+    {
+        get
+        {
+            if (_course?.Modules == null || !_course.Modules.Any())
+                return 0;
+
+            var completedModules = _course.Modules.Count(m => m.EndDate.Date < DateTime.Today);
+            var totalModules = _course.Modules.Count;
+
+            return (int)Math.Round((double)completedModules / totalModules * 100);
+        }
+    }
+
+
+    //Participants
+
+    private async Task OpenParticipantsTab()
+    {
+        activeTab = "participants";
+        await LoadParticipantsTab();
+    }
+
+    private async Task LoadParticipantsTab()
+    {
+        if (participantsLoaded || _course is null)
+            return;
+
+        isLoadingParticipants = true;
+        errorMessage = null;
+
+        try
+        {
+            participants = await ApiService.GetAsync<List<UserDto>>(
+                $"api/courses/{_course.Id}/participants") ?? new();
+
+            teachers = await ApiService.GetAsync<List<UserDto>>(
+                "api/users/teachers") ?? new();
+
+            participantsLoaded = true;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Failed to load participants: " + ex.Message;
+        }
+        finally
+        {
+            isLoadingParticipants = false;
+        }
+    }
+    
+
+    //Modules
+    private async Task ToggleModuleAsync(Guid moduleId)
+    {
+        if (_openModules.Contains(moduleId))
+        {
+            _openModules.Remove(moduleId);
+            return;
+        }
+
+        _openModules.Add(moduleId);
+
+        if (!_moduleActivities.ContainsKey(moduleId))
+        {
+            _loadingModules.Add(moduleId);
+            StateHasChanged();
+
+            try
+            {
+                var activities = await ApiService.GetAsync<List<ActivityDto>>($"api/activities/modules/{moduleId}");
+                _moduleActivities[moduleId] = activities ?? new List<ActivityDto>();
+                BuildActivityTypeColorMap();
+            }
+            catch
+            {
+                _moduleActivities[moduleId] = new List<ActivityDto>();
+                BuildActivityTypeColorMap();
+            }
+            finally
+            {
+                _loadingModules.Remove(moduleId);
+            }
+        }
+    }
+
+ 
+    // Modules - badges
+
+    private int GetModuleSortOrder(ModuleDto module) =>
+        CourseDisplayHelper.GetModuleSortOrder(module);
+
+
+    private string GetModuleStatus(ModuleDto module) =>
+    CourseDisplayHelper.GetModuleStatus(module);
+
+    private string GetModuleStatusBadgeClass(ModuleDto module) =>
+     CourseDisplayHelper.GetModuleStatusBadgeClass(module);
+
+    private string GetModuleCircleStyle(ModuleDto module) =>
+        CourseDisplayHelper.GetModuleCircleStyle(module);
+
+
+    //Aktivity badges
+
+    private readonly (string BgClass, string TextClass)[] activityColorVariants =
+[
+    ("bg-primary-subtle", "text-primary"),
+    ("bg-success-subtle", "text-success"),
+    ("bg-warning-subtle", "text-warning"),
+    ("bg-info-subtle", "text-info"),
+    ("bg-danger-subtle", "text-danger"),
+    ("bg-secondary-subtle", "text-secondary")
+];
+
+    private void BuildActivityTypeColorMap()
+    {
+        var allTypes = _moduleActivities.Values
+            .SelectMany(activities => activities)
+            .Select(a => a.TypeName?.Trim())
+            .Where(type => !string.IsNullOrWhiteSpace(type))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(type => type)
+            .ToList();
+
+        _activityTypeColorMap = new Dictionary<string, (string BgClass, string TextClass)>(StringComparer.OrdinalIgnoreCase);
+
+        for (int i = 0; i < allTypes.Count; i++)
+        {
+            _activityTypeColorMap[allTypes[i]!] = activityColorVariants[i % activityColorVariants.Length];
+        }
+    }
+
+    private (string BgClass, string TextClass) GetActivityColorClass(ActivityDto activity)
+    {
+        if (!string.IsNullOrWhiteSpace(activity.TypeName) &&
+            _activityTypeColorMap.TryGetValue(activity.TypeName, out var color))
+        {
+            return color;
+        }
+
+        return ("bg-secondary-subtle", "text-secondary");
     }
 }

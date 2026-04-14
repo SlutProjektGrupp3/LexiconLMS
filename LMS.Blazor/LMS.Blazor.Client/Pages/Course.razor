@@ -8,6 +8,7 @@
 @using LMS.Blazor.Client.Components.Icons
 @using LMS.Blazor.Client.Components.Courses
 @using LMS.Blazor.Client.Components.CourseDetails
+@using LMS.Blazor.Client.Shared.Presentation
 
 
 <PageTitle>Course Details</PageTitle>
@@ -525,57 +526,18 @@ else if (_course != null)
 
     // Modules - badges
 
-    private int GetModuleSortOrder(ModuleDto module)
-    {
-        var today = DateTime.Today;
+    private int GetModuleSortOrder(ModuleDto module) =>
+        CourseDisplayHelper.GetModuleSortOrder(module);
 
-        if (module.StartDate.Date <= today && module.EndDate.Date >= today)
-            return 0; // Ongoing
+    private string GetModuleStatus(ModuleDto module) =>
+        CourseDisplayHelper.GetModuleStatus(module);
 
-        if (module.StartDate.Date > today)
-            return 1; // Upcoming
+    private string GetModuleStatusBadgeClass(ModuleDto module) =>
+        CourseDisplayHelper.GetModuleStatusBadgeClass(module);
 
-        return 2; // Completed
-    }
+    private string GetModuleCircleStyle(ModuleDto module) =>
+        CourseDisplayHelper.GetModuleCircleStyle(module);
 
-    private string GetModuleStatus(ModuleDto module)
-    {
-        var today = DateTime.Today;
-
-        if (module.EndDate.Date < today)
-            return "Completed";
-
-        if (module.StartDate.Date > today)
-            return "Upcoming";
-
-        return "Ongoing";
-    }
-
-    private string GetModuleStatusBadgeClass(ModuleDto module)
-    {
-        var today = DateTime.Today;
-
-        if (module.EndDate.Date < today)
-            return "bg-success-subtle text-success";
-
-        if (module.StartDate.Date > today)
-            return "bg-secondary-subtle text-secondary";
-
-        return "bg-primary-subtle text-primary";
-    }
-
-    private string GetModuleCircleStyle(ModuleDto module)
-    {
-        var today = DateTime.Today;
-
-        if (module.EndDate.Date < today)
-            return "background-color:#d1e7dd; color:#0f5132;";
-
-        if (module.StartDate.Date > today)
-            return "background-color:#e2e3e5; color:#41464b;";
-
-        return "background-color:#cfe2ff; color:#084298;";
-    }
 
     private async Task HandleDeleteModule(Guid moduleId)
     {

@@ -1,0 +1,4 @@
+﻿.required::after {
+    content: " *";
+    color: #dc3545; /* Bootstrap danger color */
+}

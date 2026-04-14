@@ -27,33 +27,29 @@ public class CourseService : ICourseService
 
     public async Task<(IEnumerable<CourseDetailsDto> Items, int TotalCount)> GetCourseSummariesAsync(string? search = null, bool? active = null, int page = 1, int pageSize = 12)
     {
-        var total = 0;
-        var list = await _uow.CourseRepository.GetCourseSummariesAsync();
-        var query = list.AsQueryable();
+        var query = _uow.CourseRepository.GetCourseSummariesQuery();
 
         if (!string.IsNullOrWhiteSpace(search))
         {
             var lower = search.Trim().ToLower();
-            query = query?.Where(c => c.Name.ToLower().Contains(lower) || (c.Description != null && c.Description.ToLower().Contains(lower)));
+            query = query?.Where(c => c.Name.ToLower().Contains(lower) || 
+            (c.Description != null && c.Description.ToLower().Contains(lower)));
         }
 
         if (active.HasValue)
         {
-            if (active.Value)
-                query = query?.Where(c => c.EndDate > DateTime.Now);
-            else
-                query = query?.Where(c => c.EndDate <= DateTime.Now);
+            query = query.Where(c => c.Active == active.Value);
         }
 
-        var items = query
+        var totalCount = await query.CountAsync();
+
+        var items = await query
             .OrderBy(c => c.StartDate)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .ToList();
-
-        total += items.Count;
-
-        return (items, total);
+            .ToListAsync();
+        
+        return (items, totalCount);
     }
 
     public async Task<IEnumerable<CourseDetailsDto>> GetAllCoursesAsync(bool trackChanges = false)
@@ -62,7 +58,12 @@ public class CourseService : ICourseService
         return _mapper.Map<IEnumerable<CourseDetailsDto>>(courses);
     }
 
-    public async Task<CourseDetailsDto> GetCourseByIdAsync(Guid id)
+    public async Task<IEnumerable<CourseDto?>> GetActiveCoursesAsync()
+    {
+        var courses = await _uow.CourseRepository.GetActiveCoursesAsync();
+        return _mapper.Map<IEnumerable<CourseDto?>>(courses);
+    }
+    public async Task<CourseDetailsDto?> GetCourseByIdAsync(Guid id)
     {
         var course = await _uow.CourseRepository.GetCourseByIdAsync(id, includeModules: true);
         if (course == null)
@@ -162,5 +163,5 @@ public class CourseService : ICourseService
     {
         return await _uow.CourseRepository.GetCourseSummariesAsync();
     }
-    
+
 }

@@ -151,7 +151,7 @@ namespace LMS.Blazor.Client.Pages.Teacher
 
         protected void NavigateToCourses()
         {
-            Navigation.NavigateTo($"/teacher/courses");
+            Navigation.NavigateTo($"/teacher/managecourses");
         }
 
         protected int GetActiveCoursesNumber(IEnumerable<CourseDetailsDto>? courses = null)

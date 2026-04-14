@@ -2,19 +2,8 @@
 
 namespace LMS.Shared.DTOs.Module;
 
-public class UpdateModuleDto
+public class UpdateModuleDto : BaseModuleDto
 {
     public Guid Id { get; set; }
-    public Guid CourseId { get; set; }
-
-    [Required]
-    public string Name { get; set; } = null!;
-
-    public string Description { get; set; } = null!;
-
-    [Required]
-    public DateTime StartDate { get; set; }
-
-    [Required]
-    public DateTime EndDate { get; set; }
+    public Guid CourseId { get; set; }    
 }

@@ -229,7 +229,7 @@ else if (_course != null)
     private Guid _activityIdToRemember;
 
     private string activeTab = "modules";
-    private List<ParticipantDto> participants = new();
+    private List<UserDto> participants = new();
     private List<UserDto> teachers = new();
     private bool isLoadingParticipants = false;
     private bool participantsLoaded = false;
@@ -325,7 +325,7 @@ else if (_course != null)
 
         try
         {
-            participants = await ApiService.GetAsync<List<ParticipantDto>>(
+            participants = await ApiService.GetAsync<List<UserDto>>(
                 $"api/courses/{Id}/participants") ?? new();
 
             teachers = await ApiService.GetAsync<List<UserDto>>(

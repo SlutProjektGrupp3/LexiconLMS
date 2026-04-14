@@ -1,5 +1,6 @@
 ﻿using LMS.Shared.DTOs.User;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
@@ -8,7 +9,7 @@ namespace LMS.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-
+[Authorize]
 public class UsersController : ControllerBase
 {
     private readonly IServiceManager _serviceManager;
@@ -18,8 +19,23 @@ public class UsersController : ControllerBase
         _serviceManager = serviceManager;
     }
 
-    [Authorize(Roles = "Teacher")]
+    [HttpGet("me")]
+    [Authorize]
+    public async Task<IActionResult> GetCurrentUser()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized("User ID not found");
+
+        var user = await _serviceManager.UserService.GetUserByIdAsync(userId);
+        if (user == null)
+            return NotFound($"User with ID {userId} not found.");
+
+        return Ok(user);
+    }
+
     [HttpGet]
+    [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> GetAllUsers()
     {
         var users = await _serviceManager.UserService.GetAllUsersAsync();
@@ -27,8 +43,20 @@ public class UsersController : ControllerBase
         return Ok(users ?? new List<UserDto>());
     }
 
-    [Authorize(Roles = "Teacher")]
+    [HttpGet]
+    [Route("{id}")]
+    [Authorize]
+    public async Task<IActionResult> GetUserById(string id)
+    {
+        var user = await _serviceManager.UserService.GetUserByIdAsync(id);
+        if (user == null)
+            return NotFound($"User with ID {id} not found.");
+        return Ok(user);
+    }
+
+
     [HttpPost]
+    [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserDto userCreateDto)
     {
         var result = await _serviceManager.UserService.CreateUserAsync(userCreateDto);
@@ -37,6 +65,7 @@ public class UsersController : ControllerBase
 
     [Authorize(Roles = "Teacher")]
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> DeleteUser(string id)
     {
         await _serviceManager.UserService.DeleteUserAsync(id);
@@ -45,6 +74,7 @@ public class UsersController : ControllerBase
 
     [HttpGet]
     [Route("roles")]
+    [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> GetAllRoles()
     {
         var roles = await _serviceManager.UserService.GetAllRolesAsync();

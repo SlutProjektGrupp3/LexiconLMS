@@ -39,11 +39,29 @@ public class UserService : IUserService
                 FirstName: user.FirstName,
                 LastName: user.LastName,
                 Email: user.Email,
+                CourseId: user.CourseId,
                 RoleName: role.FirstOrDefault()
             ));
         }
 
         return dtoList;
+    }
+
+    public async Task<UserDto?> GetUserByIdAsync(string id)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(id);
+        if (user == null)
+            return null;
+        var role = await _userManager.GetRolesAsync(user);
+        return new UserDto
+        (
+            Id: user.Id,
+            FirstName: user.FirstName,
+            LastName: user.LastName,
+            Email: user.Email!,
+            CourseId: user.CourseId,
+            RoleName: role.FirstOrDefault()
+        );
     }
 
     public async Task<CreateUserResultDto> CreateUserAsync(CreateUserDto userCreateDto)
@@ -95,6 +113,7 @@ public class UserService : IUserService
                 FirstName: user.FirstName,
                 LastName: user.LastName,
                 Email: user.Email!,
+                CourseId: null,
                 RoleName: userCreateDto.RoleName
             );
 
@@ -145,6 +164,7 @@ public class UserService : IUserService
         user.LastName = dto.LastName;
         user.Email = dto.Email;
         user.UserName = dto.Email; 
+        user.CourseId = dto.CourseId;
 
         var updateResult = await _userManager.UpdateAsync(user);
         if (!updateResult.Succeeded)
@@ -176,7 +196,8 @@ public class UserService : IUserService
             user.FirstName,
             user.LastName,
             user.Email,
-            dto.RoleName
+            dto.RoleName,
+            user.CourseId
         );
     }
     public async Task<int> GetUsersCountByRoleAsync(string roleName)
@@ -201,7 +222,8 @@ public class UserService : IUserService
         t.FirstName,
         t.LastName,
         t.Email ?? string.Empty,
-        "Teacher"
+        "Teacher",
+        t.CourseId
     ));
 }
 }

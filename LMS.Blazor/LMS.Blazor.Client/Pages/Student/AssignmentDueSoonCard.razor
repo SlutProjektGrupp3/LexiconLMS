@@ -1,0 +1,42 @@
+﻿@using LMS.Shared.DTOs.Activity
+@using LMS.Blazor.Client.Components.Icons
+
+<div class="card p-4 mb-3 accent-card-primary">
+    <div class="d-flex justify-content-between align-items-center">
+       <div class="text-warning">
+            <PendingIcon />
+            <span class="text-dark fw-semibold fs-6 px-3">Upcoming assignments</span>
+       </div>
+    </div>
+
+    <span class="text-muted small fw-semibold pt-3">@NextDueActivity?.Name</span>
+
+    @if (NextDueActivity == null)
+    {
+        <div class="card bg-body-tertiary m-1  p-3">
+            <span class="text-muted small"> Lookks like you are all caught up! Good job!</span>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center">
+        <span class="text-muted small">@NextDueActivity?.EndDate.ToString("d MMM HH:mm")</span>
+        <span class="text-warning small">@GetDaysLeft(NextDueActivity?.EndDate ?? DateTime.Now) days left</span>
+    </div>
+
+    <div class="d-flex justify-content-center align-items-center pt-4">
+        <div class="text-muted small">
+            <a href="#" class="btn text-primary p-0 small">
+                <ArrowRightIcon /> View all assignments
+            </a>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public ActivityDto? NextDueActivity { get; set; }
+
+    public int GetDaysLeft(DateTime due) 
+    {
+        return (DateTime.Now - due).Days < 0 ? (DateTime.Now - due).Days * (-1) : 0;
+    }
+}

@@ -1,4 +1,5 @@
-﻿@using LMS.Shared.DTOs.Course
+﻿@using LMS.Blazor.Client.Components.Icons
+@using LMS.Shared.DTOs.Course
 @using Microsoft.EntityFrameworkCore.Metadata.Internal
 
 @if (Courses is null || Courses.Count == 0)
@@ -38,10 +39,19 @@ else
                             <div class="course-info">
                                 <h5><a href="@($"/courses/{course.Id}")">@course.Name</a></h5>
 
-                                <div class="meta">
-                                    <span>📅 @course.StartDate.ToString("yyyy-MM-dd")</span>
-                                    <span>• @(course.ModulesCount ?? 0) modules</span>
-                                    <span>• @(course.ParticipantsCount ?? 0) participants</span>
+                                <div class="meta d-flex gap-3 text-muted small">
+                                    <span class="d-inline-flex align-items-center gap-1">
+                                        <CalendarIcon Size="16" CssClass="text-muted" />
+                                        @course.StartDate.ToString("yyyy-MM-dd")
+                                    </span>
+                                    <span class="d-inline-flex align-items-center gap-1">
+                                        <i class="bi bi-layers text-muted"></i>
+                                        @(course.ModulesCount ?? 0) modules
+                                    </span>
+                                    <span class="d-inline-flex align-items-center gap-1">
+                                        <i class="bi bi-people text-muted"></i>
+                                        @(course.ParticipantsCount ?? 0) participants
+                                    </span>                                    
                                 </div>                                                           
                             </div>
                             <div class="course-actions">

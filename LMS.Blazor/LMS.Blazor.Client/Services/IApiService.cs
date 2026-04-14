@@ -7,5 +7,6 @@ public interface IApiService
     Task<TResponse?> PostAsync<TRequest, TResponse>(string endpoint, TRequest data, CancellationToken ct = default);
 
     Task PutAsync<T>(string endpoint, T data, CancellationToken ct = default);
+    Task<TResponse?> PutAsync<TRequest, TResponse>(string endpoint, TRequest data, CancellationToken ct = default);
     Task DeleteAsync(string endpoint, CancellationToken ct = default);
 }

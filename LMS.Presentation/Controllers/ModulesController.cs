@@ -1,91 +1,160 @@
-﻿using LMS.Shared.DTOs.Modules;
+﻿using LMS.Shared.DTOs;
+using LMS.Shared.DTOs.Module;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 using Swashbuckle.AspNetCore.Annotations;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace LMS.Presentation.Controllers
+namespace LMS.Presentation.Controllers;
+
+[Route("api/modules")]
+[ApiController]
+[Authorize]
+public class ModulesController : ControllerBase
 {
-    [Route("api/modules")]
-    [ApiController]
-    [Authorize]
-    public class ModulesController : ControllerBase
+    private readonly IServiceManager _serviceManager;
+
+    public ModulesController(IServiceManager serviceManager)
     {
-        private readonly IServiceManager _serviceManager;
+        _serviceManager = serviceManager;
+    }
 
-        public ModulesController(IServiceManager serviceManager)
+
+    [HttpPost]
+    [Authorize(Roles = "Teacher")]
+    [SwaggerOperation(
+        Summary = "Teacher can create a new module in a course",
+        Description = "Creates a new module in a given course. Requires a valid JWT token with Teacher role.")]
+    [SwaggerResponse(StatusCodes.Status201Created, "Module successfully created")]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid input")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Course not found")]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error")]
+    public async Task<IActionResult> CreateModule(CreateModuleDto createModuleDto)
+    {
+        var result = await _serviceManager.ModuleService.CreateModuleAsync(createModuleDto);
+
+        if (!result.Succeeded)
         {
-            this._serviceManager = serviceManager;
-        }
+            var error = result.Errors.FirstOrDefault();
 
-
-        [HttpPost]
-        [Authorize(Roles = "Teacher")]
-        [SwaggerOperation(
-            Summary = "Teacher can create a new module in a course",
-            Description = "Creates a new module in a given course. Requires a valid JWT token with Teacher role.")]
-        [SwaggerResponse(StatusCodes.Status201Created, "Module successfully created")]
-        public async Task<IActionResult> CreateModule(CreateModuleDto createModuleDto)
-        {
-            var result = await _serviceManager.ModuleService.CreateModuleAsync(createModuleDto);
-
-            return result.Succeeded ? StatusCode(StatusCodes.Status201Created, result) : BadRequest(result.Errors);
-        }
-
-        [HttpDelete("{id}")]
-        [Authorize(Roles = "Teacher")]
-        [SwaggerOperation(
-            Summary = "Teacher can delete a module in a course",
-            Description = "Deletes a module in a given course. Requires a valid JWT token with Teacher role.")]
-        [SwaggerResponse(StatusCodes.Status204NoContent, "Module successfully deleted")]
-        public async Task<IActionResult> DeleteModule(Guid id)
-        {
-            var result = await _serviceManager.ModuleService.DeleteModuleAsync(id);
-
-            if (result.Succeeded)
+                    // 404 → Course not found
+            if (error?.Code == "CourseNotFound")
             {
-                return NoContent();
-            }
-            else
-            {
-                return result.Error.StatusCode switch
+                return NotFound(new ProblemDetails
                 {
-                    ErrorStatusCode.NotFound => NotFound(result.Error),
-                    ErrorStatusCode.BadRequest => BadRequest(result.Error),
-                    ErrorStatusCode.Database => StatusCode(500, result.Error),
-                    _ => StatusCode(500, result.Error)
-                };
+                    Title = "Course not found",
+                    Status = StatusCodes.Status404NotFound,
+                    Detail = error.Description
+                });
             }
+
+                    // 400 → Validation or other errors
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Bad Request",
+                Status = StatusCodes.Status400BadRequest,
+                Detail = error?.Description ?? "Invalid request"
+            });
         }
 
-        [HttpPut("{moduleId}")]
-        [Authorize(Roles = "Teacher")]
-        [SwaggerOperation(
-          Summary = "Teacher can update a module",
-          Description = "Updates an existing module. Requires a valid JWT token with Teacher role.")]
-        [SwaggerResponse(StatusCodes.Status204NoContent, "Module successfully updated")]
-        [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid module data")]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Module not found")]
-        public async Task<IActionResult> UpdateModule(Guid moduleId, [FromBody] UpdateModuleDto dto)
+        var module = result.CreatedModule!;
+
+                // HATEOAS
+        module = module with
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            Links = new List<LinkDto>
+            {
+                new LinkDto
+                {
+                    Href = Url.Action(nameof(GetModuleById), new { id = module.Id })!,
+                    Rel = "self",
+                    Method = "GET"
+                },
+                new LinkDto
+                {
+                    Href = $"/api/courses/{createModuleDto.CourseId}",
+                    Rel = "course",
+                    Method = "GET"
+                }
+            }
+        };
 
-            try
-            {
-                await _serviceManager.ModuleService.UpdateModuleAsync(moduleId, dto);
-                return NoContent();
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+        // CreatedAtAction + Location Header
+        //return CreatedAtAction(nameof(GetModuleById), new { id = module.Id }, module);
+        //return result.Succeeded ? StatusCode(StatusCodes.Status201Created, result) : BadRequest(result.Errors);
+        return CreatedAtAction(nameof(GetModuleById), new { id = module.Id }, new { succeeded = true, createdModule = module });
+    }
+
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Teacher")]
+    [SwaggerOperation(
+        Summary = "Teacher can delete a module in a course",
+        Description = "Deletes a module in a given course. Requires a valid JWT token with Teacher role.")]
+    [SwaggerResponse(StatusCodes.Status204NoContent, "Module successfully deleted")]
+    public async Task<IActionResult> DeleteModule(Guid id)
+    {
+        var result = await _serviceManager.ModuleService.DeleteModuleAsync(id);
+
+        if (result.Succeeded)
+        {
+            return NoContent();
         }
+        else
+        {
+            return result.Error.StatusCode switch
+            {
+                ErrorStatusCode.NotFound => NotFound(result.Error),
+                ErrorStatusCode.BadRequest => BadRequest(result.Error),
+                ErrorStatusCode.Database => StatusCode(500, result.Error),
+                _ => StatusCode(500, result.Error)
+            };
+        }
+    }
+
+    [HttpPut("{moduleId}")]
+    [Authorize(Roles = "Teacher")]
+    [SwaggerOperation(
+      Summary = "Teacher can update a module",
+      Description = "Updates an existing module. Requires a valid JWT token with Teacher role.")]
+    [SwaggerResponse(StatusCodes.Status204NoContent, "Module successfully updated")]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid module data")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Module not found")]
+    public async Task<IActionResult> UpdateModule(Guid moduleId, [FromBody] UpdateModuleDto dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        await _serviceManager.ModuleService.UpdateModuleAsync(moduleId, dto);
+        return NoContent();
+    }
+
+    [HttpGet("{id:guid}", Name = "GetModuleById")]
+    [Authorize]
+    public async Task<IActionResult> GetModuleById(Guid id)
+    {
+        var module = await _serviceManager.ModuleService.GetModuleByIdAsync(id);
+
+        if (module is null)
+        {
+            return NotFound(new ProblemDetails
+            {
+                Title = "Module not found",
+                Status = StatusCodes.Status404NotFound,
+                Detail = $"Module with id {id} was not found."
+            });
+        }
+
+        // HATEOAS links
+        module = module with
+        {
+            Links = new List<LinkDto>
+            {
+                new LinkDto { Href = Url.Action(nameof(GetModuleById), new { id = module.Id })!, Rel = "self", Method = "GET" },
+                new LinkDto { Href = $"/api/courses/{module.CourseId}", Rel = "course", Method = "GET" }
+            }
+        };
+
+        return Ok(module);
     }
 }

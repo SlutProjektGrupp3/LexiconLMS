@@ -29,6 +29,11 @@ public class ServerNoOpApiService(ILogger<ServerNoOpApiService> logger) : IApiSe
         _logger.LogWarning("ServerNoOpApiService PUT called for: {Endpoint}", endpoint);
         return Task.CompletedTask;
     }
+    public Task<TResponse?> PutAsync<TRequest, TResponse>(string endpoint, TRequest data, CancellationToken ct = default)
+    {
+        _logger.LogWarning("ServerNoOpApiService called Put for: {Endpoint}", endpoint);
+        return Task.FromResult<TResponse?>(default);
+    }
 
     public Task DeleteAsync(string endpoint, CancellationToken ct = default)
     {

@@ -13,6 +13,7 @@ namespace Domain.Contracts.Repositories
         void Delete(ModuleActivity activity);
         Task<IEnumerable<ActivityType>> GetAllActivityTypesAsync(bool trackChanges);
         Task<ActivityType?> GetActivityTypeByIdAsync(Guid typeId);
+        Task<bool> ModuleExistsAsync(Guid moduleId);
 
     }
 }

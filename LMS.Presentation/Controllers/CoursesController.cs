@@ -1,9 +1,10 @@
-﻿using LMS.Shared.DTOs;
-using LMS.Shared.DTOs.CourseDtos;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
+using LMS.Shared.DTOs.Course;
 
 namespace LMS.Presentation.Controllers;
 
@@ -12,70 +13,75 @@ namespace LMS.Presentation.Controllers;
 
 public class CoursesController : ControllerBase
 {
-    private readonly ICourseService _courseService;
-    private readonly IServiceManager serviceManager;
+    private readonly IServiceManager _serviceManager;
 
-
-    public CoursesController(IServiceManager serviceManager, ICourseService courseService)
+    public CoursesController(IServiceManager serviceManager)
  
     {
-        _courseService = courseService;
-        this.serviceManager = serviceManager;
+        _serviceManager = serviceManager;
     }
 
+    // GET: api/courses
     [HttpGet]
     [Authorize(Roles = "Teacher")]
-    // GET: api/courses
     public async Task<IActionResult> GetCourses()
     {
-        var courses = await serviceManager.CourseService.GetAllCoursesAsync();
+        var courses = await _serviceManager.CourseService.GetAllCoursesAsync();
+        return Ok(courses);
+    }
+    [HttpGet("active")]
+    [Authorize(Roles = "Teacher")]
+    public async Task<IActionResult> GetActiveCourses()
+    {
+        var courses = await _serviceManager.CourseService.GetActiveCoursesAsync();
         return Ok(courses);
     }
 
+    // GET: api/courses/{id}
     [HttpGet("{id:guid}")]
     [Authorize]
     public async Task<IActionResult> GetCourseById(Guid id)
     {
-        var courseDetails = await serviceManager.CourseService.GetCourseByIdAsync(id);
-        if (courseDetails == null)
-            return NotFound();
+        var courseDetails = await _serviceManager.CourseService.GetCourseByIdAsync(id);
+        
         return Ok(courseDetails);
     }
 
+    // POST: api/courses
     [HttpPost]
     [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> CreateCourse([FromBody] CreateCourseDto dto)
     {
-        var createdCourse = await _courseService.CreateCourseAsync(dto);
-        return Ok(createdCourse);
+        var createdCourse = await _serviceManager.CourseService.CreateCourseAsync(dto);
+        
+        return CreatedAtAction(nameof(GetCourseById),new { id = createdCourse.Id },createdCourse);                
     }
 
-
+    // PUT: api/courses/{id} 
+    [HttpPut("{id:guid}")]
     [Authorize(Roles = "Teacher")]
-        [HttpPut("{id:guid}")]
-        public async Task<IActionResult> UpdateCourse(Guid id, [FromBody] UpdateCourseDto updateCourseDto)
-        {
-            if (updateCourseDto is null)
-                return BadRequest("UpdateCourseDto is null.");
+    public async Task<IActionResult> UpdateCourse(Guid id, [FromBody] UpdateCourseDto updateCourseDto)
+    {
+        await _serviceManager.CourseService.UpdateCourseAsync(id, updateCourseDto, trackChanges: true);
+        
+        return NoContent();        
+    }
 
-            await serviceManager.CourseService.UpdateCourseAsync(id, updateCourseDto, trackChanges: true);
-
-            return NoContent();
-        }
-
-        [Authorize(Roles = "Teacher")]
+    // DELETE: api/courses/{id}
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> DeleteCourse(Guid id)
     {
-        await serviceManager.CourseService.DeleteCourseAsync(id, trackChanges: true);
-        return NoContent();
+        await _serviceManager.CourseService.DeleteCourseAsync(id, trackChanges: true);
+        
+        return NoContent();        
     }
 
     [Authorize(Roles = "Teacher")]
     [HttpPost("{courseId}/students/{studentId}")]
     public async Task<IActionResult> AddStudentToCourse(Guid courseId, string studentId)
     {
-        await _courseService.AddStudentToCourseAsync(courseId, studentId);
+        await _serviceManager.CourseService.AddStudentToCourseAsync(courseId, studentId);
         return NoContent();
     }
 
@@ -83,14 +89,33 @@ public class CoursesController : ControllerBase
     [HttpGet("{courseId}/available-students")]
     public async Task<IActionResult> GetAvailableStudents()
     {
-        var students = await _courseService.GetAvailableStudentsAsync();
+        var students = await _serviceManager.CourseService.GetAvailableStudentsAsync();
         return Ok(students);
     }
 
+    // GET: api/courses/summary
+    [HttpGet("summary")]
+    [Authorize(Roles = "Teacher")]
+    public async Task<IActionResult> GetCourseSummaries([FromQuery] string? search, [FromQuery] bool? active, [FromQuery] int page = 1, [FromQuery] int pageSize = 12)
+    {
+        var (items, total, totalActiveCourses) = await _serviceManager.CourseService.GetCourseSummariesAsync(search, active, page, pageSize);
+
+        // Return CourseDetailsDto items directly in the paged response
+        var dto = new
+        {
+            Items = items,
+            Total = total,
+            TotalActiveCourses = totalActiveCourses
+        };
+
+        return Ok(dto);
+    }
+
+    // GET: api/courses/{courseId}/participants
     [HttpGet("{courseId}/participants")]
     public async Task<IActionResult> GetParticipants(Guid courseId)
     {
-        var participants = await serviceManager.CourseService
+        var participants = await _serviceManager.CourseService
             .GetParticipantsAsync(courseId);
 
         return Ok(participants);

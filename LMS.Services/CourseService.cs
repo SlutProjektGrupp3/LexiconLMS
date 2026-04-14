@@ -1,148 +1,129 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using Domain.Models.Exceptions;
 using LMS.Shared.DTOs;
 using LMS.Shared.DTOs.Course;
-using LMS.Shared.DTOs.CourseDtos;
-using LMS.Shared.DTOs.Module;
 using LMS.Shared.DTOs.User;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Service.Contracts;
-
-
 
 namespace LMS.Services;
 
 public class CourseService : ICourseService
 {
-    private IUnitOfWork uow;
-    private readonly IMapper mapper;
+    private readonly IUnitOfWork _uow;
+    private readonly IMapper _mapper;
     private readonly UserManager<ApplicationUser> _userManager;
 
     public CourseService(ICourseRepository courseRepository,IUnitOfWork uow, IMapper mapper, UserManager<ApplicationUser> userManager)
- 
     {
-        this.uow = uow;
-        this.mapper = mapper;
+        _uow = uow;
+        _mapper = mapper;
         _userManager = userManager;
-
-
     }
 
-    public async Task<IEnumerable<CourseDto>> GetAllCoursesAsync(bool trackChanges = false)
- 
+    public async Task<(IEnumerable<CourseDetailsDto> Items, int TotalCount, int TotalActiveCourses)> GetCourseSummariesAsync(string? search = null, bool? active = null, int page = 1, int pageSize = 12)
     {
-        var courses = await uow.CourseRepository.GetAllCoursesAsync(trackChanges);
-        return mapper.Map<IEnumerable<CourseDto>>(courses);
+        var query = _uow.CourseRepository.GetCourseSummariesQuery();
+        var totalActiveCourses = await query.CountAsync(c => c.Active == true);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var lower = search.Trim().ToLower();
+            query = query?.Where(c => c.Name.ToLower().Contains(lower) || 
+            (c.Description != null && c.Description.ToLower().Contains(lower)));
+        }
+
+        if (active.HasValue)
+        {
+            query = query.Where(c => c.Active == active.Value);
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .OrderBy(c => c.StartDate)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+        
+        return (items, totalCount, totalActiveCourses);
     }
 
+    public async Task<IEnumerable<CourseDetailsDto>> GetAllCoursesAsync(bool trackChanges = false)
+    {
+        var courses = await _uow.CourseRepository.GetAllCoursesAsync(trackChanges);
+        return _mapper.Map<IEnumerable<CourseDetailsDto>>(courses);
+    }
+
+    public async Task<IEnumerable<CourseDto?>> GetActiveCoursesAsync()
+    {
+        var courses = await _uow.CourseRepository.GetActiveCoursesAsync();
+        return _mapper.Map<IEnumerable<CourseDto?>>(courses);
+    }
     public async Task<CourseDetailsDto?> GetCourseByIdAsync(Guid id)
     {
-        var course = await uow.CourseRepository.GetCourseByIdAsync(id, includeModules: true);
+        var course = await _uow.CourseRepository.GetCourseByIdAsync(id, includeModules: true);
         if (course == null)
-            return null;
+            throw new NotFoundException($"Course with id {id} was not found.");
 
-        return new CourseDetailsDto(
-            course.Id,
-            course.Name,
-            course.Description,
-            course.StartDate,
-            course.EndDate,
-            course.Modules.Select(m => new ModuleDto(
-                m.Id,
-                m.Name,
-                m.Description,
-                m.StartDate,
-                m.EndDate,
-                 m.CourseId
-            )).ToList()
-        );
+        return _mapper.Map<CourseDetailsDto>(course);
     }
 
     public async Task<CourseDto> CreateCourseAsync(CreateCourseDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.Name))
-            throw new ArgumentException("Name is required.");
+        var course = _mapper.Map<Course>(dto);
 
-        if (dto.StartDate == default)
-            throw new ArgumentException("Start date is required.");
+        _uow.CourseRepository.CreateCourse(course);
 
-        if (dto.EndDate == default)
-            throw new ArgumentException("End date is required.");
+        await _uow.CompleteAsync();
 
-        if (dto.EndDate <= dto.StartDate)
-            throw new ArgumentException("End date must be after start date.");
-
-        if (dto.StartDate < DateTime.Today)
-            throw new ArgumentException("Start date cannot be in the past.");
-
-        var course = new Course
-        {
-            Name = dto.Name,
-            Description = dto.Description,
-            StartDate = dto.StartDate,
-            EndDate = dto.EndDate,
-        };
-
-        uow.CourseRepository.CreateCourse(course);
-
-        await uow.CompleteAsync();
-
-        return new CourseDto
-        {
-            Id = course.Id,
-            Name = course.Name,
-            Description = course.Description,
-            StartDate = course.StartDate,
-            EndDate = course.EndDate
-        };
+        return _mapper.Map<CourseDto>(course);
     }
 
     public async Task UpdateCourseAsync(Guid id, UpdateCourseDto updateCourseDto, bool trackChanges)
     {
-        var courseEntity = await uow.CourseRepository.GetCourseByIdAsync(id, trackChanges, includeModules: false);
+        var courseEntity = await _uow.CourseRepository
+            .GetCourseByIdAsync(id, trackChanges, includeModules: false);
 
         if (courseEntity is null)
-            throw new KeyNotFoundException($"Course with id {id} was not found.");
+            throw new NotFoundException($"Course with id {id} was not found.");       
 
-        if (updateCourseDto.EndDate < updateCourseDto.StartDate)
-            throw new Exception("End date must be after start date.");
+        _mapper.Map(updateCourseDto, courseEntity);
 
-        mapper.Map(updateCourseDto, courseEntity);
-
-        await uow.CompleteAsync();
+        await _uow.CompleteAsync();
     }
     public async Task DeleteCourseAsync(Guid id, bool trackChanges)
     {
-        var courseEntity = await uow.CourseRepository.GetCourseByIdAsync(id, trackChanges);
+        var courseEntity = await _uow.CourseRepository.GetCourseByIdAsync(id, trackChanges);
 
         if (courseEntity is null)
-            throw new Exception($"Course with id {id} was not found.");
-
-        uow.CourseRepository.Delete(courseEntity);
-        await uow.CompleteAsync();
+        {
+            throw new NotFoundException($"Course with id {id} was not found.");
+        }
+        _uow.CourseRepository.Delete(courseEntity);
+        await _uow.CompleteAsync();
     }
 
-    public async Task<IEnumerable<ParticipantDto>> GetParticipantsAsync(Guid courseId)
+    public async Task<IEnumerable<UserDto>> GetParticipantsAsync(Guid courseId)
     {
-        var course = await uow.CourseRepository
+        var course = await _uow.CourseRepository
             .GetCourseWithStudentsAsync(courseId, trackChanges: false);
 
         if (course is null)
-            return Enumerable.Empty<ParticipantDto>();
+            return Enumerable.Empty<UserDto>();
 
-        return course.Students.Select(s => new ParticipantDto(
-            Guid.Parse(s.Id),
-            s.FirstName,
-            s.LastName,
-            s.Email!
-        ));
+        var students = course.Students; 
+
+        return _mapper.Map<IEnumerable<UserDto>>(students);
     }
 
     public async Task AddStudentToCourseAsync(Guid courseId, string studentId)
     {
-        var course = await uow.CourseRepository
+        var course = await _uow.CourseRepository
             .GetCourseByIdAsync(courseId, trackChanges: false);
 
         if (course == null)
@@ -176,9 +157,12 @@ public class CourseService : ICourseService
 
         return users
             .Where(u => u.CourseId == null)
-            .Select(u => mapper.Map<AvailableStudentDto>(u))
+            .Select(u => _mapper.Map<AvailableStudentDto>(u))
             .ToList();
     }
-
+    public async Task<IEnumerable<CourseDetailsDto>> GetAllCoursesAsync()
+    {
+        return await _uow.CourseRepository.GetCourseSummariesAsync();
+    }
 
 }

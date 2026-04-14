@@ -1,5 +1,5 @@
-﻿@page "/teacher/courses/edit/{Id:guid}"
-@using LMS.Shared.DTOs.CourseDtos
+﻿@page "/teacher/managecourses/edit/{Id:guid}"
+@using LMS.Shared.DTOs.Course
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.EntityFrameworkCore.Metadata.Internal
@@ -132,7 +132,7 @@ else
         try
         {
             await ApiService.PutAsync($"api/courses/{Id}", course);
-            Navigation.NavigateTo("/teacher/courses?updated=true");
+            Navigation.NavigateTo("/teacher/managecourses?updated=true");
             successMessage = "Course updated successfully.";
 
         }
@@ -148,6 +148,6 @@ else
 
     private void GoBack()
     {
-        Navigation.NavigateTo("/teacher/courses");
+        Navigation.NavigateTo("/teacher/managecourses");
     }
 }

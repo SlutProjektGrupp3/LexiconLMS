@@ -35,5 +35,9 @@ namespace LMS.Infractructure.Repositories
         {
             return await _context.ActivityTypes.FindAsync(typeId);
         }
+        public async Task<bool> ModuleExistsAsync(Guid moduleId)
+        {
+            return await _context.Modules.AnyAsync(m => m.Id == moduleId);
+        }
     }
 }

@@ -1,17 +1,140 @@
 ﻿@page "/student/dashboard"
 @attribute [Authorize(Roles = "Student")]
-@inject HttpClient Http
+@using System.Security.Claims
+@using LMS.Shared.DTOs.User
+@using LMS.Shared.DTOs.Course
+@using LMS.Shared.DTOs.Module
+@using LMS.Shared.DTOs.Activity
+@using LMS.Blazor.Client.Components.Icons
+@inject IApiService ApiService
+@inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Dashboard – Lexicon LMS</PageTitle>
 
-<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-    <div>
-        <h4 class="fw-bold mb-0">Dashboard - student</h4>
-        <p class="text-muted small mb-0">@DateTime.Today.ToString("dddd, dd MMMM yyyy")</p>
+
+@if (isLoading)
+{
+    <div class="row mx-1 my-3">
+        <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+            <LoadingSpinnerIcon Size="48" />
+        </div>
     </div>
-</div>
+}
+else
+{
+    if (User != null && User.Course?.Id != null)
+    {
+        <StudentWelcomeHero StudentName="@User?.FirstName" CourseName="@Course?.Name" ClearedModules="@GetClearedModules()" />
+
+        <div class="row mx-1 my-3">
+            @if (CurrentModule != null)
+            {
+                <div class="d-flex flex-column col-8">
+                    <StudentCurrentModuleSummaryCard CurrentModule="@CurrentModule" />
+                    <ActivitiesCard ActivityList="@Activities" />
+                </div>
+            }
+
+            <div class="d-flex flex-column col-4">
+                <AssignmentDueSoonCard NextDueActivity="@GetNextDueActivity()" />
+                <StudentOverviewCard Modules="@Course?.Modules" />
+            </div>
+        </div>
+    }
+    else if (User != null && User.Course == null)
+    {
+        <div class="card bg-body-tertiary mx-1 my-3  p-5">
+            <span class="text-muted small"> You are not enrolled in any course! please contact us.</span>
+        </div>
+    }
+}
+
 
 @code {
+    public UserDto? User { get; set; } 
+    public CourseDetailsDto? Course { get; set; }
+    public List<ActivityDto>? Activities { get; set; } = new List<ActivityDto>();
+    public ModuleDto? CurrentModule { get; set; }
 
+    public bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            await LoadStudentDashboardData();
+        }
+    }
+
+    private async Task LoadStudentDashboardData()
+    {
+        try
+        {
+            User = await ApiService.GetAsync<UserDto>("api/users/me");
+
+            if (User != null && User.Course?.Id != null)
+            {
+                Course = await ApiService.GetAsync<CourseDetailsDto>($"api/courses/{User.Course.Id}");
+                CurrentModule = Course?.Modules?.FirstOrDefault(m => m.StartDate <= DateTime.Now && m.EndDate >= DateTime.Now);
+
+                if (CurrentModule != null)
+                {
+                    await LoadActivities(CurrentModule.Id);
+                }
+
+                isLoading = false;
+            }
+            else
+            {
+                isLoading = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle exceptions, e.g. log error or show a message to the user
+            Console.Error.WriteLine($"Error loading dashboard data: {ex.Message}");
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadActivities(Guid moduleId)
+    {
+        if (moduleId != Guid.Empty)
+        {
+            try
+            {
+                var all = await ApiService.GetAsync<List<ActivityDto>>($"api/activities/modules/{moduleId}");
+                // Only keep activities with an end date in the future
+                Activities = all?.Where(a => a.EndDate > DateTime.Now)
+                               .OrderBy(a => a.EndDate)
+                               .ToList();
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions, e.g. log error or show a message to the user
+                Console.Error.WriteLine($"Error loading activities: {ex.Message}");
+            }
+        }
+    }
+
+    private ActivityDto? GetNextDueActivity()
+    {
+        var now = DateTime.Now;
+        return Activities?
+            .Where(a => a.EndDate > now)
+            .OrderBy(a => a.EndDate)
+            .FirstOrDefault();
+    }
+
+    private int GetClearedModules()
+    {
+        var now = DateTime.Now;
+        return Course?.Modules.Where(m => m.EndDate < now).Count() ?? 0;
+    }
 }
+
+
 

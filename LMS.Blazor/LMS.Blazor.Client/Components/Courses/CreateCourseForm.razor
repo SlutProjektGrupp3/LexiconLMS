@@ -1,5 +1,5 @@
 ﻿@using System.ComponentModel.DataAnnotations
-@using LMS.Shared.DTOs
+@using LMS.Shared.DTOs.Course
 @inject IApiService ApiService
 
 <h3 class="mb-4">Add new course</h3>
@@ -23,7 +23,7 @@
 
     <div class="mb-3">
         <label class="form-label" for="course-description">Description</label>
-        <InputTextArea id="course-description" placeholder="Course description (optional)" class="form-control" rows="4" @bind-Value="model.Description" />
+        <InputTextArea id="course-description" placeholder="Course description" class="form-control" rows="4" @bind-Value="model.Description" />
     </div>
 
     <div class="row">

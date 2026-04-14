@@ -1,9 +1,10 @@
-using Microsoft.AspNetCore.Components;
-using System.Threading;
-using System.Linq;
+using Domain.Models.Entities;
+using LMS.Blazor.Client.Services;
 using LMS.Shared.DTOs.Course;
 using LMS.Shared.DTOs.Module;
-using LMS.Blazor.Client.Services;
+using Microsoft.AspNetCore.Components;
+using System.Linq;
+using System.Threading;
 
 namespace LMS.Blazor.Client.Pages.Teacher
 {
@@ -19,6 +20,7 @@ namespace LMS.Blazor.Client.Pages.Teacher
         protected bool _showSuccessMessage;
         protected string? successMessage;
         protected int TotalStudents { get; set; }
+        protected int TotalActiveCourses { get; set; }
 
         protected List<CourseDetailsDto> Courses { get; set; } = new();
         protected List<ModuleDto> modulesList { get; set; } = new();
@@ -116,7 +118,7 @@ namespace LMS.Blazor.Client.Pages.Teacher
                     ModulesCount = i.ModulesCount,
                     Active = i.Active
                 }).ToList() ?? new();
-                totalCount = dto?.Total ?? 0;
+                totalCount = dto?.TotalActiveCourses ?? 0;
             }
             catch (Exception ex)
             {
@@ -152,12 +154,6 @@ namespace LMS.Blazor.Client.Pages.Teacher
         protected void NavigateToCourses()
         {
             Navigation.NavigateTo($"/teacher/managecourses");
-        }
-
-        protected int GetActiveCoursesNumber(IEnumerable<CourseDetailsDto>? courses = null)
-        {
-            var list = courses ?? Courses;
-            return list?.Count(c => c.Active ?? false) ?? 0;
         }
     }
 }

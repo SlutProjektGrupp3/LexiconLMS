@@ -70,6 +70,7 @@ public class UsersController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Roles = "Teacher")]
     [HttpDelete("{id}")]
     [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> DeleteUser(string id)
@@ -97,6 +98,7 @@ public class UsersController : ControllerBase
     }
     
     [HttpGet("teachers")]
+    [Authorize(Roles = "Teacher,Student")]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetTeachers()
     {
         var teachers = await _serviceManager.UserService.GetTeachersAsync();

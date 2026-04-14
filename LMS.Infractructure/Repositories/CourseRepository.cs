@@ -60,7 +60,10 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
                 StartDate = c.StartDate,
                 EndDate = c.EndDate,
                 ParticipantsCount = c.Students.Count(),
-                ModulesCount = c.Modules.Count()
+                ModulesCount = c.Modules.Count(),
+
+                Active = DateTime.UtcNow >= c.StartDate &&
+                     DateTime.UtcNow <= c.EndDate
             })
             .ToListAsync();
     }
@@ -106,5 +109,22 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
                          DateTime.UtcNow <= c.EndDate
             })
             .FirstOrDefaultAsync();
+    }
+    public IQueryable<CourseDetailsDto> GetCourseSummariesQuery()
+    {
+        return FindAll(false)
+        .Select(c => new CourseDetailsDto
+        {
+            Id = c.Id,
+            Name = c.Name,
+            Description = c.Description,
+            StartDate = c.StartDate,
+            EndDate = c.EndDate,
+            ParticipantsCount = c.Students.Count(),
+            ModulesCount = c.Modules.Count(),
+
+            Active = DateTime.UtcNow >= c.StartDate &&
+                     DateTime.UtcNow <= c.EndDate
+        });
     }
 }

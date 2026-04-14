@@ -9,6 +9,13 @@
         <DataAnnotationsValidator />
         <ValidationSummary />
 
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            <div class="alert alert-danger">
+                @errorMessage
+            </div>
+        }
+
         <div class="mb-2">
             <label class="form-label">Name</label>
             <InputText class="form-control" @bind-Value="Model.Name" />
@@ -48,8 +55,41 @@
     [Parameter]
     public EventCallback OnSubmit { get; set; }
 
+    [Parameter]
+    public DateTime CourseStartDate { get; set; }
+
+    [Parameter]
+    public DateTime CourseEndDate { get; set; }
+
+    private string? errorMessage;
+
     private async Task HandleSubmit()
     {
+        errorMessage = null;
+
+        errorMessage = null;
+
+        // 1. Start in past
+        if (Model.StartDate < DateTime.Today)
+        {
+            errorMessage = "Start date cannot be in the past.";
+            return;
+        }
+
+        // 2. End before start
+        if (Model.EndDate <= Model.StartDate)
+        {
+            errorMessage = "End date must be after start date.";
+            return;
+        }
+
+        // 3. Module must be inside course dates (IMPORTANT FIX)
+        if (Model.StartDate < CourseStartDate || Model.EndDate > CourseEndDate)
+        {
+            errorMessage = "Module must be within course date range.";
+            return;
+        }
+
         await OnSubmit.InvokeAsync();
     }
 }

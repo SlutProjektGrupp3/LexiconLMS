@@ -93,7 +93,8 @@ else if (_course != null)
                         <Authorized>
                             <div class="card shadow-sm border-0 rounded-4 mb-4">
                                 <div class="card-body">
-                                    <CreateModuleForm Model="_moduleToCreate" OnSubmit="HandleCreateModule" />
+                                    <CreateModuleForm Model="_moduleToCreate" CourseStartDate="_course.StartDate"
+                                                      CourseEndDate="_course.EndDate" OnSubmit="HandleCreateModule" />
                                 </div>
                             </div>
                         </Authorized>

@@ -12,8 +12,6 @@
 @attribute [Authorize(Roles = "Student")]
 @inject IApiService ApiService
 
-<h3 class="mb-4">MyCourse</h3>
-
 @if (isLoading)
 {
     <div class="alert alert-info">Loading your course...</div>
@@ -25,7 +23,7 @@ else if (!string.IsNullOrWhiteSpace(errorMessage))
 else if (_course != null)
 {
    <div class="course-details-page">
-    <div class="container px-4">
+    <div class="px-4">
 
         <!-- Hero / Course header -->
             <CourseDetailsHero Course="_course"

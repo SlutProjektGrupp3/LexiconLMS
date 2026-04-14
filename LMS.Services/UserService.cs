@@ -55,10 +55,13 @@ public class UserService : IUserService
 
     public async Task<UserDto?> GetUserByIdAsync(string id)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(id);
+        var user = await _userManager.FindByIdAsync(id);
+
         if (user == null)
             return null;
         var role = await _userManager.GetRolesAsync(user);
+        var course = await _unitOfWork.CourseRepository.GetCourseByUserIdAsync(user.Id);
+
         return new UserDto
         (
             Id: user.Id,
@@ -66,8 +69,9 @@ public class UserService : IUserService
             LastName: user.LastName,
             Email: user.Email!,
             RoleName: role.FirstOrDefault(),
-            Course: user.Course == null ? null : new CourseDto(user.Course.Id, user.Course.Name, user.Course.Description, user.Course.StartDate, user.Course.EndDate)
+            Course: course != null ? new CourseDto(course.Id, course.Name, course.Description, course.StartDate, course.EndDate) : null
         );
+
     }
 
     public async Task<ResultDto<UserDto>> CreateUserAsync(CreateUserDto userCreateDto)

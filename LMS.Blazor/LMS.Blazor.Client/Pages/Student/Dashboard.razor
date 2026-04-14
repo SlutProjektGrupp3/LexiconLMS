@@ -41,7 +41,7 @@ else
             </div>
         </div>
     }
-    else
+    else if (User != null && User.Course == null)
     {
         <div class="card bg-body-tertiary mx-1 my-3  p-5">
             <span class="text-muted small"> You are not enrolled in any course! please contact us.</span>
@@ -85,6 +85,10 @@ else
                     await LoadActivities(CurrentModule.Id);
                 }
 
+                isLoading = false;
+            }
+            else
+            {
                 isLoading = false;
             }
         }

@@ -4,10 +4,10 @@
      viewBox="0 0 24 24" 
      fill="none" 
      stroke="currentColor" 
-     stroke-width="2" 
+     stroke-width="@StrokeWidth" 
      stroke-linecap="round" 
      stroke-linejoin="round" 
-     class="lucide lucide-mail-icon lucide-mail">
+     class="@CssClass">
     
      <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" />
 
@@ -15,5 +15,10 @@
 </svg>
 
 @code {
-    [Parameter] public int Size { get; set; } = 24;
+    [Parameter] 
+    public int Size { get; set; } = 24;
+    [Parameter] 
+    public int StrokeWidth { get; set; } = 2;
+    [Parameter]
+    public string CssClass { get; set; } = string.Empty;
 }

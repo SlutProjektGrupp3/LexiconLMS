@@ -67,8 +67,6 @@
     {
         errorMessage = null;
 
-        errorMessage = null;
-
         // 1. Start in past
         if (Model.StartDate < DateTime.Today)
         {
@@ -83,7 +81,7 @@
             return;
         }
 
-        // 3. Module must be inside course dates (IMPORTANT FIX)
+        // 3. Module must be inside course dates
         if (Model.StartDate < CourseStartDate || Model.EndDate > CourseEndDate)
         {
             errorMessage = "Module must be within course date range.";

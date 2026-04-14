@@ -6,6 +6,13 @@
     <EditForm Model="Model" OnValidSubmit="HandleSubmit">
         <DataAnnotationsValidator />
 
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            <div class="alert alert-danger">
+                @errorMessage
+            </div>
+        }
+
         <div class="mb-2">
             <label class="form-label">Name</label>
             <InputText class="form-control" @bind-Value="Model.Name" />
@@ -37,10 +44,12 @@
             <div class="col">
                 <label class="form-label">Start Date</label>
                 <InputDate class="form-control" @bind-Value="Model.StartDate" />
+                <ValidationMessage For="@(() => Model.StartDate)" />
             </div>
             <div class="col">
                 <label class="form-label">End Date</label>
                 <InputDate class="form-control" @bind-Value="Model.EndDate" />
+                <ValidationMessage For="@(() => Model.EndDate)" />
             </div>
         </div>
 
@@ -68,6 +77,14 @@
 
     private List<ActivityTypeDto> availableTypes = new();
 
+    private string? errorMessage;
+
+    [Parameter]
+    public DateTime ModuleStartDate { get; set; }
+
+    [Parameter]
+    public DateTime ModuleEndDate { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         availableTypes = await ApiService.GetAsync<List<ActivityTypeDto>>("api/activities/types");
@@ -75,6 +92,29 @@
 
     private async Task HandleSubmit()
     {
+        errorMessage = null;
+
+        // 1. Start in past
+        if (Model.StartDate < DateTime.Today)
+        {
+            errorMessage = "Start date cannot be in the past.";
+            return;
+        }
+
+        // 2. End before start
+        if (Model.EndDate <= Model.StartDate)
+        {
+            errorMessage = "End date must be after start date.";
+            return;
+        }
+
+        // 3. Activity must be inside module dates
+        if (Model.StartDate < ModuleStartDate || Model.EndDate > ModuleEndDate)
+        {
+            errorMessage = "Activity must be within module dates.";
+            return;
+        }
+
         await OnSubmit.InvokeAsync(ActivityId);
     }
 

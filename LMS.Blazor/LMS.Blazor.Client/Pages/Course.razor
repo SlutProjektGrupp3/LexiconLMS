@@ -241,6 +241,8 @@ else if (_course != null)
     private Dictionary<Guid, bool> _showEditModuleForm = new();
     private Dictionary<Guid, UpdateModuleDto> _modulesToEdit = new();
 
+
+
     private IEnumerable<ModuleDto> SortedModules =>
     _course?.Modules?
         .OrderBy(m => GetModuleSortOrder(m))
@@ -400,13 +402,18 @@ else if (_course != null)
         
         _editingActivityId = null;
 
+        var module = _course?.Modules.FirstOrDefault(m => m.Id == moduleId);
+
         if (_showCreateForm[moduleId] && !_newActivities.ContainsKey(moduleId))
         {
             _newActivities[moduleId] = new CreateActivityDto
             {
                 ModuleId = moduleId,
                 StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(1)
+                EndDate = DateTime.Now.AddDays(1),
+
+                ModuleStartDate = module!.StartDate,
+                ModuleEndDate = module.EndDate
             };
         }
     }
@@ -623,14 +630,19 @@ else if (_course != null)
         _showCreateForm[moduleId] = false;
         
         _editingActivityId = activity.Id;
-        
+
+        var module = _course?.Modules.FirstOrDefault(m => m.Id == moduleId);
+
         _activityToUpdate = new UpdateActivityDto
         {
             Name = activity.Name,
             Description = activity.Description,
             StartDate = activity.StartDate,
             EndDate = activity.EndDate,
-            TypeId = activity.TypeId
+            TypeId = activity.TypeId,
+
+            ModuleStartDate = module!.StartDate,
+            ModuleEndDate = module.EndDate
         };
     }
 

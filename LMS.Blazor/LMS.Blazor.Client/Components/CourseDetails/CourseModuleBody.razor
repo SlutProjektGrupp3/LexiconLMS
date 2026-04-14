@@ -38,6 +38,8 @@
             <div class="mb-3">
                 <AddActivityForm ModuleId="@Module.Id"
                                  Model="NewActivities[Module.Id]"
+                                 ModuleStartDate="Module.StartDate"
+                                 ModuleEndDate="Module.EndDate"
                                  OnSubmit="OnCreateActivity" />
             </div>
         }

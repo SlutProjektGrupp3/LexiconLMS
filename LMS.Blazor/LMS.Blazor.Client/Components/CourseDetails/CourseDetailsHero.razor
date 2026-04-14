@@ -1,0 +1,72 @@
+﻿@using LMS.Shared.DTOs.Course
+@using LMS.Blazor.Client.Components
+@using LMS.Blazor.Client.Components.Icons
+
+<div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card-body p-4 p-lg-5">
+
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-start gap-3 mb-4">
+            <div>
+                <h1 class="h1 fw-bold mb-2">@Course.Name</h1>
+
+                <p class="text-muted mb-3 course-hero-description">
+                    @Course.Description
+                </p>
+
+                <div class="d-flex flex-wrap gap-4 text-muted small">
+
+                    <div class="d-flex align-items-center gap-2 course-meta">
+                        <CalendarIcon Size="18" />
+                        <span>Start: @Course.StartDate.ToString("yyyy-MM-dd")</span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2 course-meta">
+                        <UsersIcon Size="18" />
+                        <span>@ParticipantCount participants</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <AuthorizeView Roles="Teacher">
+                <Authorized>
+                    <ShowFormButton ShowForm="ShowCreateModuleForm"
+                                    OnClick="OnToggleCreateModuleForm"
+                                    HiddenText="New Module" />
+                </Authorized>
+            </AuthorizeView>
+        </div>
+
+        <div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-semibold">Course progress</span>
+                <span class="text-muted">@CourseProgressPercentage%</span>
+            </div>
+
+            <div class="progress" style="height: 10px;">
+                <div class="progress-bar"
+                     role="progressbar"
+                     style="width: @(CourseProgressPercentage)%;">
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public CourseDetailsDto Course { get; set; } = default!;
+
+    [Parameter]
+    public int ParticipantCount { get; set; }
+
+    [Parameter]
+    public int CourseProgressPercentage { get; set; }
+
+    [Parameter]
+    public bool ShowCreateModuleForm { get; set; }
+
+    [Parameter]
+    public EventCallback OnToggleCreateModuleForm { get; set; }
+}

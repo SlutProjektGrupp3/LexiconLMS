@@ -73,7 +73,16 @@ public class ActivityService : IActivityService
 
         await _unitOfWork.CompleteAsync();
 
-        var dtoResult = _mapper.Map<ActivityDto>(activity);
+        var dtoResult = new ActivityDto(
+                activity.Id,
+                activity.Name,
+                activity.Type?.Name ?? "Unknown",
+                activity.Description,
+                activity.StartDate,
+                activity.EndDate,
+                activity.TypeId,
+                activity.ModuleId
+            );
 
         return dtoResult;
     }

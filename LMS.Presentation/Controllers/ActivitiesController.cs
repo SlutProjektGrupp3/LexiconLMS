@@ -8,7 +8,7 @@ namespace LMS.Presentation.Controllers;
 
 [Route("api/activities")]
 [ApiController]
-[Authorize] 
+[Authorize]
 public class ActivitiesController : ControllerBase
 {
     private readonly IServiceManager _serviceManager;

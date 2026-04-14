@@ -1,0 +1,52 @@
+﻿@page "/teacher/dashboard"
+@using LMS.Blazor.Client.Components
+@using LMS.Blazor.Client.Components.Courses
+@using LMS.Blazor.Client.Components.Icons
+@using LMS.Blazor.Client.Components.Shared
+@using LMS.Shared.DTOs.Course
+@using LMS.Shared.DTOs.Module
+@attribute [Authorize(Roles = "Teacher")]
+
+
+<PageTitle>Dashboard – Lexicon LMS</PageTitle>
+
+<Statistics ActiveCourses="@GetActiveCoursesNumber()" TotalStudents="@TotalStudents" AssignmentsToGrade=1 />
+
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <h4 class="fw-bold mb-0">Courses</h4>
+    <button class="btn btn-primary" @onclick="NavigateToCourses">
+        <CirclePlusIcon Size="16" CssClass="me-1" />
+        Create Course
+    </button>
+</div>
+
+<CourseSummarySearch 
+    SearchText="@searchText" 
+    SearchTextChanged="@(v => searchText = v)" 
+    ActiveFilter="@activeFilter" 
+    ActiveFilterChanged="@(v => activeFilter = v)" 
+    OnSearchInput="OnSearchDebounced" 
+    OnActiveChanged="OnActiveChanged" 
+    OnSearchClicked="@( () => LoadCourses(1) )" />
+
+<div class="row mt-4">
+    @if (isLoading)
+    {
+        <LoadingSpinnerIcon />
+    }
+    else if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <p class="text-danger">@errorMessage</p>
+    }
+    else
+    {
+        @foreach (var course in Courses)
+        {
+            <CourseSummaryCard Course="course" />
+        }
+    }
+</div>
+
+<CourseSummaryPagination CurrentPage="@currentPage" PageSize="@pageSize" TotalCount="@totalCount" OnPageChanged="@(p => LoadCourses(p))" />
+<TeacherToDo />
+

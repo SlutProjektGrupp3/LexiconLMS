@@ -1,0 +1,33 @@
+﻿.module-accordion-button::after {
+    display: none;
+}
+
+.module-title {
+    font-size: 1.1rem;
+    font-weight: 900; /* ändra från 950, se nedan */
+    color: #0f172a;
+    letter-spacing: -0.02em;
+}
+
+.module-header-divider {
+    width: 1px;
+    height: 20px;
+    background-color: #dee2e6;
+}
+
+.module-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: #6c757d;
+    line-height: 1;
+}
+
+.module-action-icon svg {
+    transition: transform 0.15s ease;
+}
+
+.module-action-icon:hover svg {
+    transform: scale(1.1);
+}

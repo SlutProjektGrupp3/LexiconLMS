@@ -23,7 +23,7 @@ public class CoursesController : ControllerBase
 
     // GET: api/courses
     [HttpGet]
-    [Authorize(Roles = "Teacher")]    
+    [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> GetCourses()
     {
         var courses = await _serviceManager.CourseService.GetAllCoursesAsync();
@@ -36,16 +36,7 @@ public class CoursesController : ControllerBase
     public async Task<IActionResult> GetCourseById(Guid id)
     {
         var courseDetails = await _serviceManager.CourseService.GetCourseByIdAsync(id);
-        if (courseDetails is null)
-        {
-                return NotFound(new ProblemDetails
-                {
-                    Title = "Course not found",
-                    Status = StatusCodes.Status404NotFound,
-                    Detail = $"Course with id {id} was not found."
-                });
-        }
-
+        
         return Ok(courseDetails);
     }
 
@@ -56,26 +47,7 @@ public class CoursesController : ControllerBase
     {
         var createdCourse = await _serviceManager.CourseService.CreateCourseAsync(dto);
         
-        if (createdCourse.Succeeded)
-            return CreatedAtAction(nameof(GetCourseById),new { id = createdCourse.Data!.Id },createdCourse);
-        
-        var error = createdCourse.Errors.First();
-
-        return error.Code switch
-        {
-            "CourseNotFound" => NotFound(new ProblemDetails
-            {
-                Title = "Course not found",
-                Status = StatusCodes.Status404NotFound,
-                Detail = error.Description
-            }),
-            _ => BadRequest(new ProblemDetails
-            {
-                Title = "Bad Request",
-                Status = StatusCodes.Status400BadRequest,
-                Detail = error.Description
-            })
-        };
+        return CreatedAtAction(nameof(GetCourseById),new { id = createdCourse.Id },createdCourse);                
     }
 
     // PUT: api/courses/{id} 
@@ -83,30 +55,9 @@ public class CoursesController : ControllerBase
     [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> UpdateCourse(Guid id, [FromBody] UpdateCourseDto updateCourseDto)
     {
-        if (updateCourseDto is null)
-        {
-            return BadRequest(new ProblemDetails
-            {
-                Title = "Invalid request",
-                Status = StatusCodes.Status400BadRequest,
-                Detail = "UpdateCourseDto is null"
-            });
-        }
-
-        try
-        {
-            await _serviceManager.CourseService.UpdateCourseAsync(id, updateCourseDto, trackChanges: true);
-            return NoContent();
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound(new ProblemDetails
-            {
-                Title = "Course not found",
-                Status = StatusCodes.Status404NotFound,
-                Detail = $"Course with id {id} was not found."
-            });
-        }
+        await _serviceManager.CourseService.UpdateCourseAsync(id, updateCourseDto, trackChanges: true);
+        
+        return NoContent();        
     }
 
     // DELETE: api/courses/{id}
@@ -114,46 +65,9 @@ public class CoursesController : ControllerBase
     [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> DeleteCourse(Guid id)
     {
-        try
-        {
-            var result = await _serviceManager.CourseService.DeleteCourseAsync(id, trackChanges: true);
-            
-            if (!result.Succeeded)
-            {
-                var error = result.Errors.FirstOrDefault();
-                if (error == null)
-                {
-                    return StatusCode(500, "Unknown error");
-                }
-                if (error.Code == "CourseNotFound")
-                {
-                    return NotFound(new ProblemDetails
-                    {
-                        Title = "Course not found",
-                        Status = StatusCodes.Status404NotFound,
-                        Detail = error.Description
-                    });
-                }
-
-                return StatusCode(500, new ProblemDetails
-                {
-                    Title = "Internal Server Error",
-                    Status = StatusCodes.Status500InternalServerError,
-                    Detail = error.Description
-                });
-            }
-
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ProblemDetails
-            {
-                Title = "Internal Server Error",
-                Status = StatusCodes.Status500InternalServerError,
-                Detail = ex.Message
-            });
-        }
+        await _serviceManager.CourseService.DeleteCourseAsync(id, trackChanges: true);
+        
+        return NoContent();        
     }
 
     [Authorize(Roles = "Teacher")]
@@ -170,6 +84,23 @@ public class CoursesController : ControllerBase
     {
         var students = await _serviceManager.CourseService.GetAvailableStudentsAsync();
         return Ok(students);
+    }
+
+    // GET: api/courses/summary
+    [HttpGet("summary")]
+    [Authorize(Roles = "Teacher")]
+    public async Task<IActionResult> GetCourseSummaries([FromQuery] string? search, [FromQuery] bool? active, [FromQuery] int page = 1, [FromQuery] int pageSize = 12)
+    {
+        var (items, total) = await _serviceManager.CourseService.GetCourseSummariesAsync(search, active, page, pageSize);
+
+        // Return CourseDetailsDto items directly in the paged response
+        var dto = new
+        {
+            Items = items,
+            Total = total
+        };
+
+        return Ok(dto);
     }
 
     // GET: api/courses/{courseId}/participants

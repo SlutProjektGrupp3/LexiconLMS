@@ -33,6 +33,11 @@ namespace LMS.Infractructure.Repositories
             return await FindByCondition(m => m.Id == moduleId, trackChanges)
                 .SingleOrDefaultAsync();
         }
+
+        public IQueryable<Module> GetModuleQuery(bool trackChanges = false)
+        {
+            return FindAll(trackChanges);
+        }
     }
 }
 

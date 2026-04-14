@@ -13,10 +13,10 @@
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
-
+<nav class="nav flex-column">
     <AuthorizeView Roles="Teacher">
         <Authorized>
-        <nav class="nav flex-column">
+        
             <div class="d-flex flex-column justify-content-between size">
                 <div>
                     <div class="nav-item">
@@ -47,13 +47,11 @@
                     </button>
                 </form>
             </div>
-            </nav>
         </Authorized>
     </AuthorizeView>
 
     <AuthorizeView Roles="Student">
         <Authorized>
-             <nav class="nav flex-column">
             <div class="d-flex flex-column justify-content-between size">
                <div>
                     <div class="nav-item">
@@ -77,9 +75,9 @@
                     </button>
                 </form>
             </div>
-            </nav>
         </Authorized>
     </AuthorizeView>
+</nav>
 
 @code {
     private string? currentUrl;

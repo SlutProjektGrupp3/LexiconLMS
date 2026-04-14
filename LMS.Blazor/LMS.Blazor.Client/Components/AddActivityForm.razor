@@ -5,10 +5,12 @@
 
     <EditForm Model="Model" OnValidSubmit="HandleSubmit">
         <DataAnnotationsValidator />
+        <ValidationSummary />
 
         <div class="mb-2">
             <label class="form-label">Name</label>
             <InputText class="form-control" @bind-Value="Model.Name" />
+            <ValidationMessage For="@(() => Model.Name)" />
         </div>
 
         <div class="mb-3">
@@ -30,16 +32,19 @@
         <div class="mb-2">
             <label class="form-label">Description</label>
             <InputText class="form-control" @bind-Value="Model.Description" />
+            <ValidationMessage For="@(() => Model.Description)" />
         </div>
 
         <div class="row mb-2">
             <div class="col">
                 <label class="form-label">Start Date</label>
                 <InputDate class="form-control" @bind-Value="Model.StartDate" />
+                <ValidationMessage For="@(() => Model.StartDate)" />
             </div>
             <div class="col">
                 <label class="form-label">End Date</label>
                 <InputDate class="form-control" @bind-Value="Model.EndDate" />
+                <ValidationMessage For="@(() => Model.EndDate)" />
             </div>
         </div>
 

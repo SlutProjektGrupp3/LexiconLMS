@@ -13,9 +13,10 @@
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
-<nav class="nav flex-column">
+
     <AuthorizeView Roles="Teacher">
         <Authorized>
+        <nav class="nav flex-column">
             <div class="d-flex flex-column justify-content-between size">
                 <div>
                     <div class="nav-item">
@@ -37,7 +38,7 @@
                     </div>
                 </div>
 
-                <form action="Account/Logout" method="post" >
+                <form action="Account/Logout" method="post">
                     <AntiforgeryToken />
                     <input type="hidden" name="ReturnUrl" value="@currentUrl" />
                     <button type="submit" class="nav-link">
@@ -46,12 +47,14 @@
                     </button>
                 </form>
             </div>
+            </nav>
         </Authorized>
     </AuthorizeView>
 
     <AuthorizeView Roles="Student">
         <Authorized>
-            <div class="d-flex flex-column justify-content-between h-100">
+             <nav class="nav flex-column">
+            <div class="d-flex flex-column justify-content-between size">
                <div>
                     <div class="nav-item">
                         <NavLink class="nav-link" href="student/dashboard">
@@ -74,9 +77,9 @@
                     </button>
                 </form>
             </div>
+            </nav>
         </Authorized>
     </AuthorizeView>
-</nav>
 
 @code {
     private string? currentUrl;

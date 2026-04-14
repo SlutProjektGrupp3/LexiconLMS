@@ -1,12 +1,14 @@
 .nav {
-    height: 95vh;
+    height: calc(100vh - 60px);
 }
 
 .size {
+    height: 100%;
     display: flex;
     flex-grow: 1;
     flex-direction: column;
 }
+
 .navbar-toggler {
     appearance: none;
     cursor: pointer;

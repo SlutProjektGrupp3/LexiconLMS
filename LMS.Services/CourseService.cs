@@ -167,5 +167,5 @@ public class CourseService : ICourseService
     {
         return await _uow.CourseRepository.GetCourseSummariesAsync();
     }
-    
+
 }

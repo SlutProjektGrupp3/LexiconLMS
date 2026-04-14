@@ -79,28 +79,36 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
                 StartDate = c.StartDate,
                 EndDate = c.EndDate,
 
-                Modules = c.Modules.Select(m =>
-                new ModuleDto(
-                    m.Id,
-                    m.Name,
-                    m.Description,
-                    m.StartDate,
-                    m.EndDate,
-                    m.CourseId,
-                    new List<LinkDto>()
-                    )
-                ).ToList(),
+                Modules = c.Modules
+                    .Select(m => new ModuleDto(
+                        m.Id,
+                        m.Name,
+                        m.Description,
+                        m.StartDate,
+                        m.EndDate,
+                        m.CourseId,
+                        new List<LinkDto>()
+                    ))
+                    .ToList(),
 
-                Participants = c.Students.Select(u =>
-                new UserDto(
-                    u.Id,
-                    u.FirstName,
-                    u.LastName,
-                    u.Email,
-                    "Student",
-                     u.CourseId
-                    )
-                ).ToList(),
+                Participants = c.Students
+                    .Select(u => new UserDto(
+                        u.Id,
+                        u.FirstName,
+                        u.LastName,
+                        u.Email,
+                        "Student",
+                        u.Course == null
+                            ? null
+                            : new CourseDto(
+                                u.Course.Id,
+                                u.Course.Name,
+                                u.Course.Description,
+                                u.Course.StartDate,
+                                u.Course.EndDate
+                            )
+                    ))
+                    .ToList(),
 
                 ParticipantsCount = c.Students.Count(),
                 ModulesCount = c.Modules.Count(),
@@ -108,6 +116,12 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
                 Active = DateTime.UtcNow >= c.StartDate &&
                          DateTime.UtcNow <= c.EndDate
             })
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<Course?> GetCourseByUserIdAsync(string userId, bool trackChanges = false)
+    {
+        return await FindByCondition(c => c.Students.Any(s => s.Id == userId), trackChanges)
             .FirstOrDefaultAsync();
     }
     public IQueryable<CourseDetailsDto> GetCourseSummariesQuery()
@@ -126,5 +140,14 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
             Active = DateTime.UtcNow >= c.StartDate &&
                      DateTime.UtcNow <= c.EndDate
         });
+    }
+
+    public async Task<IEnumerable<Course?>> GetActiveCoursesAsync(bool trackChanges = false)
+    {
+        //return active and upcoming courses
+        return await FindAll(trackChanges)
+            .Where(c => c.EndDate >= DateTime.UtcNow)
+            .AsNoTracking()
+            .ToListAsync();
     }
 }

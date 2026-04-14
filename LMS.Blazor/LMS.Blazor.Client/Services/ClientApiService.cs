@@ -60,6 +60,20 @@ public class ClientApiService : IApiService
 
         response.EnsureSuccessStatusCode();
     }
+    public async Task<TResponse?> PutAsync<TRequest, TResponse>(string endpoint, TRequest data, CancellationToken ct = default)
+    {
+        var json = JsonSerializer.Serialize(data, _jsonOptions);
+        System.Diagnostics.Debug.WriteLine($"DEBUG: PutAsync: {json}");
+
+        var response = await _httpClient.PutAsJsonAsync($"api/proxy/{endpoint}", data, _jsonOptions, ct);
+
+        if (HandleAuth(response))
+            return default;
+
+        response.EnsureSuccessStatusCode();
+
+        return await JsonSerializer.DeserializeAsync<TResponse>(await response.Content.ReadAsStreamAsync(ct), _jsonOptions, ct);
+    }
     public async Task DeleteAsync(string endpoint, CancellationToken ct = default)
     {
         var response = await _httpClient.DeleteAsync($"api/proxy/{endpoint}", ct);

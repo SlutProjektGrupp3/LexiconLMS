@@ -1,0 +1,110 @@
+﻿@using LMS.Blazor.Client.Components.Icons
+@using LMS.Shared.DTOs.User
+
+<div class="row g-4">
+    @foreach (var user in Users)
+    {
+        <div class="col-md-6 col-lg-4">
+            <div class="bg-white rounded-4 shadow-sm border border-light p-4 d-flex flex-column h-100 user-card">
+
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-start mb-3">
+
+                    <!-- Avatar + Name -->
+                    <div class="d-flex align-items-center gap-3">
+
+                        <!-- Avatar -->
+                        <div class="avatar-circle"
+                             style="background-color:@GetAvatarColor(user)">
+                            @GetInitials(user)
+                        </div>
+
+                        <div>
+                            <h6 class="fw-semibold mb-1 text-dark">
+                                @user.FirstName @user.LastName
+                            </h6>
+
+                            <span class="badge rounded-pill @(user.RoleName == "Teacher" ? "bg-info-subtle text-info-emphasis" : "bg-success-subtle text-success")">
+                                @(user.RoleName == "Teacher" ? "Teacher" : "Student")
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-flex gap-1">
+                        <button class="edit-btn rounded"
+                                title="Edit"
+                                @onclick="() => OnEdit.InvokeAsync(user.Id)">
+                            <EditIcon Size="16" />
+                        </button>
+
+                        <button class="delete-btn rounded"
+                                title="Delete"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteUserModal"
+                                @onclick="() => OnDelete.InvokeAsync(user.Id)">
+                            <TrashIcon Size="16" />
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="mt-auto pt-3 border-top small text-muted">
+
+                    <!-- Email -->
+                    <div class="d-flex align-items-center mb-1">
+                        <span class="me-2"><MailIcon Size="16"></MailIcon></span>
+                        <a href="mailto:@user.Email"
+                               class="text-decoration-none text-muted text-truncate hover-link">
+                            @user.Email
+                        </a>
+                    </div>
+
+                    <!-- Course (only for students) -->
+                    @if (user.RoleName == "Student" && user.Course != null)
+                    {
+                        <div class="d-flex align-items-center">
+                            <span class="me-2"><GraduationCapIcon Size="16"></GraduationCapIcon></span>
+                            <span class="text-truncate">
+                                @user.Course.Name
+                            </span>
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public IEnumerable<UserDto> Users { get; set; } = [];
+    [Parameter] public EventCallback<string> OnEdit { get; set; }
+    [Parameter] public EventCallback<string> OnDelete { get; set; }
+
+    private string GetInitials(UserDto user)
+    {
+        return $"{user.FirstName.FirstOrDefault()}{user.LastName.FirstOrDefault()}".ToUpper();
+    }
+
+    private string GetAvatarColor(UserDto user)
+    {
+        // deterministic "random" color based on user id or email
+        var colors = new[]
+        {
+            "#6366f1", // indigo
+            "#0ea5e9", // sky
+            "#10b981", // emerald
+            "#f59e0b", // amber
+            "#ef4444", // red
+            "#8b5cf6", // purple
+            "#ec4899"  // pink
+        };
+
+        var hash = user.Email.GetHashCode();
+        var index = Math.Abs(hash) % colors.Length;
+
+        return colors[index];
+    }
+}

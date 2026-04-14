@@ -7,8 +7,9 @@ namespace Service.Contracts;
 public interface ICourseService
 {
     Task<IEnumerable<CourseDetailsDto>> GetAllCoursesAsync();
+    Task<IEnumerable<CourseDto?>> GetActiveCoursesAsync();
     Task<CourseDto> CreateCourseAsync(CreateCourseDto dto);
-    Task<CourseDetailsDto> GetCourseByIdAsync(Guid id);
+    Task<CourseDetailsDto?> GetCourseByIdAsync(Guid id);
     Task UpdateCourseAsync(Guid id, UpdateCourseDto updateCourseDto, bool trackChanges);
     Task DeleteCourseAsync(Guid id, bool trackChanges);
     Task AddStudentToCourseAsync(Guid courseId, string studentId);

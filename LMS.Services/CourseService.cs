@@ -58,7 +58,12 @@ public class CourseService : ICourseService
         return _mapper.Map<IEnumerable<CourseDetailsDto>>(courses);
     }
 
-    public async Task<CourseDetailsDto> GetCourseByIdAsync(Guid id)
+    public async Task<IEnumerable<CourseDto?>> GetActiveCoursesAsync()
+    {
+        var courses = await _uow.CourseRepository.GetActiveCoursesAsync();
+        return _mapper.Map<IEnumerable<CourseDto?>>(courses);
+    }
+    public async Task<CourseDetailsDto?> GetCourseByIdAsync(Guid id)
     {
         var course = await _uow.CourseRepository.GetCourseByIdAsync(id, includeModules: true);
         if (course == null)
@@ -158,5 +163,5 @@ public class CourseService : ICourseService
     {
         return await _uow.CourseRepository.GetCourseSummariesAsync();
     }
-    
+
 }

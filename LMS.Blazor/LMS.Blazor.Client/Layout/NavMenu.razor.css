@@ -88,6 +88,20 @@
     display: block;
 }
 
+.avatar-circle {
+    width: 50px;
+    height: 50px;
+    font-size: 0.85rem;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
 @media (min-width: 641px) {
     .navbar-toggler {
         display: none;

@@ -1,4 +1,7 @@
 ﻿@implements IDisposable
+@using System.Security.Claims
+@using LMS.Shared.DTOs.User
+@using LMS.Blazor.Client.Components
 @using LMS.Blazor.Client.Components.Icons
 @inject NavigationManager NavigationManager
 
@@ -15,7 +18,7 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
-        <AuthorizeView Roles="Teacher">
+        <AuthorizeView Roles="Teacher" Context="auth">
             <Authorized>
                 <div class="d-flex flex-column justify-content-between size">
                     <div >
@@ -38,19 +41,41 @@
                         </div>
                     </div>
 
-                    <form action="Account/Logout" method="post">
-                        <AntiforgeryToken />
-                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                        <button type="submit" class="nav-link">
-                            <LogOutIcon CssClass="text-danger mx-3" /> 
-                            <span class="text-light">Logout</span>
-                        </button>
-                    </form>
+                    <div>
+                        <!-- Avatar + Name -->
+                        <div class="d-flex align-items-center gap-3 px-3 mb-3">
+
+                            <!-- Avatar -->
+                            <div class="avatar-circle"
+                                 style="background-color:@GetAvatarColor(auth.User)">
+                                @GetInitials(auth.User)
+                            </div>
+
+                            <div>
+                                <h6 class="fw-semibold mb-1 text-light">
+                                    @userFirstName @userLastName
+                                </h6>
+
+                                <span class="badge rounded-pill @(GetUserRole(auth.User) == "Teacher" ? "bg-info-subtle text-info-emphasis" : "bg-success-subtle text-success")">
+                                    @(GetUserRole(auth.User) == "Teacher" ? "Teacher" : "Student")
+                                </span>
+                            </div>
+                        </div>
+
+                        <form action="Account/Logout" method="post">
+                            <AntiforgeryToken />
+                            <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                            <button type="submit" class="nav-link">
+                                <LogOutIcon CssClass="text-danger mx-3" /> 
+                                <span class="text-light">Logout</span>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </Authorized>
         </AuthorizeView>
 
-        <AuthorizeView Roles="Student">
+        <AuthorizeView Roles="Student" Context="auth">
             <Authorized>
                 <div class="d-flex flex-column justify-content-between size">
                    <div>
@@ -66,6 +91,27 @@
                         </div>
                    </div>
 
+                   <div>
+                    <!-- Avatar + Name -->
+                    <div class="d-flex align-items-center gap-3 px-3 mb-3">
+
+                        <!-- Avatar -->
+                        <div class="avatar-circle"
+                             style="background-color:@GetAvatarColor(auth.User)">
+                            @GetInitials(auth.User)
+                        </div>
+
+                        <div>
+                            <h6 class="fw-semibold mb-1 text-light">
+                                @userFirstName @userLastName
+                            </h6>
+
+                            <span class="badge rounded-pill @(GetUserRole(auth.User) == "Teacher" ? "bg-info-subtle text-info-emphasis" : "bg-success-subtle text-success")">
+                                @(GetUserRole(auth.User) == "Teacher" ? "Teacher" : "Student")
+                            </span>
+                        </div>
+                    </div>
+
                     <form action="Account/Logout" method="post">
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@currentUrl" />
@@ -74,6 +120,7 @@
                             <span class="text-light">Logout</span>
                         </button>
                     </form>
+                    </div>
                 </div>
             </Authorized>
         </AuthorizeView>
@@ -81,6 +128,10 @@
 </div>
 @code {
     private string? currentUrl;
+    private string? fullName;
+    private string? userFirstName;
+    private string? userLastName;
+    private string? userRoleName;
 
     protected override void OnInitialized()
     {
@@ -97,6 +148,41 @@
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+
+    private string GetInitials(ClaimsPrincipal user)
+    {
+        fullName = user.Identity?.Name;
+        userFirstName = fullName?.Split(' ').FirstOrDefault() ?? "";
+        userLastName = fullName?.Split(' ').Skip(1).FirstOrDefault() ?? "";
+
+        return $"{userFirstName.FirstOrDefault()}{userLastName.FirstOrDefault()}".ToUpper();
+    }
+
+    private string GetAvatarColor(ClaimsPrincipal user)
+    {
+        // deterministic "random" color based on user's full name
+        var colors = new[]
+        {
+            "#6366f1", // indigo
+            "#0ea5e9", // sky
+            "#10b981", // emerald
+            "#f59e0b", // amber
+            "#ef4444", // red
+            "#8b5cf6", // purple
+            "#ec4899"  // pink
+        };
+
+        fullName = user.Identity?.Name;
+        var hash = fullName.GetHashCode();
+        var index = Math.Abs(hash) % colors.Length;
+
+        return colors[index];
+    }
+
+    private string GetUserRole(ClaimsPrincipal user)
+    {
+        return user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value ?? "";
     }
 }
 

@@ -7,14 +7,7 @@
     <EditForm Model="Model" OnValidSubmit="HandleSubmit">
         <DataAnnotationsValidator />
         <ValidationSummary />
-
-        @if (!string.IsNullOrWhiteSpace(errorMessage))
-        {
-            <div class="alert alert-danger">
-                @errorMessage
-            </div>
-        }
-
+       
         <div class="mb-2">
             <label class="form-label">Name</label>
             <InputText class="form-control" @bind-Value="Model.Name" />
@@ -71,9 +64,7 @@
     
     [Parameter] 
     public EventCallback<Guid> OnSubmit { get; set; }
-    private List<ActivityTypeDto> availableTypes = new();
-    
-    private string? errorMessage;
+    private List<ActivityTypeDto> availableTypes = new();    
 
     [Parameter]
     public DateTime ModuleStartDate { get; set; }
@@ -88,28 +79,8 @@
 
     private async Task HandleSubmit()
     {
-        errorMessage = null;
-
-        // 1. Start in past
-        if (Model.StartDate < DateTime.Today)
-        {
-            errorMessage = "Start date cannot be in the past.";
-            return;
-        }
-
-        // 2. End before start
-        if (Model.EndDate <= Model.StartDate)
-        {
-            errorMessage = "End date must be after start date.";
-            return;
-        }
-
-        // 3. Activity must be inside module dates
-        if (Model.StartDate < ModuleStartDate || Model.EndDate > ModuleEndDate)
-        {
-            errorMessage = "Activity must be within module dates.";
-            return;
-        }
+        Model.ModuleStartDate = ModuleStartDate;
+        Model.ModuleEndDate = ModuleEndDate;
        
         await OnSubmit.InvokeAsync(ModuleId);
     }

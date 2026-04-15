@@ -409,8 +409,8 @@ else if (_course != null)
             _newActivities[moduleId] = new CreateActivityDto
             {
                 ModuleId = moduleId,
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(1),
+                StartDate = module!.StartDate,
+                EndDate = module.StartDate.AddDays(1),
 
                 ModuleStartDate = module!.StartDate,
                 ModuleEndDate = module.EndDate
@@ -429,8 +429,9 @@ else if (_course != null)
                 CourseId = _course.Id,
                 Name = string.Empty,
                 Description = string.Empty,
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(1)
+                StartDate = _course.StartDate,
+                EndDate = _course.StartDate.AddDays(1)
+               
             };
         }
     }

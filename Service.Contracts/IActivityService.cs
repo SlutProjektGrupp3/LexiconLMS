@@ -6,9 +6,9 @@ namespace Service.Contracts;
 public interface IActivityService
 {
     Task<IEnumerable<ActivityDto>> GetActivitiesForModuleAsync(Guid moduleId);
-    Task<ResultDto<ActivityDto>> CreateActivityAsync(CreateActivityDto dto);
+    Task<ActivityDto> CreateActivityAsync(CreateActivityDto dto);
     Task<IEnumerable<ActivityTypeDto>> GetAllActivityTypesAsync();
-    Task<ResultDto<bool>> DeleteActivityAsync(Guid id);
-    Task<ResultDto<ActivityDto>> UpdateActivityAsync(Guid id, UpdateActivityDto dto);
+    Task DeleteActivityAsync(Guid id);
+    Task<ActivityDto> UpdateActivityAsync(Guid id, UpdateActivityDto dto);
 
 }

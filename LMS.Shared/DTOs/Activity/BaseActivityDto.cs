@@ -18,6 +18,9 @@ namespace LMS.Shared.DTOs.Activity
         [Required]
         public DateTime EndDate { get; set; }
 
+        public DateTime ModuleStartDate { get; set; }
+        public DateTime ModuleEndDate { get; set; }
+
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             if (EndDate <= StartDate)
@@ -34,6 +37,13 @@ namespace LMS.Shared.DTOs.Activity
                     "Start date cannot be in the past.",
                     new[] { nameof(StartDate) }
                 );
+            }
+
+            if (StartDate < ModuleStartDate || EndDate > ModuleEndDate)
+            {
+                yield return new ValidationResult(
+                    "Activity must be within module dates.",
+                    new[] { nameof(StartDate), nameof(EndDate) });
             }
         }
     }

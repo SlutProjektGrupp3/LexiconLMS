@@ -75,6 +75,9 @@ public class CourseService : ICourseService
 
     public async Task<CourseDto> CreateCourseAsync(CreateCourseDto dto)
     {
+        if (string.IsNullOrWhiteSpace(dto.Description))
+            throw new BadRequestException("Description is required.");
+
         var course = _mapper.Map<Course>(dto);
 
         _uow.CourseRepository.CreateCourse(course);

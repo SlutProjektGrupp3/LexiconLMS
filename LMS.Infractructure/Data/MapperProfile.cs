@@ -41,10 +41,11 @@ public class MapperProfile : Profile
         CreateMap<Module, ModuleDto>();
         CreateMap<CreateModuleDto, Module>();
         CreateMap<UpdateModuleDto, Module>();
-        CreateMap<UpdateCourseDto, Course>();
 
         //Activity mappings
-        CreateMap<ModuleActivity, ActivityDto>();
+        CreateMap<ModuleActivity, ActivityDto>().
+            ForMember(dest => dest.TypeName,
+               opt => opt.MapFrom(src => src.Type.Name));
         CreateMap<CreateActivityDto, ModuleActivity>();
         CreateMap<UpdateActivityDto, ModuleActivity>();
         CreateMap<ActivityType, ActivityTypeDto>();

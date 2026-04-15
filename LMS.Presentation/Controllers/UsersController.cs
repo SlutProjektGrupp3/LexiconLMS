@@ -19,16 +19,13 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("me")]
-    [Authorize]
     public async Task<IActionResult> GetCurrentUser()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrWhiteSpace(userId))
-            return Unauthorized("User ID not found");
+            return Unauthorized();
 
-        var user = await _serviceManager.UserService.GetUserByIdAsync(userId);
-        if (user == null)
-            return NotFound($"User with ID {userId} not found.");
+        var user = await _serviceManager.UserService.GetUserByIdAsync(userId);        
 
         return Ok(user);
     }
@@ -39,7 +36,7 @@ public class UsersController : ControllerBase
     {
         var users = await _serviceManager.UserService.GetAllUsersAsync();
 
-        return Ok(users ?? new List<UserDto>());
+        return Ok(users);
     }
 
     [HttpGet]
@@ -48,8 +45,7 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> GetUserById(string id)
     {
         var user = await _serviceManager.UserService.GetUserByIdAsync(id);
-        if (user == null)
-            return NotFound($"User with ID {id} not found.");
+        
         return Ok(user);
     }
 
@@ -59,14 +55,19 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> CreateUser([FromBody] CreateUserDto createUserDto)
     {
         var result = await _serviceManager.UserService.CreateUserAsync(createUserDto);
-        return result.Succeeded ? CreatedAtAction(nameof(GetAllUsers), new { id = result.Data!.Id }, result) : BadRequest(result.Errors);
+
+        return CreatedAtAction(
+            nameof(GetUserById),
+            new { id = result.Id },
+            result
+        );
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserDto updateUserDto)
     {
         var result = await _serviceManager.UserService.UpdateUserAsync(id, updateUserDto);
-        return result.Succeeded ? Ok(result) : BadRequest(result.Errors);
+        return Ok(result);
     }
 
     [Authorize(Roles = "Teacher")]
@@ -83,11 +84,7 @@ public class UsersController : ControllerBase
     [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> GetAllRoles()
     {
-        var roles = await _serviceManager.UserService.GetAllRolesAsync();
-        if(roles == null || !roles.Any())
-        {
-            return NotFound("No roles found.");
-        }
+        var roles = await _serviceManager.UserService.GetAllRolesAsync();        
         return Ok(roles);
     }
 
@@ -96,9 +93,6 @@ public class UsersController : ControllerBase
     [Authorize(Roles = "Teacher")]
     public async Task<IActionResult> GetUsersCountByRole(string roleName)
     {
-        if (string.IsNullOrWhiteSpace(roleName))
-            return BadRequest("Role name is required.");
-
         var count = await _serviceManager.UserService.GetUsersCountByRoleAsync(roleName);
         return Ok(count);
     }

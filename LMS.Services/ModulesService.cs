@@ -12,13 +12,11 @@ public class ModulesService : IModuleService
 {
     private readonly IUnitOfWork _uow;
     private readonly IMapper _mapper;
-    private readonly IModuleRepository _moduleRepository;
 
-    public ModulesService(IUnitOfWork uow, IMapper mapper, IModuleRepository moduleRepository)
+    public ModulesService(IUnitOfWork uow, IMapper mapper)
     {
         _uow = uow;
         _mapper = mapper;
-        _moduleRepository = moduleRepository;
     }
 
     public async Task<CreateModuleResultDto> CreateModuleAsync(CreateModuleDto createModuleDto)
@@ -106,7 +104,7 @@ public class ModulesService : IModuleService
     {
         ValidateUpdateModule(moduleId, dto);
 
-        var module = await _moduleRepository.GetModuleByIdAndCourseIdAsync(
+        var module = await _uow.ModuleRepository.GetModuleByIdAndCourseIdAsync(
             moduleId,
             dto.CourseId,
             trackChanges: true);
@@ -150,13 +148,17 @@ public class ModulesService : IModuleService
         return _mapper.Map<ModuleDto>(module);
     }
 
+    //public async Task<IEnumerable<ModuleDto>> GetModulesByCourseIdAsync(Guid courseId)
+    //{
+    //    var query = (_uow.ModuleRepository as Domain.Contracts.Repositories.IModuleRepository)!.GetModuleQuery(false);
+    //    var modules = await query.Where(m => m.CourseId == courseId)
+    //        .Select(m => new ModuleDto(m.Id, m.Name, m.Description, m.StartDate, m.EndDate, m.CourseId))
+    //        .ToListAsync();
+
+    //    return modules;
+    //}
     public async Task<IEnumerable<ModuleDto>> GetModulesByCourseIdAsync(Guid courseId)
     {
-        var query = (_uow.ModuleRepository as Domain.Contracts.Repositories.IModuleRepository)!.GetModuleQuery(false);
-        var modules = await query.Where(m => m.CourseId == courseId)
-            .Select(m => new ModuleDto(m.Id, m.Name, m.Description, m.StartDate, m.EndDate, m.CourseId))
-            .ToListAsync();
-
-        return modules;
+        return await _uow.ModuleRepository.GetModulesByCourseIdAsync(courseId);
     }
 }

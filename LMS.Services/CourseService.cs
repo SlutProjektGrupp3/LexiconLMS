@@ -18,7 +18,7 @@ public class CourseService : ICourseService
     private readonly IMapper _mapper;
     private readonly UserManager<ApplicationUser> _userManager;
 
-    public CourseService(ICourseRepository courseRepository,IUnitOfWork uow, IMapper mapper, UserManager<ApplicationUser> userManager)
+    public CourseService( IUnitOfWork uow, IMapper mapper, UserManager<ApplicationUser> userManager)
     {
         _uow = uow;
         _mapper = mapper;

@@ -1,8 +1,9 @@
 ﻿using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Infractructure.Data;
-using Microsoft.EntityFrameworkCore;
 using LMS.Infractructure.Repositories;
+using LMS.Shared.DTOs.Module;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -33,10 +34,24 @@ namespace LMS.Infractructure.Repositories
             return await FindByCondition(m => m.Id == moduleId, trackChanges)
                 .SingleOrDefaultAsync();
         }
-
-        public IQueryable<Module> GetModuleQuery(bool trackChanges = false)
+        
+        public async Task<IEnumerable<Module>> GetModulesByCourseIdAsync(Guid courseId, bool trackChanges = false)
         {
-            return FindAll(trackChanges);
+            return await FindByCondition(m => m.CourseId == courseId, trackChanges)
+                .ToListAsync();
+        }
+        public async Task<IEnumerable<ModuleDto>> GetModulesByCourseIdAsync(Guid courseId)
+        {
+            return await FindByCondition(m => m.CourseId == courseId, trackChanges: false)
+                .Select(m => new ModuleDto(
+                    m.Id,
+                    m.Name,
+                    m.Description,
+                    m.StartDate,
+                    m.EndDate,
+                    m.CourseId
+                ))
+                .ToListAsync();
         }
     }
 }
